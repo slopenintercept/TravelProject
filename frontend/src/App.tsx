@@ -108,6 +108,7 @@ export default function App() {
                 busy={busy}
                 onMove={(itemId, day) => act(api.moveItem(state.id, itemId, day))}
                 onSwap={(itemId, attractionId) => act(api.swapItem(state.id, itemId, attractionId))}
+                onRemove={(attractionId) => act(api.decide(state.id, 'remove', `attraction:${attractionId}`))}
               />
             )}
             <button className="primary big finish-button" disabled={busy} onClick={() => { setFinishing(true); window.scrollTo(0, 0) }}>
