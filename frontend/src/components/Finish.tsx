@@ -2,10 +2,9 @@ import { money, safeHref, whoIsIn } from '../format'
 import type { BookingStep, Category, TripView } from '../types'
 import { Chips } from './Chips'
 
-/** What the group books together; each traveler's own flight and stays come first. */
+/** What the group books together; each traveler's own flight, stays and transport come first. */
 const SHARED: [Category, string][] = [
   ['attractions', 'Tickets'],
-  ['transport', 'Getting around'],
 ]
 
 const LINK_LABEL: Record<BookingStep['link'], string> = {

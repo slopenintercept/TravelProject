@@ -189,3 +189,77 @@ def test_saved_attractions_are_tied_to_the_current_group_by_name(group):
     assert by_name["Fushimi Inari Taisha"].need_by == ["p1"]  # Alex needs "Kyoto"; this was a Kyoto must-see
     assert by_name["teamLab Planets"].want_by == ["p2"] and not by_name["teamLab Planets"].must_have
     assert by_name["Senso-ji"].need_by == [] and by_name["Senso-ji"].want_by == []
+
+
+def test_transport_is_each_travelers_own_choice_and_cost(group):
+    from tripwright.models import TransportLeg
+    from tripwright.specialists import assign_legs
+    sam = group.travelers[1]
+    group.transport.legs.append(TransportLeg(id="l_car", kind="rental_car", mode="Rental car", price_usd=300,
+                                             per_person=False, source=Source(url="https://example.com")))
+    assign_legs(group)  # nobody asked for the car, so it is on nobody's plan
+    asyncio.run(orchestrator.decide(group, "remove", "leg:p1:l_nex"))  # Alex skips the airport train
+    asyncio.run(orchestrator.decide(group, "switch", "transport:p2"))  # Sam adds the rental car
+    # Each pays in full for what they keep: nothing is split and nobody's choice touches the other's budget.
+    assert group.budgets["p1"].by_category["transport"] == 95 + 95
+    assert group.budgets["p2"].by_category["transport"] == 95 + 95 + 40 + 300
+
+    cards = {c.id: c for c in review_cards(group)}
+    assert (cards["leg:p1:l_nex"].status, cards["leg:p2:l_nex"].status) == ("removed", "proposed")
+    assert cards["leg:p2:l_car"].price_usd == 300 and "leg:p1:l_car" not in cards
+    assert cards["leg:p1:l_shink"].traveler == "p1" and cards["leg:p1:l_shink"].price_usd == 95
+
+    steps = {s.id: s for s in booking_steps(group)}
+    assert "leg:p1:l_nex" not in steps and steps["leg:p2:l_nex"].who == ["Sam"]
+    assert steps["leg:p2:l_car"].price_usd == 300 and "leg:p1:l_car" not in steps
+
+    asyncio.run(orchestrator.decide(group, "remove", "leg:p2:l_car"))
+    assert not sam.rental_car and group.budgets["p2"].by_category["transport"] == 230
+
+    assign_legs(group)  # transport is planned again: Alex's airport train stays off Alex's plan
+    assert [leg.included for leg in group.travelers[0].legs] == [True, True, False, False]
+    assert [leg.included for leg in sam.legs] == [True, True, True, False]
+
+
+def test_each_traveler_swaps_their_own_way_to_make_a_trip(group):
+    from tripwright.models import TransportLeg
+    alex, sam = group.travelers
+    bus = TransportLeg(id="l_bus", kind="intercity", from_place="Tokyo", to_place="Kyoto", mode="Highway bus",
+                       duration_minutes=480, price_usd=30, source=Source(url="https://example.com"))
+    for t in group.travelers:
+        t.legs[0].alternatives = [bus.model_copy()]
+    card = next(c for c in review_cards(group) if c.id == "leg:p2:l_shink")
+    assert [(o.title, o.price_usd, o.detail) for o in card.alternatives] == [("Highway bus", 30, "480 min")]
+
+    asyncio.run(orchestrator.decide(group, "swap", "leg:p2:l_shink", "l_bus"))  # Sam takes the bus
+    assert (alex.legs[0].mode, sam.legs[0].mode) == ("Shinkansen", "Highway bus")
+    assert [o.mode for o in sam.legs[0].alternatives] == ["Shinkansen"]  # and can swap back
+    assert group.budgets["p1"].by_category["transport"] == 230
+    assert group.budgets["p2"].by_category["transport"] == 230 - 95 + 30
+    # The group's day in Kyoto starts once the slowest traveler is there.
+    ride = next(i for i in group.itinerary if i.title == "Tokyo → Kyoto")
+    assert (ride.end.hour * 60 + ride.end.minute) - (ride.start.hour * 60 + ride.start.minute) >= 480
+
+
+def test_adding_a_rental_car_leaves_everyone_elses_legs_alone(group):
+    from tripwright.specialists import LegOut, TransportOut, assign_legs, build_transport
+    alex, sam = group.travelers
+    alex.legs[2].included = False  # Alex skips the airport train
+    sam.rental_car = True
+    ctx = RunContext(agent="transport", state=group)
+    ctx.sources["example.com/a"] = Source(url="https://example.com/a")
+    leg = dict(notes="", source_url="https://example.com/a")
+    # Asked for the car, the agent plans every leg around it.
+    out = TransportOut(most_visitors_use="trains", because="fast", alternative="rental car", rideshare_note="",
+                       source_urls=["https://example.com/a"], legs=[
+        LegOut(kind="rental_car", from_place="", to_place="", mode="Economy car", duration_minutes=0, price_usd=450, **leg),
+        LegOut(kind="intercity", from_place="Tokyo", to_place="Kyoto", mode="Drive", duration_minutes=300, price_usd=60, **leg),
+        LegOut(kind="intercity", from_place="Kyoto", to_place="Tokyo", mode="Drive", duration_minutes=300, price_usd=60, **leg),
+        LegOut(kind="airport_transfer", from_place="Narita", to_place="Tokyo", mode="Car pickup", duration_minutes=90, price_usd=0, **leg),
+    ])
+    group.transport = asyncio.run(build_transport(group, ctx, out))
+    assign_legs(group)
+    # The plan keeps its legs and gains only the car, which is on Sam's plan alone.
+    assert [leg.mode for leg in group.transport.legs] == ["Shinkansen", "Shinkansen", "Narita Express", "Economy car"]
+    assert [leg.included for leg in alex.legs] == [True, True, False, False]
+    assert [leg.included for leg in sam.legs] == [True, True, True, True]

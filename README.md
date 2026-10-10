@@ -61,7 +61,7 @@ What is individual and what is shared:
 - **Lodging:** one agent researches what most travelers pick and searches each stay once; each traveler's room is then chosen from those options by their own nightly budget, in code ([specialists.py](backend/tripwright/specialists.py) `assign_rooms`).
 - **Attractions:** one agent for the group. Everyone's requests are merged, and each attraction comes back tied to who needs it and who wants it.
 - **Itinerary:** the scheduler ([scheduler.py](backend/tripwright/scheduler.py)) puts everything on one shared itinerary while it fits, needs before wants. Something only some travelers asked for that does not fit is scheduled for just them, during a group activity none of them asked for, and they regroup after. The group's day starts once the last person has landed and ends when the first person leaves for their flight home.
-- **Budgets:** per traveler: their flight, their rooms, tickets for what they attend, and their share of transport.
+- **Budgets:** per traveler: their flight, their rooms, tickets for what they attend, and the transport legs they keep.
 
 Each specialist node wraps a Strands `Agent` in the orchestrator's review loop:
 

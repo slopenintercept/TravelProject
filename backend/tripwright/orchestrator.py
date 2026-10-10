@@ -326,8 +326,7 @@ def new_trip(request: TripRequest) -> TripState:
     preferences = state.profile.stated_preferences if state.profile else []
     if PREF["airbnb"] in preferences:
         state.lodging_override = "airbnb"
-    if PREF["rental_car"] in preferences:
-        state.transport_override = "rental_car"
+    host.rental_car = PREF["rental_car"] in preferences
     store.save_trip(state)
     return state
 
@@ -405,6 +404,12 @@ def _learn(state: TripState, preference: str | None, forget: list[str]) -> None:
     store.save_profile(profile)
 
 
+def _rental_car(state: TripState, traveler: Traveler, wanted: bool) -> None:
+    traveler.rental_car = wanted
+    if traveler.host:
+        _learn(state, PREF["rental_car"] if wanted else None, [PREF["rental_car"]])
+
+
 async def decide(state: TripState, action: str, card: str, option_id: str | None = None) -> None:
     """Apply one review-screen decision, then re-run only what it affects."""
     kind, _, ref = card.partition(":")
@@ -421,17 +426,32 @@ async def decide(state: TripState, action: str, card: str, option_id: str | None
         state.traveler(traveler_id).lodging.stays[int(index)].selected_id = option_id
     elif action in ("remove", "restore") and kind == "attraction":
         next(a for a in state.attractions if a.id == ref).included = action == "restore"
-    elif action in ("remove", "restore") and kind == "leg":
-        next(leg for leg in state.transport.legs if leg.id == ref).included = action == "restore"
+    elif action in ("swap", "remove", "restore") and kind == "leg":  # one traveler's own leg
+        traveler_id, _, leg_id = ref.partition(":")
+        traveler = state.traveler(traveler_id)
+        at = next(i for i, leg in enumerate(traveler.legs) if leg.id == leg_id)
+        leg = traveler.legs[at]
+        if action == "swap":  # another way to make the same trip; the one they had becomes an alternative
+            options = [leg.model_copy(update={"alternatives": []}), *leg.alternatives]
+            chosen = next(o for o in options if o.id == option_id)
+            traveler.legs[at] = chosen.model_copy(update={"alternatives": [o for o in options if o.id != option_id]})
+        else:
+            leg.included = action == "restore"
+            if leg.kind == "rental_car":
+                _rental_car(state, traveler, leg.included)
     elif action == "switch" and kind == "lodging":
         current = state.lodging_override or state.lodging.common_choice.choice
         state.lodging_override = "hotel" if current == "airbnb" else "airbnb"
         _learn(state, PREF[state.lodging_override], [PREF["airbnb"], PREF["hotel"]])
         rerun = ["lodging"]
-    elif action == "switch" and kind == "transport":
-        state.transport_override = None if state.transport_override else "rental_car"
-        _learn(state, PREF["rental_car"] if state.transport_override else None, [PREF["rental_car"]])
-        rerun = ["transport"]
+    elif action == "switch" and kind == "transport":  # one traveler adds a rental car
+        traveler = state.traveler(ref)
+        _rental_car(state, traveler, True)
+        cars = [leg for leg in traveler.legs if leg.kind == "rental_car"]
+        for leg in cars:
+            leg.included = True
+        if not cars:  # nobody has asked for one before, so the agent has to price it
+            rerun = ["transport"]
     else:
         raise ValueError(f"Cannot {action} {card}")
     await run(state, planning_graph(rerun), "replan")

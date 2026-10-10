@@ -458,6 +458,14 @@ def attractions_task(state: TripState, who: Traveler | None = None) -> str:
 
 # --- transport -----------------------------------------------------------------
 
+class LegAlternative(BaseModel):
+    mode: str = Field(description="e.g. highway bus, Keisei Skyliner")
+    duration_minutes: int
+    price_usd: float = Field(description="USD per person")
+    notes: str
+    source_url: str = Field(description="URL from your tools where this price was found")
+
+
 class LegOut(BaseModel):
     kind: Literal["intercity", "airport_transfer", "local_pass", "rental_car"]
     from_place: str = Field(description="City or airport; empty for local_pass and rental_car")
@@ -467,6 +475,8 @@ class LegOut(BaseModel):
     price_usd: float = Field(description="USD per person, or for the whole rental")
     notes: str
     source_url: str = Field(description="URL from your tools where this price was found")
+    alternatives: list[LegAlternative] = Field(
+        default=[], description="Up to 2 other ways to make this same trip, e.g. a cheaper bus or a faster train")
 
 
 class TransportOut(BaseModel):
@@ -476,6 +486,22 @@ class TransportOut(BaseModel):
     rideshare_note: str = Field(description="Whether rideshare is common there, one sentence")
     source_urls: list[str] = Field(description="URLs from web_research backing the claim")
     legs: list[LegOut] = Field(description="One entry per trip the traveler makes, plus passes")
+
+
+def _missing_hops(state: TripState, legs: list[TransportLeg]) -> list[str]:
+    """Moves between cities on the route that no intercity leg covers."""
+    missing = []
+    unused = [leg for leg in legs if leg.kind == "intercity"]
+    plan = stay_plan(state)
+    for (a, _, day), (b, _, _) in zip(plan, plan[1:]):
+        if same_city(a, b):
+            continue
+        match = next((leg for leg in unused if {leg.from_place.lower(), leg.to_place.lower()} == {a.lower(), b.lower()}), None)
+        if match is None:
+            missing.append(f"no intercity leg for {a} to {b} on {day}")
+        else:
+            unused.remove(match)
+    return missing
 
 
 async def build_transport(state: TripState, ctx: RunContext, out: TransportOut) -> TransportPlan:
@@ -491,23 +517,28 @@ async def build_transport(state: TripState, ctx: RunContext, out: TransportOut) 
             continue
         if not 0 <= leg.price_usd <= 2000 or (leg.kind == "intercity" and (leg.price_usd <= 0 or leg.duration_minutes <= 0)):
             problems.append(f"{label}: ${leg.price_usd:.0f} / {leg.duration_minutes} min is not plausible")
-        legs.append(TransportLeg(id=new_id("l"), per_person=leg.kind != "rental_car", source=source,
-                                 **leg.model_dump(exclude={"source_url"})))
+        others = [
+            TransportLeg(id=new_id("l"), kind=leg.kind, from_place=leg.from_place, to_place=leg.to_place, source=found,
+                         **alt.model_dump(exclude={"source_url"}))
+            for alt in leg.alternatives
+            # An alternative without a source or a believable price is left out rather than sent back.
+            if (found := ctx.source(alt.source_url)) and 0 < alt.price_usd <= 2000
+            and (leg.kind != "intercity" or alt.duration_minutes > 0)
+        ]
+        legs.append(TransportLeg(id=new_id("l"), per_person=leg.kind != "rental_car", source=source, alternatives=others,
+                                 **leg.model_dump(exclude={"source_url", "alternatives"})))
 
-    unused = [leg for leg in legs if leg.kind == "intercity"]
-    plan = stay_plan(state)
-    for (a, _, day), (b, _, _) in zip(plan, plan[1:]):
-        if same_city(a, b):
-            continue
-        match = next((leg for leg in unused if {leg.from_place.lower(), leg.to_place.lower()} == {a.lower(), b.lower()}), None)
-        if match is None:
-            problems.append(f"no intercity leg for {a} to {b} on {day}")
-        else:
-            unused.remove(match)
-    if state.transport_override == "rental_car" and not any(leg.kind == "rental_car" for leg in legs):
-        problems.append("the traveler asked for a rental car: add a rental_car leg priced for the whole trip")
+    problems += _missing_hops(state, legs)
+    cars = [leg for leg in legs if leg.kind == "rental_car"]
+    if any(t.rental_car for t in state.travelers) and not cars:
+        problems.append("a traveler asked for a rental car: add a rental_car leg priced for the whole trip")
     if problems:
         raise Rejected(problems)
+    old = state.transport.legs if state.transport else []
+    if cars and old and not _missing_hops(state, old) and not any(leg.kind == "rental_car" for leg in old):
+        # A traveler added a car to a plan that already covers the route: add only the car, so
+        # nobody else's legs, prices or choices change.
+        legs = old + cars
     return TransportPlan(
         common_choice=CommonChoice(choice=out.most_visitors_use, because=out.because,
                                    alternative=out.alternative, sources=sources),
@@ -515,17 +546,35 @@ async def build_transport(state: TripState, ctx: RunContext, out: TransportOut) 
     )
 
 
+def assign_legs(state: TripState) -> None:
+    """Give each traveler their own copy of the legs, to keep or remove and pay for on their own budget.
+
+    A rental car is only on the plan of a traveler who asked for one. Legs a traveler removed
+    stay removed when transport is planned again, as long as the route is described the same way.
+    """
+    def trip(leg) -> tuple:
+        return leg.kind, leg.from_place, leg.to_place
+
+    for t in state.travelers:
+        removed = {trip(leg) for leg in t.legs if not leg.included}
+        t.legs = [leg.model_copy(update={"included": t.rental_car if leg.kind == "rental_car" else trip(leg) not in removed})
+                  for leg in state.transport.legs]
+
+
 def transport_task(state: TripState, who: Traveler | None = None) -> str:
     plan = stay_plan(state)
     hops = "; ".join(f"{a} to {b} on {day}" for (a, _, day), (b, _, _) in zip(plan, plan[1:]) if not same_city(a, b))
-    override = ("The group has asked for a rental car: add a rental_car leg priced for the whole trip, "
-                "but still report what most visitors use. ") if state.transport_override else ""
+    override = ("A traveler has asked for a rental car: add a rental_car leg priced for one car for the whole "
+                "trip, but still report what most visitors use. Only that traveler takes the car, so price every "
+                "other leg for someone without one. ") if any(t.rental_car for t in state.travelers) else ""
     return (f"{brief(state)}\n\nFirst use web_research to find how most visitors get around "
             f"{state.request.destination} (trains and transit, rental car, or rideshare) and whether rideshare "
             f"is common. Keep the source URLs. {override}Then price each leg this trip needs, one entry per "
             f"trip: intercity legs ({hops or 'none'}); an airport_transfer from the arrival airport to "
             f"{plan[0][0]} and one back for the flight home; and a local_pass covering daily transit for "
-            f"{state.request.days} days. Prices are USD per person.")
+            f"{state.request.days} days. Each traveler picks their own way to make each trip, so give every "
+            "intercity leg and airport transfer up to 2 alternatives (a cheaper way, a faster way), each with "
+            "its own price, duration and source_url. Prices are USD per person.")
 
 
 # --- weather (no LLM: Open-Meteo only) -----------------------------------------
@@ -635,5 +684,5 @@ SPECS = {s.name: s for s in [
     Spec("transport", "Transport agent", "transport", TransportPlan, TransportOut, transport_task, build_transport,
          lambda t: [t.web_research, t.read_source],
          lambda p: f"{p.common_choice.choice}; {len(p.legs)} legs, ${sum(x.price_usd for x in p.legs):,.0f}",
-         judged=True, review=review_transport),
+         judged=True, after=assign_legs, review=review_transport),
 ]}

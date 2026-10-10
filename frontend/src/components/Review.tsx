@@ -186,7 +186,7 @@ export function Review({ view, busy, onDecision, onApplyBudget }: Props) {
               {group.filter((card) => card.kind === 'default').map((card) => (
                 <DefaultCard key={card.id} card={card} busy={busy} onDecision={onDecision} />
               ))}
-              {category === 'flights' || category === 'lodging'
+              {category !== 'attractions'
                 ? travelers.map((t) => {
                     const theirs = items.filter((card) => card.traveler === t.id)
                     const theirFlag = category === 'flights' ? state.flags[`flight:${t.id}`] : undefined
@@ -196,6 +196,11 @@ export function Review({ view, busy, onDecision, onApplyBudget }: Props) {
                         {!solo && <h3>{t.name}</h3>}
                         {theirFlag && <FlagBadge flag={theirFlag} />}
                         {theirs.map(item)}
+                        {category === 'transport' && !t.legs.some((leg) => leg.kind === 'rental_car' && leg.included) && (
+                          <button className="add" disabled={busy} onClick={() => onDecision('switch', `transport:${t.id}`)}>
+                            Add a rental car{solo ? '' : ` for ${t.name}`}
+                          </button>
+                        )}
                       </Fragment>
                     )
                   })

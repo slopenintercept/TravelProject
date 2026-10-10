@@ -62,13 +62,15 @@ class DayFrame:
 
 
 def _leg_minutes(state: TripState, kind: str, a: str = "", b: str = "", default: int = 0) -> int:
-    for leg in state.transport.legs if state.transport else []:
+    """How long this ride takes the group: the slowest of the ways its travelers have chosen."""
+    found = []
+    for leg in [leg for t in state.travelers for leg in t.legs] or (state.transport.legs if state.transport else []):
         if leg.kind != kind or not leg.included or not leg.duration_minutes:
             continue
         ends = {leg.from_place.lower(), leg.to_place.lower()}
         if kind != "intercity" or (a.lower() in ends and b.lower() in ends):
-            return leg.duration_minutes
-    return default
+            found.append(leg.duration_minutes)
+    return max(found, default=default)
 
 
 def build_frames(state: TripState) -> list[DayFrame]:

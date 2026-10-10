@@ -1,6 +1,6 @@
 """Review-screen cards: every decision with its price and reasoning.
 
-Flights and stays are per traveler; attractions and transport are shared by the group.
+Flights, stays and transport are per traveler; attractions are shared by the group.
 """
 
 from __future__ import annotations
@@ -21,12 +21,12 @@ class Alternative(BaseModel):
 
 
 class Card(BaseModel):
-    # "flight:<traveler>", "stay:<traveler>:<n>", "attraction:<id>", "leg:<id>",
+    # "flight:<traveler>", "stay:<traveler>:<n>", "attraction:<id>", "leg:<traveler>:<id>",
     # or the most-travelers-pick cards "lodging" / "transport"
     id: str
     category: Literal["flights", "lodging", "attractions", "transport"]
     kind: Literal["item", "default"] = "item"  # "default" is the most-travelers-pick card
-    traveler: str | None = None  # whose flight or stay this is (traveler id); None for shared cards
+    traveler: str | None = None  # whose flight, stay or leg this is (traveler id); None for shared cards
     title: str
     detail: str = ""
     price_usd: float = 0
@@ -48,7 +48,7 @@ def _clock(dt) -> str:
     return f"{dt:%a %b %d, %H:%M}" if dt else "time to confirm"
 
 
-def _default(card_id: str, category: str, choice: CommonChoice, note: str, switch_label: str, flag: Flag | None) -> Card:
+def _default(card_id: str, category: str, choice: CommonChoice, note: str, switch_label: str | None, flag: Flag | None) -> Card:
     return Card(
         id=card_id, category=category, kind="default",
         title=f"Most travelers here pick: {choice.choice}",
@@ -122,20 +122,24 @@ def review_cards(state: TripState) -> list[Card]:
         ))
 
     if state.transport:
-        choice = state.transport.common_choice
-        note = state.transport.rideshare_note
-        if state.transport_override:
-            note += " You added a rental car."
-        cards.append(_default("transport", "transport", choice, note,
-                              "Remove the rental car" if state.transport_override else "Add a rental car",
-                              state.flags.get("transport")))
-        for leg in state.transport.legs:
+        cards.append(_default("transport", "transport", state.transport.common_choice, state.transport.rideshare_note,
+                              None, state.flags.get("transport")))
+    for t in state.travelers:
+        for leg in t.legs:
+            if leg.kind == "rental_car" and not leg.included:
+                continue  # only shown to a traveler who asked for one
             route = f"{leg.from_place} to {leg.to_place}" if leg.from_place and leg.to_place else leg.kind.replace("_", " ")
+            card_id = f"leg:{t.id}:{leg.id}"
             cards.append(Card(
-                id=f"leg:{leg.id}", category="transport", title=f"{leg.mode}: {route}",
+                id=card_id, category="transport", traveler=t.id, title=f"{leg.mode}: {route}",
                 detail=f"{leg.duration_minutes} min" if leg.duration_minutes else "",
-                price_usd=leg.price_usd * (len(everyone) if leg.per_person else 1), reasoning=leg.notes,
-                sources=[leg.source], booking_url=leg.booking_url, status=status(f"leg:{leg.id}", leg.included),
+                price_usd=leg.price_usd, reasoning=leg.notes,
+                sources=[leg.source], booking_url=leg.booking_url, status=status(card_id, leg.included),
                 must_have=leg.kind == "intercity", flag=state.flags.get("transport"),
+                alternatives=[
+                    Alternative(id=o.id, title=o.mode, price_usd=o.price_usd,
+                                detail=" · ".join(filter(None, [f"{o.duration_minutes} min" if o.duration_minutes else "", o.notes])))
+                    for o in leg.alternatives
+                ],
             ))
     return cards

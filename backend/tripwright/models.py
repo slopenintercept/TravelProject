@@ -175,6 +175,8 @@ class Traveler(TravelerIn):
     host: bool = False
     flights: FlightPlan | None = None
     lodging: LodgingPlan | None = None  # this traveler's room for each stay, chosen from the group's options
+    legs: list[TransportLeg] = []  # this traveler's own copy of the transport legs: what they keep, they pay for
+    rental_car: bool = False  # this traveler wants a rental car
 
 
 class Attraction(BaseModel):
@@ -212,6 +214,7 @@ class TransportLeg(BaseModel):
     booking_url: str | None = None
     source: Source
     included: bool = True
+    alternatives: list[TransportLeg] = []  # other ways to make the same trip, for a traveler to swap to
 
 
 class TransportPlan(BaseModel):
@@ -328,7 +331,6 @@ class TripState(BaseModel):
     agents: dict[str, AgentStatus] = {}
     # Overrides from the review screen.
     lodging_override: Literal["hotel", "airbnb"] | None = None
-    transport_override: Literal["rental_car"] | None = None
 
     def traveler(self, traveler_id: str) -> Traveler:
         return next(t for t in self.travelers if t.id == traveler_id)

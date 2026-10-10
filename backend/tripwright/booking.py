@@ -26,7 +26,7 @@ HOTEL_PAGE = "/travel/hotels/entity/"
 class BookingStep(BaseModel):
     id: str
     category: Literal["flights", "lodging", "attractions", "transport"]
-    traveler: str | None = None  # whose booking this is (traveler id); None for shared tickets and transport
+    traveler: str | None = None  # whose booking this is (traveler id); None for shared tickets
     who: list[str] = []  # names of the people this is for
     title: str
     when: str
@@ -95,9 +95,8 @@ def stay_link(room: LodgingOption) -> str:
 
 
 def booking_steps(state: TripState) -> list[BookingStep]:
-    """Each traveler's own flight and stays first, then the tickets and transport the group shares."""
+    """Each traveler's own flight and stays first, then the group's tickets, then each traveler's own transport."""
     steps: list[BookingStep] = []
-    everyone = [t.id for t in state.travelers]
 
     for t in state.travelers:
         if t.flights and state.dates:
@@ -142,13 +141,14 @@ def booking_steps(state: TripState) -> list[BookingStep]:
             steps.append(BookingStep(id=f"attraction:{a.id}", category="attractions", title=a.name, when=when, who=going,
                                      todo=f"No ticket needed. {a.availability_note}".strip()))
 
-    arrivals = [t.flights.selected.arrive_at.date() for t in state.travelers if t.flights]
-    if state.transport and state.dates and state.route and arrivals:
+    for t in state.travelers:
+        if not (t.flights and state.dates and state.route):
+            continue
         plan = stay_plan(state)
+        arrival = t.flights.selected.arrive_at.date()
         hops = [b_in for (a, _, _), (b, b_in, _) in zip(plan, plan[1:]) if not same_city(a, b)]
-        transfers = [min(arrivals), state.dates.end]
-        n = len(everyone)
-        for leg in state.transport.legs:
+        transfers = [arrival, state.dates.end]
+        for leg in t.legs:
             if not leg.included:
                 continue
             if leg.kind == "intercity":
@@ -156,15 +156,14 @@ def booking_steps(state: TripState) -> list[BookingStep]:
             elif leg.kind == "airport_transfer":
                 day = transfers.pop(0) if transfers else None
             else:
-                day = min(arrivals)
+                day = arrival
             route = f": {leg.from_place} to {leg.to_place}" if leg.from_place and leg.to_place else ""
             url = leg.booking_url or leg.source.url
-            buy = _people(n, "ticket") if leg.per_person else "one booking"
+            buy = _people(1, "ticket") if leg.per_person else "one booking"
             steps.append(BookingStep(
-                id=f"leg:{leg.id}", category="transport", title=f"{leg.mode}{route}", who=state.names(everyone),
+                id=f"leg:{t.id}:{leg.id}", category="transport", traveler=t.id, title=f"{leg.mode}{route}", who=[t.name],
                 when=f"{day:%a %b} {day.day}" if day else "", provider=_host(url),
                 todo=f"Buy {buy}{f' for {day:%A, %B} {day.day}' if day and leg.kind != 'local_pass' else ' on arrival'}. {leg.notes}".strip(),
-                price_usd=leg.price_usd * (n if leg.per_person else 1), url=url,
-                link="booking" if leg.booking_url else "info",
+                price_usd=leg.price_usd, url=url, link="booking" if leg.booking_url else "info",
             ))
     return steps
