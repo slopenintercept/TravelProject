@@ -12,7 +12,8 @@ import { TripForm } from './components/TripForm'
 import { monthDay } from './format'
 import { useTrip } from './useTrip'
 
-/** The trip id lives in the URL hash, so a reload resumes the trip: `#<tripId>`, or `#<tripId>/join` for the invite link. */
+/** The trip id lives in the URL hash, so a reload resumes the trip. The hash is `#<tripId>`,
+ *  or `#<tripId>/join` for the invite link. */
 function routeFromHash() {
   const [tripId, page] = window.location.hash.slice(1).split('/')
   return { tripId: tripId || null, joining: page === 'join' }

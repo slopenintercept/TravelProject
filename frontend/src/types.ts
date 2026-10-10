@@ -134,12 +134,12 @@ export interface LodgingPlan {
   stays: LodgingStay[]
 }
 
-/** One person on the trip. Flights are found for each traveler individually. */
+/** One person on the trip, with their own flight and their own rooms picked to their own budget. */
 export interface Traveler extends TravelerIn {
   id: string
   host: boolean
   flights: FlightPlan | null
-  lodging: LodgingPlan | null // the rooms picked for this traveler, by their own budget
+  lodging: LodgingPlan | null // this traveler's room for each stay, chosen from the group's options
 }
 
 export interface Attraction {
@@ -281,7 +281,7 @@ export interface TripState {
   route: RoutePlan | null
   windows: DateWindow[]
   dates: TripDates | null
-  lodging: LodgingPlan | null // the options researched once for the group
+  lodging: LodgingPlan | null // what the lodging agent found: the options for each stay
   attractions: Attraction[]
   transport: TransportPlan | null
   weather: DayWeather[]

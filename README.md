@@ -1,6 +1,6 @@
 # Tripwright
 
-An agentic trip planner built for Hack Midwest. Describe a trip (where from, where to, how long, budget, must-sees) and a team of AI agents plans it end to end: dates, flights, lodging, attractions, local transport and a day-by-day itinerary that fits the budget and has no scheduling conflicts. The agents gather live data by browsing provider sites, every price is stored with its source URL and a saved snapshot of the page it came from, and you approve, swap or remove every decision before anything is booked.
+An agentic trip planner built for Hack Midwest, for one traveler or a group. The host describes the trip and invites the others with a link; each traveler adds where they fly from, their budget, and what they need versus want to see. A team of AI agents then plans it end to end: dates, a flight for each traveler, a room for each traveler within their own budget, attractions for the group, local transport, and a day-by-day itinerary with no scheduling conflicts. Everyone shares one itinerary while it fits; when it doesn't, someone splits off for an activity and regroups after. The agents gather live data by browsing provider sites, every price is stored with its source URL and a saved snapshot of the page it came from, and you approve, swap or remove every decision before anything is booked.
 
 - **Strands Agents SDK** runs every agent: a Strands `Graph` dispatches specialists in parallel, each a Strands `Agent` with `@tool` functions, Pydantic structured output, hooks and streaming.
 - **Akamai Cloud** hosts it: the hackathon's hosted inference endpoint is the model provider, a Linode runs the API and the Chromium workers, Managed PostgreSQL holds trip state, and Object Storage holds the evidence snapshots.
@@ -15,9 +15,9 @@ flowchart LR
     API["FastAPI<br/>trip endpoints + SSE"]
     subgraph Strands["Strands Graph (orchestrator)"]
         direction TB
-        S1["Stage 1: form submitted<br/>route, then profile ∥ timeframe"]
-        S2["Stage 2: dates chosen<br/>flight ∥ lodging ∥ attractions ∥ transport ∥ weather"]
-        S3["Stage 3: budget → scheduler → validate_itinerary"]
+        S1["Stage 1: host's form<br/>route, then profile ∥ timeframe"]
+        S2["Stage 2: everyone's in<br/>a flight agent per traveler ∥ lodging ∥ attractions ∥ transport ∥ weather"]
+        S3["Stage 3: scheduler → budget → validate_itinerary"]
         S1 --> S2 --> S3
     end
     subgraph Akamai["Akamai Cloud"]
@@ -38,26 +38,39 @@ flowchart LR
 Each stage is one run of a Strands `Graph` ([orchestrator.py](backend/tripwright/orchestrator.py)). Nodes with no edge between them run in the same batch, in parallel.
 
 ```
-Stage 1  form submitted      route ──┬── profile
+Stage 1  host's form         route ──┬── profile
                                      └── timeframe (suggests 2-3 date windows)
 
-Stage 2  dates chosen        flight ─────┐
-                             lodging ────┤
-                             attractions ┼──► budget ──► scheduler ──► validate
-                             transport ──┤
-                             weather ────┘
+         host picks dates, shares the invite link; each traveler adds their preferences
 
-Stage 4  any user change     [only the affected specialists] ──► budget ──► scheduler ──► validate
+Stage 2  everyone's in       route (again, now with everyone's needs)
+                             flight: Alex ──┐
+                             flight: Sam ───┤
+                             flight: Jo ────┤
+                             lodging ───────┼──► scheduler ──► budget ──► validate
+                             attractions ───┤
+                             transport ─────┤
+                             weather ───────┘
+
+Stage 4  any user change     [only the affected specialists] ──► scheduler ──► budget ──► validate
 ```
+
+What is individual and what is shared:
+
+- **Flights:** one agent per traveler, searching from that traveler's own origin within their own budget.
+- **Lodging:** one agent researches what most travelers pick and searches each stay once; each traveler's room is then chosen from those options by their own nightly budget, in code ([specialists.py](backend/tripwright/specialists.py) `assign_rooms`).
+- **Attractions:** one agent for the group. Everyone's requests are merged, and each attraction comes back tied to who needs it and who wants it.
+- **Itinerary:** the scheduler ([scheduler.py](backend/tripwright/scheduler.py)) puts everything on one shared itinerary while it fits, needs before wants. Something only some travelers asked for that does not fit is scheduled for just them, during a group activity none of them asked for, and they regroup after. The group's day starts once the last person has landed and ends when the first person leaves for their flight home.
+- **Budgets:** per traveler: their flight, their rooms, tickets for what they attend, and their share of transport.
 
 Each specialist node wraps a Strands `Agent` in the orchestrator's review loop:
 
 ```
 working ──► under review ──► accepted
                │
-               ├─ deterministic checks: every id and URL was really returned by a tool,
-               │  dates/cities match TripState, prices are plausible, budget share respected
-               ├─ LLM judgment (orchestrator agent): plausibility and fit with the traveler
+               ├─ deterministic checks, every attempt: every id and URL was really returned by a
+               │  tool, dates/cities match TripState, prices are plausible, budget share respected
+               ├─ LLM judgment (orchestrator agent), first attempt only: plausibility and fit
                │
                └─► sent back with specific feedback (up to 2 retries)
                       └─► fallback to the last accepted result (database, then demo fixtures),
@@ -69,8 +82,9 @@ A specialist has a time limit (`AGENT_TIMEOUT_S`). A node never raises, so a slo
 ### The key rule: facts and math are code, not the model
 
 - **Prices are never typed by the model.** Tools return a short table and keep the full results in a per-run context keyed by id. The agent answers with ids, reasoning and source URLs; Python joins them back to the real price, times, source URL and evidence snapshot ([toolbox.py](backend/tripwright/toolbox.py), [specialists.py](backend/tripwright/specialists.py)).
-- **`validate_itinerary`** ([validate.py](backend/tripwright/validate.py)) is deterministic: overlapping activities, travel time between stops, opening hours and closed days, conflicts with flights and intercity travel, lodging covering every night, wrong-city days, missing must-sees, total cost against budget. It runs after every change.
-- **Budget** ([budget.py](backend/tripwright/budget.py)) and **scheduling** ([scheduler.py](backend/tripwright/scheduler.py)) are deterministic graph nodes. If the plan is over budget, the optimizer proposes the fewest swaps that fit while keeping must-haves.
+- **`validate_itinerary`** ([validate.py](backend/tripwright/validate.py)) is deterministic: nobody in two places at once, travel time between stops, opening hours and closed days, conflicts with flights and intercity travel, each traveler's lodging covering every night, wrong-city days, everyone attending what they need to see, each traveler's cost against their budget. It runs after every change.
+- **Budget** ([budget.py](backend/tripwright/budget.py)) and **scheduling** ([scheduler.py](backend/tripwright/scheduler.py)) are deterministic graph nodes. If a traveler is over budget, the optimizer proposes the fewest swaps of their own flight and rooms that fit; shared attractions are left alone.
+- **The landing day comes from real flight results**, not from the model: it is read from a flight search before lodging dates are set.
 
 ## How Strands is used
 
@@ -109,7 +123,7 @@ cd backend
 python3 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 .venv/bin/playwright install chromium
-.venv/bin/pytest                # 32 tests: validator, scheduler, budget, review loop, booking links
+.venv/bin/pytest                # 43 tests: validator, scheduler, budget, review loop, booking links, group trips
 
 cd ../frontend
 npm install
@@ -178,7 +192,10 @@ deploy/             Akamai provisioning and deploy scripts
 - **Hotel links rely on an undocumented Google Hotels URL parameter** (`ts`) to carry the stay dates. It was checked against live pages on 2026-10-10; if Google drops it, the link still opens the right hotel on default dates.
 - **Return-flight times** come from a second search in the reverse direction, matched by airline. Google Flights only shows the paired return after a click-through, which was unreliable headless. The round-trip price is exact; the return time is typical for that carrier and is confirmed at checkout.
 - **Travel times between stops are estimates** (great-circle distance at urban transit speed). There is no free transit-routing API for Japan. Intercity legs use the Transport agent's researched durations.
-- **Budget optimizer, scheduler and weather are deterministic graph nodes**, not LLM agents, following the key rule.
+- **Budget optimizer, scheduler and weather are deterministic graph nodes**, not LLM agents, following the key rule. The scheduler runs before the budget step, because a traveler's ticket costs depend on which activities they attend.
+- **Lodging is one agent, not one per traveler.** Each traveler still gets their own room by their own budget, but the pick is made in code from one agent's research. Running a lodging agent per traveler overloaded the shared endpoint in live tests.
+- **The reviewer model judges each result once.** In live runs it sent back correct results for reasons that were not true, so the code checks run on every attempt and the model's judgment only on the first.
+- **Invites are a share link with no login.** Anyone with the link can join, and anyone who opens the trip sees the host's controls.
 - **Trip length:** `days` runs from leaving home to the flight home, so "7 days" from Kansas City is 6 nights in Japan.
 - **Source and evidence links are not shown on the cards.** They were removed from the UI; every card in the API response still carries them (`sources[].url`, `sources[].evidence_url`).
 - **Not built:** the monitor agent (stretch goal), and food is not part of the budget.

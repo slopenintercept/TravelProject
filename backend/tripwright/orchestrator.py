@@ -14,8 +14,8 @@ traveler's own budget. Attractions are planned once for the group, from everyone
 needs and wants.
 
 Each specialist is a custom graph node that wraps a Strands Agent with the review
-loop: deterministic checks first, then the orchestrator's LLM judgment, up to
-MAX_RETRIES send-backs with specific feedback, then a flagged fallback. A node never
+loop: deterministic checks on every attempt, the orchestrator's LLM judgment on the
+first, up to MAX_RETRIES send-backs with specific feedback, then a flagged fallback. A node never
 raises, so one slow or failing specialist cannot stall the others.
 """
 
@@ -130,6 +130,8 @@ class SpecialistNode(MultiAgentBase):
             events.status(state, self.name, "pending", f"No result yet: {reason}")
             return
         self._store(state, who, value)
+        if self.spec.after_fallback:
+            self.spec.after_fallback(state)
         state.flags[self.name] = Flag(kind="fallback", reason=f"Showing saved results: the live run {reason}.")
         events.status(state, self.name, "fallback", f"Using saved results: {reason}", found=self.spec.describe(value))
 
@@ -153,7 +155,7 @@ class SpecialistNode(MultiAgentBase):
                 answer = await self._ask(agent, prompt, events)
                 events.status(state, self.name, "under_review", "Orchestrator is checking sources, dates and budget")
                 value = await spec.build(state, ctx, answer)
-                if spec.judged:
+                if spec.judged and attempt == 1:  # one judgment call per result; code checks every attempt
                     await judge(state, spec, value, who)
             except Rejected as rejected:
                 problems = rejected.problems

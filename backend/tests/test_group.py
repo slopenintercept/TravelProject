@@ -168,3 +168,15 @@ def test_each_traveler_gets_a_room_that_fits_their_own_budget(group):
     assert "within Sam's lodging budget of about $70 a night" in sam.lodging.stays[0].reasoning
     # Kyoto, 2 nights: both rooms ($100 and $75 a night) are over Sam's budget, so Sam gets the cheapest.
     assert sam.lodging.stays[1].selected.name == "Kyoto Hotel k2" and "over Sam's lodging budget" in sam.lodging.stays[1].reasoning
+
+
+def test_saved_attractions_are_tied_to_the_current_group_by_name(group):
+    from tripwright.specialists import relink_wishes
+    for a in group.attractions:  # as saved for some other group
+        a.need_by, a.want_by = ["p9"], ["p8"]
+    relink_wishes(group)
+    by_name = {a.name: a for a in group.attractions}
+    assert by_name["Tokyo Disneyland"].need_by == ["p1"]  # Alex needs it
+    assert by_name["Fushimi Inari Taisha"].need_by == ["p1"]  # Alex needs "Kyoto"; this was a Kyoto must-see
+    assert by_name["teamLab Planets"].want_by == ["p2"] and not by_name["teamLab Planets"].must_have
+    assert by_name["Senso-ji"].need_by == [] and by_name["Senso-ji"].want_by == []

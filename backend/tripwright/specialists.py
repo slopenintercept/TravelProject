@@ -358,14 +358,14 @@ class AttractionOut(BaseModel):
     name: str
     city: str = Field(description="The route city you would visit it from")
     wish_ids: list[str] = Field(description="Ids of the travelers' requests this covers, e.g. [\"w1\"]; empty for your own suggestions")
-    why: str = Field(description="Why it fits this traveler, one sentence")
+    why: str = Field(description="Why it fits this group, one short sentence")
     duration_minutes: int = Field(description="Typical visit length")
     ticket_price_usd: float = Field(description="Adult ticket in USD; 0 if free")
     opens: str = Field(description="Opening time HH:MM, or empty if always open")
     closes: str = Field(description="Closing time HH:MM, or empty if always open")
     closed_weekdays: list[int] = Field(description="Weekdays it is closed, Monday=0; empty if none")
     outdoor: bool = Field(description="True if rain would spoil it")
-    availability_note: str = Field(description="Booking or availability advice, e.g. buy tickets in advance")
+    availability_note: str = Field(description="Booking advice in under 15 words, e.g. buy tickets in advance")
     source_url: str = Field(description="URL from your tools where the price and hours were found")
     booking_url: str = Field(description="Official ticket page, or empty")
 
@@ -418,6 +418,19 @@ async def build_attractions(state: TripState, ctx: RunContext, out: AttractionsO
     return found
 
 
+def relink_wishes(state: TripState) -> None:
+    """A saved attractions list was made for other travelers: tie it to this group's requests by name."""
+    def asked(wish: str, a: Attraction) -> bool:
+        w, name = wish.strip().lower(), a.name.lower()
+        return bool(w) and (w in name or name in w or (a.must_have and same_city(a.city, wish)))
+
+    for a in state.attractions:
+        a.need_by = [t.id for t in state.travelers if any(asked(w, a) for w in t.need)]
+        a.want_by = [t.id for t in state.travelers if t.id not in a.need_by and any(asked(w, a) for w in t.want)]
+    for a in state.attractions:
+        a.must_have = bool(a.need_by)
+
+
 def attractions_task(state: TripState, who: Traveler | None = None) -> str:
     cities = ", ".join(dict.fromkeys(s.city for s in state.route.segments))
     requests = "\n".join(
@@ -425,10 +438,12 @@ def attractions_task(state: TripState, who: Traveler | None = None) -> str:
         f"{', '.join(state.names(want)) or 'nobody'})"
         for wish_id, text, need, want in wishes(state)
     ) or "(nobody asked for anything specific)"
+    # The more the travelers asked for themselves, the fewer extras the plan has room for.
+    extras = max(1, SUGGESTIONS[state.request.pace] - sum(not need for _, _, need, _ in wishes(state)))
     return (f"{brief(state)}\n\nPlan attractions for the whole group. These are the travelers' requests:\n{requests}\n\n"
             "Cover every request someone needs, and as many wanted ones as you can. Give each attraction the "
             "wish_ids it covers; if a request is a city or region, pick its one or two top sights and give "
-            f"both that wish id. Then suggest up to {SUGGESTIONS[state.request.pace]} more, with empty wish_ids, "
+            f"both that wish id. Then suggest up to {extras} more, with empty wish_ids, "
             "that fit this group, the weather on these dates, popularity, and being close to what is already "
             "planned. For each one find the adult ticket price "
             "in USD, opening hours, closed weekdays, typical visit length and booking advice. Work quickly: "
@@ -577,6 +592,7 @@ class Spec:
     judged: bool = False  # also gets the orchestrator's LLM plausibility-and-fit review
     per_traveler: bool = False  # run once for each traveler, with their own origin and budget
     after: Callable[[TripState], None] | None = None  # runs once the result is stored
+    after_fallback: Callable[[TripState], None] | None = None  # extra step when a saved result is used
     review: Callable[[TripState, Any], str] | None = None  # what the reviewer is shown; defaults to describe()
 
     def dump(self, value) -> str:
@@ -611,7 +627,7 @@ SPECS = {s.name: s for s in [
     Spec("attractions", "Attractions agent", "attractions", list[Attraction], AttractionsOut, attractions_task,
          build_attractions, lambda t: [t.web_research, t.browse_page],
          lambda a: f"{len(a)} attractions, {sum(x.must_have for x in a)} needed by someone",
-         judged=True, review=review_attractions),
+         judged=True, review=review_attractions, after_fallback=relink_wishes),
     Spec("transport", "Transport agent", "transport", TransportPlan, TransportOut, transport_task, build_transport,
          lambda t: [t.web_research, t.read_source],
          lambda p: f"{p.common_choice.choice}; {len(p.legs)} legs, ${sum(x.price_usd for x in p.legs):,.0f}",

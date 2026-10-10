@@ -8,6 +8,7 @@ as an evidence snapshot so every researched fact links back to what was read.
 from __future__ import annotations
 
 import ast
+import re
 from datetime import datetime
 
 from strands_tools.tavily import tavily_extract, tavily_search
@@ -21,8 +22,12 @@ PAGE_CHARS = 5000
 WEEK = 7 * 24 * 3600
 
 
+# Pages sometimes embed their own access tokens (map widgets, for example). Never keep those.
+EMBEDDED_TOKEN = re.compile(r"\b[sp]k\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+")
+
+
 def _payload(result: dict) -> dict:
-    text = result["content"][0]["text"]
+    text = EMBEDDED_TOKEN.sub("[token removed]", result["content"][0]["text"])
     if result["status"] != "success":
         raise RuntimeError(text)
     data = ast.literal_eval(text)  # the tool returns str(dict)
@@ -56,8 +61,8 @@ async def read(url: str) -> dict:
         data = _payload(await tavily_extract(urls=[url], extract_depth="basic", format="markdown"))
         if not data["results"]:
             raise RuntimeError(f"Could not read {url}")
-        text = data["results"][0].get("raw_content", "")
-        return {"url": url, "text": text[:PAGE_CHARS], "fetched_at": datetime.now().isoformat(),
+        text = data["results"][0].get("raw_content", "")[:PAGE_CHARS]  # keep only what the agent is shown
+        return {"url": url, "text": text, "fetched_at": datetime.now().isoformat(),
                 "evidence_url": await evidence.save(f"page {url}", text.encode(), "txt")}
 
     return await cached(f"read:{url}".lower(), fetch, ttl_s=WEEK, fuzzy=False)
