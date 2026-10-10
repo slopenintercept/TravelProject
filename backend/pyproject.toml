@@ -1,0 +1,36 @@
+[project]
+name = "tripwright"
+version = "0.1.0"
+description = "Agentic trip planner: Strands agents on Akamai Cloud"
+requires-python = ">=3.11"
+dependencies = [
+    # Pinned: strands-agents-tools is experimental and its Tavily tools are deprecated from 0.8.9.
+    "strands-agents[openai]==1.59.0",
+    "strands-agents-tools==0.8.9",
+    "playwright==1.63.0",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "pydantic>=2.7",
+    "httpx>=0.27",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "boto3>=1.34",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["tripwright*"]
+
+[tool.setuptools.package-data]
+tripwright = ["fixtures/**/*.json"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

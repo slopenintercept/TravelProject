@@ -1,0 +1,56 @@
+[
+ {
+  "time": [
+   "2026-01-22",
+   "2026-01-23"
+  ],
+  "temperature_2m_max": [
+   2.3,
+   4.3
+  ],
+  "temperature_2m_min": [
+   -5.8,
+   -7.2
+  ],
+  "precipitation_sum": [
+   0.5,
+   0.0
+  ]
+ },
+ {
+  "time": [
+   "2025-01-22",
+   "2025-01-23"
+  ],
+  "temperature_2m_max": [
+   10.4,
+   11.6
+  ],
+  "temperature_2m_min": [
+   -0.5,
+   0.7
+  ],
+  "precipitation_sum": [
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "time": [
+   "2024-01-22",
+   "2024-01-23"
+  ],
+  "temperature_2m_max": [
+   11.1,
+   6.2
+  ],
+  "temperature_2m_min": [
+   5.0,
+   -1.0
+  ],
+  "precipitation_sum": [
+   0.0,
+   0.0
+  ]
+ }
+]

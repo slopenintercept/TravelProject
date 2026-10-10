@@ -1,0 +1,45 @@
+import type { DecisionAction, TravelerIn, TripRequest, TripView } from './types'
+
+async function request(path: string, init?: RequestInit): Promise<TripView> {
+  const res = await fetch(`/api/trips${path}`, init)
+  if (!res.ok) throw new Error(await errorDetail(res))
+  return res.json()
+}
+
+function post(path: string, body?: unknown): Promise<TripView> {
+  return request(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+}
+
+/** Errors are `{detail: string}`; request validation errors are `{detail: [{loc, msg}]}`. */
+async function errorDetail(res: Response): Promise<string> {
+  try {
+    const { detail } = await res.json()
+    if (typeof detail === 'string') return detail
+    if (Array.isArray(detail)) {
+      return detail.map((d: { loc: string[]; msg: string }) => `${d.loc.slice(1).join('.')}: ${d.msg}`).join('; ')
+    }
+  } catch {
+    // not JSON (for example the dev proxy when the backend is down)
+  }
+  return `Request failed (${res.status} ${res.statusText})`
+}
+
+export const api = {
+  createTrip: (trip: TripRequest) => post('', trip),
+  getTrip: (id: string) => request(`/${id}`),
+  eventsUrl: (id: string) => `/api/trips/${id}/events`,
+  chooseDates: (id: string, start: string) => post(`/${id}/dates`, { start }),
+  join: (id: string, traveler: TravelerIn) => post(`/${id}/travelers`, traveler),
+  leave: (id: string, travelerId: string) => request(`/${id}/travelers/${travelerId}`, { method: 'DELETE' }),
+  plan: (id: string) => post(`/${id}/plan`),
+  decide: (id: string, action: DecisionAction, card: string, option_id?: string) =>
+    post(`/${id}/decisions`, { action, card, option_id }),
+  applyBudget: (id: string, traveler: string) => post(`/${id}/budget/apply`, { traveler }),
+  moveItem: (id: string, item_id: string, day: string) => post(`/${id}/itinerary/move`, { item_id, day }),
+  swapItem: (id: string, item_id: string, attraction_id: string) =>
+    post(`/${id}/itinerary/swap`, { item_id, attraction_id }),
+}

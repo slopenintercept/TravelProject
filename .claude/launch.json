@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tripwright",
+      "runtimeExecutable": "/Users/deep/Documents/Travel Project/backend/.venv/bin/python",
+      "runtimeArgs": ["-m", "uvicorn", "tripwright.api:app", "--app-dir", "/Users/deep/Documents/Travel Project/backend", "--port", "8000"],
+      "port": 8000
+    }
+  ]
+}

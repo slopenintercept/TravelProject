@@ -1,0 +1,13 @@
+# The API, the Strands agents and the Chromium worker pool, on one Akamai compute instance.
+#   docker compose up -d --build
+#   docker compose logs -f app
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    shm_size: 1gb  # Chromium needs more shared memory than Docker's 64 MB default
+    volumes:
+      - ./data:/app/data  # SQLite and local evidence, when the Akamai services aren't configured
+    restart: unless-stopped
