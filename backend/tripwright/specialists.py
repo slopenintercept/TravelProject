@@ -250,7 +250,8 @@ class StayPick(BaseModel):
     stay: int = Field(description="Stay number from the brief, starting at 1")
     option_id: str = Field(description="An id from search_hotels or search_airbnb")
     alternative_ids: list[str] = Field(description="Up to 3 other ids from the same search")
-    reasoning: str = Field(description="Why this place: transit, location, price. One or two sentences")
+    reasoning: str = Field(description="Why this place: transit, location, rating. One or two sentences. "
+                                       "No budgets or traveler names")
 
 
 class LodgingOut(BaseModel):
@@ -311,10 +312,10 @@ def _nightly_cap(state: TripState, traveler: Traveler) -> float:
 
 
 def assign_rooms(state: TripState) -> None:
-    """Give each traveler their own room for every stay, chosen by their own budget.
+    """Give each traveler their own room for every stay, chosen by their own budget alone.
 
-    Deterministic: the agent's pick if it fits, else the best-rated option that does,
-    else the cheapest one found.
+    Deterministic: the best-rated option within their budget, else the cheapest one found.
+    Nobody else's budget plays a part, so travelers can end up in different places.
     """
     def nightly(room) -> float:
         return room.price_total_usd / max(room.nights, 1)
@@ -323,12 +324,12 @@ def assign_rooms(state: TripState) -> None:
         cap, stays = _nightly_cap(state, t), []
         for stay in state.lodging.stays:
             within = [o for o in stay.options if nightly(o) <= cap]
-            if stay.selected in within:
-                room, why = stay.selected, stay.reasoning
-            elif within:
+            if within:
                 room = max(within, key=lambda o: (o.rating or 0, -o.price_total_usd))
                 why = (f"Best-rated option within {t.name}'s lodging budget of about ${cap:.0f} a night "
                        f"(rated {room.rating or 'n/a'}, ${nightly(room):.0f} a night).")
+                if room == stay.selected:
+                    why += f" {stay.reasoning}"
             else:
                 room = min(stay.options, key=lambda o: o.price_total_usd)
                 why = (f"Cheapest option found at ${nightly(room):.0f} a night; that is over {t.name}'s lodging "
@@ -339,7 +340,8 @@ def assign_rooms(state: TripState) -> None:
 
 def lodging_task(state: TripState, who: Traveler | None = None) -> str:
     caps = ", ".join(f"{t.name} ${_nightly_cap(state, t):,.0f}" for t in state.travelers)
-    lowest = min(_nightly_cap(state, t) for t in state.travelers)
+    nightly = [_nightly_cap(state, t) for t in state.travelers]
+    lowest, highest = min(nightly), max(nightly)
     override = (f"The group has asked for {state.lodging_override}, so search for that, but still report "
                 "what most travelers pick. ") if state.lodging_override else ""
     return (f"{brief(state)}\n\nFind lodging options for the group: each traveler gets their own room, picked to "
@@ -347,9 +349,11 @@ def lodging_task(state: TripState, who: Traveler | None = None) -> str:
             f"First use web_research to find what most travelers to {state.request.destination} "
             "choose for this kind of trip, hotel or Airbnb, and which neighborhoods they stay in (near transit, "
             "central to the attractions, easy for the airport, budget-friendly). Keep the source URLs. "
-            f"{override}Then search within that choice once per stay and pick one place per stay plus up to 3 "
-            f"alternatives. Every stay needs at least one option at or under ${lowest:,.0f} a night, the "
-            "lowest budget in the group.")
+            f"{override}Then search within that choice once per stay, with max_nightly_usd at ${highest:,.0f}, the "
+            "highest budget, and pick one place per stay plus up to 3 alternatives at different prices. Every "
+            f"stay needs at least one option at or under ${lowest:,.0f} a night, the lowest budget. In each "
+            "stay's reasoning describe the place only; each traveler's card states their own budget, so leave "
+            "budgets and traveler names out.")
 
 
 # --- attractions ---------------------------------------------------------------

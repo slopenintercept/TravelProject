@@ -161,13 +161,22 @@ def test_each_traveler_gets_a_room_that_fits_their_own_budget(group):
     from tripwright.specialists import assign_rooms
     alex, sam = group.travelers
     alex.budget_usd, sam.budget_usd = 2500, 1500  # about $117 and $70 a night for lodging
+    tokyo = group.lodging.stays[0]
+    tokyo.options[0].rating, tokyo.options[1].rating = 4.6, 4.2  # t1 is $110 a night, t2 is $70
     assign_rooms(group)
-    # Tokyo, 3 nights: the agent's pick is $110 a night; the cheaper room is $70.
+    # Tokyo: Alex can afford the better-rated room; Sam's budget only reaches the cheaper one.
     assert alex.lodging.stays[0].selected.name == "Tokyo Hotel t1"
+    assert "within Alex's lodging budget of about $117 a night" in alex.lodging.stays[0].reasoning
     assert sam.lodging.stays[0].selected.name == "Tokyo Hotel t2"
     assert "within Sam's lodging budget of about $70 a night" in sam.lodging.stays[0].reasoning
     # Kyoto, 2 nights: both rooms ($100 and $75 a night) are over Sam's budget, so Sam gets the cheapest.
     assert sam.lodging.stays[1].selected.name == "Kyoto Hotel k2" and "over Sam's lodging budget" in sam.lodging.stays[1].reasoning
+
+    # Alex's budget plays no part in Sam's room: raising Sam's alone moves Sam, whatever Alex has.
+    alex.budget_usd, sam.budget_usd = 1500, 3000
+    assign_rooms(group)
+    assert alex.lodging.stays[0].selected.name == "Tokyo Hotel t2"
+    assert sam.lodging.stays[0].selected.name == "Tokyo Hotel t1"
 
 
 def test_saved_attractions_are_tied_to_the_current_group_by_name(group):
