@@ -31,9 +31,16 @@ SUGGESTIONS = {"relaxed": 3, "balanced": 5, "packed": 8}
 
 PREAMBLE = (
     "You are the {title} on Tripwright, a team of travel-planning agents led by an orchestrator. "
+    "{tools} Keep every explanation to one or two plain sentences."
+)
+WITH_TOOLS = (
     "Gather real data with your tools. Never invent a price, time, option id or URL: use only what "
-    "your tools returned. Call only the tools you were given; you cannot delegate to other agents. "
-    "Keep every explanation to one or two plain sentences."
+    "your tools returned. Call only the tools you were given; you cannot delegate to other agents."
+)
+# Told it has tools, a model with none makes some up (WebSearch, Skill) and loses a round trip to the error.
+NO_TOOLS = (
+    "You have no research tools for this step: no web search, no page fetch, no skills. Answer straight "
+    "away from the brief and what you already know."
 )
 
 
@@ -111,7 +118,7 @@ class RouteOut(BaseModel):
 
 
 async def build_route(state: TripState, ctx: RunContext, out: RouteOut) -> RoutePlan:
-    """Accept the cities; make the nights add up exactly, which the model often gets wrong."""
+    """Accept the cities; make the nights add up exactly and end at the gateway, which the model often gets wrong."""
     offset = min(max(out.arrival_day_offset, 0), 1)
     nights = state.request.days - offset
     if not out.segments or nights < 1:
@@ -125,9 +132,13 @@ async def build_route(state: TripState, ctx: RunContext, out: RouteOut) -> Route
             longest.nights -= 1
     segments[0].nights += nights - sum(s.nights for s in segments)
     gateway = segments[0].city
-    if not same_city(segments[-1].city, gateway):
-        raise Rejected([f"the route must end in {gateway}, where the flight home leaves from: "
-                        f"move one night from another stay to a final night in {gateway}"])
+    if not same_city(segments[-1].city, gateway):  # the flight home leaves from where they landed
+        longest = max(segments, key=lambda s: s.nights)
+        if longest.nights == 1:
+            raise Rejected([f"the route must end in {gateway}, where the flight home leaves from: "
+                            f"drop a city to leave a final night in {gateway}"])
+        longest.nights -= 1
+        segments.append(RouteSegment(city=gateway, nights=1))
     return RoutePlan(segments=segments, arrival_day_offset=offset)
 
 
@@ -216,6 +227,14 @@ async def build_flights(state: TripState, ctx: RunContext, out: FlightsOut) -> F
         raise Rejected(problems or ["call search_flights, then pick 3 option ids from its results"])
 
     d = state.dates
+    share = allotted(ctx.traveler)["flights"]
+    on_dates = [o for o in ctx.flights.values() if (o.depart_at.date(), o.arrive_at.date()) == (d.start, d.arrival)]
+    cheapest = min(on_dates, key=lambda o: o.price_usd, default=None)
+    if cheapest and picks[0].price_usd > share and picks[0].price_usd > cheapest.price_usd * 1.05:
+        # Over the flight budget with a cheaper fare on offer: lead with that fare rather than send it back.
+        lead = next((p for p in picks if p.id == cheapest.id), None) or cheapest.model_copy(
+            update={"tradeoff": "The cheapest fare found for these dates."})
+        picks = [lead] + [p for p in picks if p.id != cheapest.id]
     for o in picks:
         if o.depart_at.date() != d.start:
             problems.append(f"{o.id} leaves on {o.depart_at.date()} but the trip starts {d.start}")
@@ -224,12 +243,6 @@ async def build_flights(state: TripState, ctx: RunContext, out: FlightsOut) -> F
         if o.price_usd < 80 or (o.duration_minutes >= 480 and o.price_usd < 250):
             problems.append(f"{o.id} at ${o.price_usd:.0f} is not a plausible fare for this route")
 
-    share = allotted(ctx.traveler)["flights"]
-    on_dates = [o for o in ctx.flights.values() if (o.depart_at.date(), o.arrive_at.date()) == (d.start, d.arrival)]
-    cheapest = min(on_dates, key=lambda o: o.price_usd, default=None)
-    if cheapest and picks[0].price_usd > share and picks[0].price_usd > cheapest.price_usd * 1.05:
-        problems.append(f"first pick costs ${picks[0].price_usd:.0f}, over the ${share:.0f} flight budget, "
-                        f"and {cheapest.id} is cheaper at ${cheapest.price_usd:.0f}")
     if problems:
         raise Rejected(problems)
     return FlightPlan(origin_airports=out.origin_airports, options=picks[:3], selected_id=picks[0].id)
@@ -595,13 +608,6 @@ async def fetch_weather(state: TripState) -> list[DayWeather]:
 
 # --- what the orchestrator's reviewer is shown: the whole result, compactly ---------
 
-def review_flights(state: TripState, plan: FlightPlan) -> str:
-    return "\n".join(
-        f"{i}. {o.airline}, ${o.price_usd:,.0f}, leaves {o.depart_at:%b %d %H:%M}, lands {o.destination} "
-        f"{o.arrive_at:%b %d %H:%M}, {o.duration_minutes // 60}h{o.duration_minutes % 60:02d}, {o.stops} stop(s). {o.tradeoff}"
-        for i, o in enumerate(plan.options, 1))
-
-
 def review_lodging(state: TripState, plan: LodgingPlan) -> str:
     lines = [f"Most travelers pick {plan.common_choice.choice} because {plan.common_choice.because}. "
              "Each traveler gets their own room from these options, by their own budget."]
@@ -623,7 +629,14 @@ def review_attractions(state: TripState, found: list[Attraction]) -> str:
 
 
 def review_transport(state: TripState, plan: TransportPlan) -> str:
-    lines = [f"Most visitors use {plan.common_choice.choice} because {plan.common_choice.because}. {plan.rideshare_note}"]
+    cars = ", ".join(t.name for t in state.travelers if t.rental_car) or "nobody on this trip"
+    lines = [f"Most visitors use {plan.common_choice.choice} because {plan.common_choice.because}. {plan.rideshare_note}",
+             # Without this the reviewer sends back correct plans for not being built around the car.
+             "How rental cars work here (settled by code, not up for review): every leg is priced the way most "
+             "visitors travel, because each traveler keeps or removes legs on their own card. A traveler who "
+             f"prefers a rental car ({cars}) gets one rental_car leg for the whole trip on top of those, and "
+             "removes the legs they won't use. So train legs plus a rental_car leg is the correct plan, and a "
+             "rental-car preference is never a reason to send it back."]
     lines += [f"- {leg.kind}: {leg.mode} {leg.from_place} to {leg.to_place}, {leg.duration_minutes} min, ${leg.price_usd:,.0f}"
               for leg in plan.legs]
     return "\n".join(lines)
@@ -671,7 +684,7 @@ SPECS = {s.name: s for s in [
     Spec("flight", "Flight agent", "flights", FlightPlan, FlightsOut, flights_task, build_flights,
          lambda t: [t.search_flights],
          lambda f: f"{len(f.options)} options; best is {f.selected.airline} at ${f.selected.price_usd:,.0f}",
-         judged=True, per_traveler=True, review=review_flights),
+         per_traveler=True),
     Spec("lodging", "Lodging agent", "lodging", LodgingPlan, LodgingOut, lodging_task, build_lodging,
          lambda t: [t.web_research, t.read_source, t.search_hotels, t.search_airbnb],
          lambda p: "; ".join(f"{s.city}: {len(s.options)} options from ${min(o.price_total_usd for o in s.options):,.0f}"

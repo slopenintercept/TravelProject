@@ -37,7 +37,7 @@ from .events import Bus, bus
 from .llm import Activity, RateLimit, make_model
 from .models import Flag, RoutePlan, RouteSegment, Traveler, TravelerIn, TripDates, TripRequest, TripState, new_id
 from .scheduler import schedule
-from .specialists import PREAMBLE, SPECS, Rejected, Spec, brief, fetch_weather
+from .specialists import NO_TOOLS, PREAMBLE, SPECS, WITH_TOOLS, Rejected, Spec, brief, fetch_weather
 from .toolbox import RunContext, Toolbox
 from .tools import flights
 from .validate import rebudget, validate_itinerary
@@ -141,9 +141,10 @@ class SpecialistNode(MultiAgentBase):
             return self._fall_back(state, events, who, "had no inference key (set OPENAI_API_KEY)")
 
         ctx = RunContext(agent=self.name, state=state, traveler=who)
+        tools = spec.tools(Toolbox(ctx))
         agent = Agent(
-            model=make_model(), name=spec.name, system_prompt=PREAMBLE.format(title=spec.title),
-            tools=spec.tools(Toolbox(ctx)),
+            model=make_model(), name=spec.name, tools=tools,
+            system_prompt=PREAMBLE.format(title=spec.title, tools=WITH_TOOLS if tools else NO_TOOLS),
             hooks=[RateLimit(), Activity(self.name, events.emit)], callback_handler=None,
         )
 

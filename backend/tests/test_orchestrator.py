@@ -32,6 +32,7 @@ class ScriptedModel(Model):
 
     async def stream(self, messages, tool_specs=None, system_prompt=None, **kwargs):
         self.seen.append(messages[-1])
+        self.system_prompt = system_prompt
         await asyncio.sleep(self.delay)
         turn = self.turns.pop(0)
         yield {"messageStart": {"role": "assistant"}}
@@ -103,8 +104,7 @@ def statuses(trip, agent):
 
 async def test_rejected_result_is_sent_back_with_feedback_then_accepted(trip, monkeypatch):
     flight_agent = ScriptedModel([[("text", "Searching MCI to Tokyo."), SEARCH], [picks("f99")], [picks("f2", "f1", "f3")]])
-    reviewer = ScriptedModel([[("tool", "Verdict", {"accept": True, "feedback": ""})]])
-    script(monkeypatch, flight_agent, reviewer)
+    script(monkeypatch, flight_agent)
 
     await orchestrator.run(trip, orchestrator.planning_graph(["flight:p1"]), "planning")
 
@@ -120,6 +120,7 @@ async def test_rejected_result_is_sent_back_with_feedback_then_accepted(trip, mo
 
 
 async def test_llm_reviewer_can_send_a_result_back(trip, monkeypatch):
+    monkeypatch.setattr(orchestrator.SPECS["flight"], "judged", True)  # flights are not judged; any specialist can be
     flight_agent = ScriptedModel([[SEARCH], [picks("f2", "f3")], [picks("f2", "f1", "f3")]])
     script(monkeypatch, flight_agent,
            ScriptedModel([[("tool", "Verdict", {"accept": False, "feedback": "offer three options, not two"})]]),
@@ -132,19 +133,31 @@ async def test_llm_reviewer_can_send_a_result_back(trip, monkeypatch):
     assert [o.id for o in trip.travelers[0].flights.options] == ["f2", "f1", "f3"]
 
 
-async def test_pick_over_its_budget_share_is_sent_back_when_a_cheaper_one_exists(trip, monkeypatch):
-    flight_agent = ScriptedModel([[SEARCH], [picks("f3", "f1", "f2")], [picks("f2", "f1", "f3")]])
-    script(monkeypatch, flight_agent, ScriptedModel([[("tool", "Verdict", {"accept": True, "feedback": ""})]]))
+async def test_pick_over_its_budget_share_gives_way_to_the_cheapest_without_a_send_back(trip, monkeypatch):
+    script(monkeypatch, ScriptedModel([[SEARCH], [picks("f3", "f1")]]))  # $1576 first; the budget share is $1250
 
     await orchestrator.run(trip, orchestrator.planning_graph(["flight:p1"]), "planning")
 
-    assert "over the $1250 flight budget, and f2 is cheaper at $1300" in flight_agent.seen[-1]["content"][0]["text"]
-    assert trip.travelers[0].flights.selected_id == "f2"
+    assert "sent_back" not in statuses(trip, "flight:p1")
+    plan = trip.travelers[0].flights
+    assert [o.id for o in plan.options] == ["f2", "f3", "f1"] and plan.selected_id == "f2"  # f2 was never picked
+    assert plan.selected.tradeoff == "The cheapest fare found for these dates."
+
+
+async def test_route_is_ended_at_the_arrival_city_in_code_and_the_planner_knows_it_has_no_tools(trip, monkeypatch):
+    planner = ScriptedModel([[("tool", "RouteOut", {"arrival_day_offset": 1, "segments": [
+        {"city": "Tokyo", "nights": 4}, {"city": "Kyoto", "nights": 2}]})]])
+    script(monkeypatch, planner)
+
+    await orchestrator.run(trip, orchestrator.route_graph(), "route")
+
+    assert statuses(trip, "route") == ["working", "under_review", "accepted"]
+    assert [(s.city, s.nights) for s in trip.route.segments] == [("Tokyo", 3), ("Kyoto", 2), ("Tokyo", 1)]
+    assert "no research tools" in planner.system_prompt
 
 
 async def test_three_failures_fall_back_to_the_saved_result_and_flag_it(trip, monkeypatch):
-    script(monkeypatch, ScriptedModel([[SEARCH], [picks("f2")]]),
-           ScriptedModel([[("tool", "Verdict", {"accept": True, "feedback": ""})]]))
+    script(monkeypatch, ScriptedModel([[SEARCH], [picks("f2")]]))
     await orchestrator.run(trip, orchestrator.planning_graph(["flight:p1"]), "planning")
     saved = trip.travelers[0].flights.selected.depart_at
 
@@ -177,7 +190,6 @@ async def test_slow_agent_times_out_without_blocking_the_others(trip, monkeypatc
 async def test_each_traveler_gets_their_own_flight_agent_and_they_run_in_parallel(trip, monkeypatch):
     trip.travelers.append(Traveler(id="p2", name="Sam", origin="Elsewhere", budget_usd=3000))
     monkeypatch.setattr(orchestrator, "make_model", lambda: ScriptedModel([[SEARCH], [picks("f2")]], delay=0.4))
-    monkeypatch.setattr(orchestrator, "judge", lambda *a: asyncio.sleep(0))
 
     started = time.monotonic()
     await orchestrator.run(trip, orchestrator.planning_graph(["flight:p1", "flight:p2"]), "planning")

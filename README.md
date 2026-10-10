@@ -70,7 +70,7 @@ working ──► under review ──► accepted
                │
                ├─ deterministic checks, every attempt: every id and URL was really returned by a
                │  tool, dates/cities match TripState, prices are plausible, budget share respected
-               ├─ LLM judgment (orchestrator agent), first attempt only: plausibility and fit
+               ├─ LLM judgment (orchestrator agent), first attempt only, not for flights: plausibility and fit
                │
                └─► sent back with specific feedback (up to 2 retries)
                       └─► fallback to the last accepted result (database, then demo fixtures),
@@ -194,7 +194,7 @@ deploy/             Akamai provisioning and deploy scripts
 - **Travel times between stops are estimates** (great-circle distance at urban transit speed). There is no free transit-routing API for Japan. Intercity legs use the Transport agent's researched durations.
 - **Budget optimizer, scheduler and weather are deterministic graph nodes**, not LLM agents, following the key rule. The scheduler runs before the budget step, because a traveler's ticket costs depend on which activities they attend.
 - **Lodging is one agent, not one per traveler.** Each traveler still gets their own room by their own budget, but the pick is made in code from one agent's research. Running a lodging agent per traveler overloaded the shared endpoint in live tests.
-- **The reviewer model judges each result once.** In live runs it sent back correct results for reasons that were not true, so the code checks run on every attempt and the model's judgment only on the first.
+- **The reviewer model judges each result once.** In live runs it sent back correct results for reasons that were not true, so the code checks run on every attempt and the model's judgment only on the first. Flights are not judged at all: every fact in a flight result comes from the search, and an over-budget first pick is reordered in code.
 - **Invites are a share link with no login.** Anyone with the link can join, and anyone who opens the trip sees the host's controls.
 - **Trip length:** `days` runs from leaving home to the flight home, so "7 days" from Kansas City is 6 nights in Japan.
 - **Source and evidence links are not shown on the cards.** They were removed from the UI; every card in the API response still carries them (`sources[].url`, `sources[].evidence_url`).

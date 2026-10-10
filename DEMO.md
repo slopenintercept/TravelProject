@@ -23,7 +23,7 @@ Three date windows appear, each with typical weather, crowd level and the cheape
 
 > "I didn't give dates. The timeframe agent researched crowds and seasons, then checked real fares and three years of weather history for each window. The cheapest window is hundreds of dollars below the others. Behind every number is a source URL and a snapshot of the page, saved to Akamai Object Storage."
 
-Point at the route lane's **attempt 2**: the route planner usually proposes Tokyo then Kyoto, and the orchestrator sends it back to add a last night in Tokyo for the flight home. Then click **Choose these dates** on the first window.
+Point at the route lane: the route planner proposes the cities, and the orchestrator's code makes the nights add up and ends the route with a last night in Tokyo for the flight home. Then click **Choose these dates** on the first window.
 
 **0:40 Who's coming? (20 s)**
 
