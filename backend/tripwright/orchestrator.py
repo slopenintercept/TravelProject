@@ -37,7 +37,8 @@ from .budget import apply_swaps
 from .events import Bus, bus
 from .llm import Activity, RateLimit, make_model
 from .models import (
-    Flag, Idea, RoutePlan, RouteSegment, Traveler, TravelerIn, TripDates, TripRequest, TripState, new_id,
+    Flag, Idea, RoutePlan, RouteSegment, Traveler, TravelerIn, TravelerProfile, TripDates,
+    TripRequest, TripState, new_id,
 )
 from .scheduler import schedule
 from .specialists import (
@@ -360,8 +361,11 @@ def _saved(state: TripState) -> None:
 
 def new_trip(request: TripRequest) -> TripState:
     host = Traveler(id="p1", host=True, **request.model_dump(include=set(TravelerIn.model_fields)))
-    state = TripState(id=new_id("trip"), request=request, travelers=[host], profile=store.load_profile(), stage="timeframe")
-    preferences = state.profile.stated_preferences if state.profile else []
+    saved = store.load_profile()
+    preferences = saved.stated_preferences if saved else []
+    # Only the stated preferences carry over: the rest of the saved profile describes the last trip's host.
+    state = TripState(id=new_id("trip"), request=request, travelers=[host],
+                      profile=TravelerProfile(stated_preferences=preferences), stage="timeframe")
     if PREF["airbnb"] in preferences:
         state.lodging_override = "airbnb"
     host.rental_car = PREF["rental_car"] in preferences

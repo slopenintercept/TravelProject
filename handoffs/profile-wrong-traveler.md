@@ -67,6 +67,14 @@ Keep in mind:
 - The server does not reload on code changes: start it after your edit.
 - Remove the entry from `.claude/launch.json` and stop the server when you are done. Remove only your own entry and never restore that file with git.
 
+## Demo mode
+
+Added at about 06:10, after this file was handed over: the user asked that every fix also holds in demo mode, where the problem exists there.
+
+- **`DEMO_MODE=true` changes the tools only** (`backend/tripwright/recorded.py`): they replay recorded results. The agents still ask the real model, through the same `new_trip` and `brief`. So the fault is in demo mode too and the same fix covers it. Check 3 already runs with `DEMO_MODE=true`; say so in your Result.
+- **One path only the safety net uses.** With no inference key, or after three failed attempts, the Profile agent does not run: `_fall_back` (`orchestrator.py`, line 128) shows the last accepted profile for the same origin, destination and days, from the database first and then from `backend/tripwright/fixtures/recorded.json`. The recorded one ("A budget-conscious first-time visitor from Kansas City ...") names nobody. One saved in the database by an earlier trip can name that trip's host. It is shown as a saved result, and the demo script's host is the one the recording was made for, so **leave the fallback as it is**.
+- **Check 4, no code, if you see this in time:** on the scratch backend, restarted with `OPENAI_API_KEY=` added to its variables, start a trip as Sam from Kansas City to Japan for 7 days and report what the Profile agent's card says and how it is marked. This uses no inference. If you had already finished, the checking chat runs it.
+
 ## Ground rules
 
 - Read "Start here" and "Gotchas" in `HANDOFF.md` first. The user's global rules apply: minimum code, surgical changes, verify against a concrete check.
@@ -78,3 +86,38 @@ Keep in mind:
 ## When you finish
 
 Add a `## Result` section at the end of this file: the files you changed, what you ran and what it showed for each of the three checks (quote the summary the live run produced), and anything left undone. Write it last and in one go, after your server is stopped and your launch entry is removed: the checking chat takes that heading as "ready".
+
+## Result
+
+Written 2026-10-11 by the chat that made the fix. Nothing is committed, pushed or deployed. The scratch server on port 8016 is stopped and the `tripwright-profile` entry is gone from `.claude/launch.json`.
+
+**Files changed**
+
+- `backend/tripwright/orchestrator.py`, `new_trip` only (plus `TravelerProfile` added to the import): a new trip starts with `TravelerProfile(stated_preferences=<the saved ones>)` instead of the whole saved profile. The Airbnb and rental car lines read the same list as before.
+- `backend/tripwright/specialists.py`, `brief` only: the `Host:` line is added only when the profile has a summary or stated preferences, and an empty summary is left out of it. With both it reads exactly as before.
+- `backend/tests/test_profile.py`, new, two tests.
+
+**Check 1, the new test.** Both tests failed before the change (the brief held "Host: Alex is a solo traveler from Kansas City ...") and pass after. They cover: no "Alex" and no "Kansas City" in the new host's brief, the stated preference still in it, `lodging_override == "airbnb"`, and no `Host:` line at all when nothing is known yet.
+
+**Check 2, the whole suite.** `cd backend && .venv/bin/python -m pytest -q`: 128 passed (126 plus the two new ones).
+
+**Check 3, one live run, with `DEMO_MODE=true`.** Scratch backend on 8016 (`/api/health`: `sqlite`, `local disk`, `demo_mode: true`, inference key present), saved profile seeded with the Alex sentence from the table. `POST /api/trips` as Deep, Kansas, Japan, 7 days, $3,000 gave `trip_87ab3340`. The Profile agent was "Accepted by the orchestrator" on attempt 1 and wrote:
+
+> A solo traveler from Kansas planning a 7-day balanced-pace Japan trip on a $3,000 budget, visiting Tokyo, Kyoto, and Osaka.
+
+No Alex and no Kansas City; `home` is "Kansas". It does not use the name Deep. Run once. Demo mode replays the tools only, so this is the same `new_trip` and `brief` as a normal run and the one fix covers both.
+
+**Check 4, no inference key.** Same scratch backend restarted with `OPENAI_API_KEY=` (`/api/health`: `"key": false`). `POST /api/trips` as Sam, Kansas City, Japan, 7 days, $2,500 (the handoff gave no budget; I used the demo's) gave `trip_8817d12a`. The Profile agent's card:
+
+- status `fallback`, attempt 0, message "Using saved results: had no inference key (set OPENAI_API_KEY)"
+- found: "A budget-conscious first-time visitor from Kansas City planning a 7-day, balanced-pace Japan trip focused on Tokyo Disneyland and Kyoto within a $2,500 total budget."
+- flag: "Showing saved results: the live run had no inference key (set OPENAI_API_KEY)."
+
+That is the recorded profile from `fixtures/recorded.json`; it names nobody. Route and timeframe were `fallback` too, ideas `pending` (no saved result). The fallback was left as it is.
+
+**Left undone, and noticed**
+
+- Not changed, as told: the single `"default"` profile, the fallback, and trips already saved with the wrong sentence.
+- A side effect of always giving a new trip a profile: if the Profile agent fails with no saved result, `plan_timeframe` now saves a profile with no summary as `"default"` (stated preferences kept). Before, with nothing saved, it saved nothing. Nothing prints the empty summary: `brief` skips it.
+- Noticed, not touched, and not new: when the Profile agent falls back, the saved result replaces the trip's whole profile, stated preferences included, and `plan_timeframe` then saves that as `"default"`. So a fallback run can drop "Prefers Airbnb over hotels" for later trips. In check 4 there were none to lose.
+- The server on port 8000 was not touched and still runs the old code.

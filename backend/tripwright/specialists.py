@@ -67,9 +67,9 @@ def brief(state: TripState, who: Traveler | None = None) -> str:
                      f"{', '.join(t.want) or 'nothing specified'}{skips}.")
     if who:
         lines.append(f"You are planning for {who.name} only.")
-    if state.profile:
-        lines.append(f"Host: {state.profile.summary} Stated preferences: "
-                     f"{'; '.join(state.profile.stated_preferences) or 'none yet'}.")
+    if state.profile and (state.profile.summary or state.profile.stated_preferences):
+        lines.append(" ".join(filter(None, ["Host:", state.profile.summary, "Stated preferences: "
+                     f"{'; '.join(state.profile.stated_preferences) or 'none yet'}."])))
     if state.dates:
         lines.append(f"Dates: leave home {state.dates.start}, land {state.dates.arrival}, fly home {state.dates.end}.")
     if state.route and state.dates:
