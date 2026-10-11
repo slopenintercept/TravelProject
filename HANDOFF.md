@@ -5,7 +5,7 @@ Updated 2026-10-11, early morning Central, for continuing in a new chat. If you 
 ## Start here
 
 - **The app is live on Akamai** and the code on the server matches the committed app code. Details and commands are in "Hosting on Akamai".
-- **Branch:** `combine-picks-and-group-trips` is where all work happens and is pushed. `main` is behind it: it stops at `03125d7`, before the redesign and the new README, so GitHub's front page still shows the old README (see Git).
+- **Branch:** `combine-picks-and-group-trips` is where all work happens and is pushed. `main` was fast-forwarded to `ffe77ab` on 2026-10-11, so it has the redesign and the new README; only handoff updates made after that are missing from it (see Git).
 - **The whole UI was rebuilt on 2026-10-11** to the design the user approved (see "The redesign"). It is committed, pushed and deployed. The user has not yet looked at the screens that had no mockup.
 - Several chats share the folder: run `git status` first, commit only your own files, and never stash or revert someone else's.
 - **Waiting on the user, none urgent:**
@@ -13,7 +13,6 @@ Updated 2026-10-11, early morning Central, for continuing in a new chat. If you 
   2. Whether to give the hosted site a clean `https://` name. The user asked why the address is an IP with `:8000`, was offered a domain plus Caddy, and said to leave it for now.
   3. The full planning flow has not been run on the hosted site.
   4. Sign-off on the redesign choices listed under "The redesign".
-  5. Fast-forwarding `main`, so GitHub shows the new README (the command is under Git).
 - **Housekeeping left on the Mac:** Docker Desktop is running from a test build and can be quit. The "Linode sign-in" terminal tab from the earlier chat is finished and can be closed.
 
 ## What it is
@@ -98,7 +97,7 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 - Remote: `https://github.com/slopenintercept/TravelProject.git` (public).
 - Current branch: `combine-picks-and-group-trips`, pushed. It holds everything: Brandon's picks, per-person links and draft plan, merged with the user's `group-trips-live-run`.
-- `main` was fast-forwarded to this branch several times on 2026-10-10 and again on 2026-10-11, each time because the user asked. The last time left it at `03125d7`, so it does not have the 16-places change, the approval fix, the UI rebuild, `design/` or the new docs. On 2026-10-11 the user asked for the README to be put on GitHub, but the chat's push to `main` was refused by its permission check ("merge without review"), so the user has to run the command below themselves. Fast-forwarding is not a standing rule: commits made here are not in `main` until the user asks again.
+- `main` was fast-forwarded to this branch several times on 2026-10-10 and again on 2026-10-11, each time because the user asked. The last time, early on 2026-10-11, left it at `ffe77ab`: the redesign, the approval fix, `design/` and the new docs are in it. A chat's own push to `main` is refused by its permission check ("merge without review"), so the user runs the command below themselves. Fast-forwarding is not a standing rule: commits made here are not in `main` until the user asks again.
 - To fast-forward `main` without leaving this branch or touching the working folder: `git push origin origin/combine-picks-and-group-trips:refs/heads/main`, then `git fetch && git branch -f main origin/main`.
 - `group-trips-live-run` is pushed at `b370be3` and is fully contained in the current branch.
 - GitHub push protection once blocked a push because a third-party Mapbox token sat inside scraped page text. It was redacted, not bypassed, and `tools/research.py` now strips such tokens.
