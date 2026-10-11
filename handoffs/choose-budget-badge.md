@@ -61,3 +61,24 @@ There are no frontend tests in this repo, so the browser is the check.
 ## When you finish
 
 Add a `## Result` section at the end of this file: what you changed, what you ran and what it showed for each of the four checks, and anything left undone. Write it last and in one go, after your servers are stopped and your launch entries are removed: the checking chat takes that heading as "ready".
+
+## Result
+
+Written 2026-10-11 by the chat that made the fix.
+
+**Changed:** one line, `frontend/src/components/Choose.tsx` line 83: the badge text "Matched to your budget" is now "Picked for you". Nothing else in the file, and no other file.
+
+**Checked** on `trip_badge1`, a copy of `trip_479d20ea` in a scratch SQLite database (backend on port 8014, `/api/health` said `sqlite` and `local disk`; Vite dev server on port 5184), read from the page text as Alex (`#trip_badge1/p1`) and as Sam (`#trip_badge1/p2`):
+
+1. Kyoto (Dec 28 – 30) and the last Tokyo night (Dec 30 – 31): the line says "Cheapest option found at $50 / $75 a night; that is over ...'s lodging budget of about $44 a night", and the picked room (Agora Place Kyoto Nijo, TOKYO-W-inn Asakusa) reads "Picked for you". "Matched to your budget" appears nowhere on the page. Same for both travelers.
+2. First Tokyo stay (Dec 12 – 28): "Best-rated option within ...'s lodging budget of about $44 a night", and Guest House Tokyo Samurai reads "Picked for you". Same for both travelers.
+3. The flight's badge still reads "Agent's pick", for both travelers.
+4. `cd frontend && npx tsc --noEmit` passes (exit 0), run right after the edit and again at the end with the other chat's `App.tsx` change in the tree.
+
+"Confirm my flight and stays" was not clicked. `trip_479d20ea` was only read, once, with `GET /api/trips/trip_479d20ea`.
+
+**Cleaned up:** both servers stopped (nothing listens on 8014 or 5184), and the `tripwright-badge` and `tripwright-badge-frontend` entries are removed from `.claude/launch.json`. The entries still showing in that file's diff are the other chat's. The scratch database is in this chat's scratchpad, outside the repo.
+
+**Not done, as instructed:** no `npm run build`, no commit, push or deploy. Keeping "Matched to your budget" for rooms that do fit the budget was left out (it needs a new field from `assign_rooms`).
+
+One thing to know when building: the dev server compiled whatever was in `frontend/src` at the time, so the browser check may have run with the other chat's `App.tsx` change in place or without it. The badge line does not depend on it.

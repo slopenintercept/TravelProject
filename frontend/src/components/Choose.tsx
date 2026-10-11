@@ -80,7 +80,7 @@ export function Choose({ state, you, sending, onConfirm }: Props) {
                   onChange={() => setRoomIds(roomIds.map((id, j) => (j === i ? o.id : id)))}
                 />
                 <div className="what">
-                  <b>{o.name}{o.id === stay.selected_id && <small>Matched to your budget</small>}</b>
+                  <b>{o.name}{o.id === stay.selected_id && <small>Picked for you</small>}</b>
                   <p>
                     {o.kind === 'airbnb' ? 'Airbnb' : 'Hotel'}{o.neighborhood && ` · ${o.neighborhood}`}
                     {o.rating !== null && ` · rated ${o.rating}`}
