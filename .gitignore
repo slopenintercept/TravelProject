@@ -7,3 +7,9 @@ __pycache__/
 node_modules/
 frontend/dist/
 .DS_Store
+
+# Claude Code tooling installed on one machine: third-party skills (20 MB, with a macOS binary) and their agents.
+# skills-lock.json records which skills and where they came from.
+.claude/skills/
+.claude/agents/
+.impeccable/hook.cache.json

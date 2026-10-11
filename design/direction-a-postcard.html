@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tripwright — Direction A, Postcard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* SYSTEM — Direction A, "Postcard"
+   Type: Figtree only. Display 800 at -0.05em tracking, line-height .95. Scale 150 / 84 / 44 / 22 / 17 / 14.
+   Colour: white page, near-black ink. Four saturated category panels, each a dark ground with its own pale ink:
+           flights navy+blush, lodging rust+cream, attractions moss+lime, transport teal+aqua.
+   Shape: every control is a full pill. Panels 32px radius, tiles 22px.
+   Rhythm: 1320px column, 40px gutters, panels stacked with 20px gaps. One idea per panel. */
+:root {
+  --ink: #0c0c0d; --paper: #fff; --mist: #f2f2ee; --line: #e3e3dd; --soft: rgb(12 12 13 / 60%);
+  --navy: oklch(0.27 0.11 268); --blush: oklch(0.89 0.05 25);
+  --rust: oklch(0.45 0.14 42); --cream: oklch(0.95 0.035 80);
+  --moss: oklch(0.4 0.07 125); --lime: oklch(0.93 0.07 115);
+  --teal: oklch(0.36 0.06 205); --aqua: oklch(0.93 0.04 195);
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 400 17px/1.5 Figtree, sans-serif; color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul { margin: 0; padding: 0; } ul { list-style: none; }
+p { text-wrap: pretty; }
+button, input { font: inherit; color: inherit; }
+.screen { display: none; } .screen.on { display: block; }
+.wrap { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
+.display { font-weight: 800; letter-spacing: -0.05em; line-height: 0.95; }
+.cap { font-size: 14px; font-weight: 600; color: var(--soft); }
+.grow { flex: 1; }
+
+.pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 22px; border-radius: 999px; border: 1.5px solid currentColor; background: none; color: inherit; font-weight: 600; font-size: 16px; cursor: pointer; white-space: nowrap; text-decoration: none; }
+.pill.solid { background: var(--ink); border-color: var(--ink); color: #fff; }
+.pill.sm { height: 36px; padding: 0 16px; font-size: 14px; }
+.pill.xl { height: 64px; padding: 0 36px; font-size: 20px; }
+.pill.quiet { border-color: var(--line); }
+
+.top { display: flex; align-items: center; gap: 14px; height: 76px; }
+.brand { font-weight: 800; font-size: 22px; letter-spacing: -0.04em; color: inherit; text-decoration: none; }
+.tripline { display: flex; gap: 6px; margin-left: 14px; }
+.tripline span { height: 32px; padding: 0 14px; border-radius: 999px; background: var(--mist); font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; }
+.you { font-size: 14px; color: var(--soft); } .you b { color: var(--ink); }
+
+/* ---- Start ---- */
+.start { padding-top: 34px; padding-bottom: 80px; }
+.mega { font-size: clamp(96px, 11.5vw, 164px); }
+.lede { font-size: 20px; line-height: 1.5; color: var(--soft); max-width: 60ch; margin-top: 22px; }
+.sentence { margin-top: 44px; font-size: clamp(34px, 3.9vw, 54px); font-weight: 700; letter-spacing: -0.035em; line-height: 1.62; color: var(--soft); max-width: 22em; }
+.blank { display: inline-flex; flex-direction: column; vertical-align: top; }
+.blank input { field-sizing: content; min-width: 1.2em; border: 0; border-bottom: 4px solid var(--ink); padding: 0 4px; background: none; color: var(--ink); font-weight: 800; letter-spacing: inherit; line-height: 1.15; outline: none; }
+.blank input:focus { border-color: var(--rust); }
+.blank small { font-size: 13px; font-weight: 600; letter-spacing: 0; line-height: 1.5; color: var(--soft); padding-left: 4px; }
+.start-row { display: flex; align-items: flex-end; gap: 36px; margin-top: 30px; }
+.start-row .cap { display: block; margin-bottom: 8px; }
+.seg { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--mist); }
+.seg button { height: 38px; padding: 0 18px; border: 0; border-radius: 999px; background: none; font-weight: 600; font-size: 15px; cursor: pointer; }
+.seg button.on { background: var(--ink); color: #fff; }
+
+/* ---- Picks ---- */
+.picks-head { display: flex; align-items: flex-end; gap: 40px; padding: 26px 0 36px; }
+.h-xl { font-size: clamp(60px, 6.4vw, 88px); }
+.picks-head .lede { margin: 0 0 6px; font-size: 18px; max-width: 46ch; }
+.group { display: grid; grid-template-columns: 220px 1fr; gap: 20px; padding: 26px 0; border-top: 1.5px solid var(--ink); }
+.group h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; position: sticky; top: 20px; align-self: start; }
+.group h2 small { display: block; margin-top: 8px; font-size: 14px; font-weight: 600; letter-spacing: 0; color: var(--soft); }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.idea { display: flex; flex-direction: column; gap: 6px; min-height: 196px; padding: 20px; border-radius: 22px; background: var(--mist); transition: background 160ms ease, color 160ms ease; }
+.idea .city { font-size: 13px; font-weight: 700; opacity: 0.75; }
+.idea h3 { font-size: 22px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; }
+.idea p { font-size: 15px; line-height: 1.4; opacity: 0.82; }
+.choices { display: flex; gap: 6px; margin-top: auto; padding-top: 14px; }
+.choices button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1.5px solid rgb(12 12 13 / 22%); background: none; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.choices button:hover { border-color: currentColor; }
+.idea[data-choice="must"] { background: var(--navy); color: var(--blush); }
+.idea[data-choice="must"] .choices button { border-color: rgb(255 255 255 / 26%); }
+.idea[data-choice="must"] .choices [data-pick="must"] { background: var(--blush); border-color: var(--blush); color: var(--navy); }
+.idea[data-choice="like"] { background: var(--blush); }
+.idea[data-choice="like"] [data-pick="like"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.idea[data-choice="no"] { background: none; box-shadow: inset 0 0 0 1.5px var(--line); color: rgb(12 12 13 / 62%); }
+.idea[data-choice="no"] h3 { text-decoration: line-through; text-decoration-thickness: 2px; }
+.idea[data-choice="no"] [data-pick="no"] { background: rgb(12 12 13 / 60%); border-color: transparent; color: #fff; }
+.dock { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; align-items: center; gap: 22px; height: 68px; padding: 0 10px 0 28px; border-radius: 999px; background: var(--ink); color: #fff; font-size: 15px; box-shadow: 0 14px 40px rgb(0 0 0 / 22%); white-space: nowrap; }
+.dock b { font-size: 20px; font-weight: 800; margin-right: 4px; }
+.dock .pill { border-color: var(--blush); background: var(--blush); color: var(--navy); height: 48px; }
+.picks-end { height: 120px; }
+
+/* ---- Review ---- */
+.budget { display: grid; grid-template-columns: auto 1fr; gap: 56px; align-items: end; padding: 22px 0 30px; }
+.budget .of { font-size: 36px; letter-spacing: -0.03em; color: var(--soft); }
+.over { display: inline-flex; height: 34px; align-items: center; padding: 0 16px; border-radius: 999px; background: var(--rust); color: var(--cream); font-weight: 700; font-size: 15px; }
+.bar { position: relative; display: flex; height: 22px; margin: 14px 0 12px; border-radius: 999px; overflow: visible; }
+.bar i { display: block; height: 100%; }
+.bar i:first-child { border-radius: 999px 0 0 999px; } .bar i:nth-child(4) { border-radius: 0 999px 999px 0; }
+.bar .limit { position: absolute; left: 91.3%; top: -8px; bottom: -8px; width: 2px; background: var(--ink); }
+.bar .limit::after { content: '$2,500 budget'; position: absolute; bottom: 100%; right: 6px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+.legend { display: flex; gap: 26px; font-size: 14.5px; }
+.legend li::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); margin-right: 8px; }
+.legend b { font-weight: 700; margin-left: 4px; }
+.strip { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-top: 1.5px solid var(--ink); font-size: 15px; }
+.strip .ok { width: 10px; height: 10px; border-radius: 50%; background: oklch(0.62 0.16 150); }
+.strip button.link { border: 0; background: none; text-decoration: underline; cursor: pointer; font-size: 15px; padding: 0; }
+.panel { border-radius: 32px; padding: 40px; margin-top: 20px; }
+.panel .cap { color: inherit; opacity: 0.9; }
+.panel h2 { font-size: 44px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; }
+.conflicts { background: var(--mist); display: grid; grid-template-columns: 340px 1fr; gap: 40px; }
+.conflicts li { padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 16.5px; }
+.conflicts li:last-child { border: 0; }
+.conflicts .note { margin-top: 14px; font-size: 15px; color: var(--soft); }
+.flights { background: var(--navy); color: var(--blush); display: grid; grid-template-columns: 1fr 400px; gap: 40px; }
+.price { font-size: 96px; font-weight: 800; letter-spacing: -0.055em; line-height: 0.9; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 26px; }
+.glass { display: inline-flex; align-items: center; height: 38px; padding: 0 16px; border-radius: 999px; background: rgb(255 255 255 / 12%); border: 1px solid rgb(255 255 255 / 16%); color: #fff; font-size: 14.5px; font-weight: 500; }
+.why { padding: 18px 20px; border-radius: 20px; background: rgb(255 255 255 / 10%); border: 1px solid rgb(255 255 255 / 16%); color: #fff; font-size: 15.5px; line-height: 1.45; }
+.why b { display: block; font-size: 13px; opacity: 0.85; margin-bottom: 4px; }
+.alts { margin-top: 12px; } .alts li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 2px; border-bottom: 1px solid rgb(255 255 255 / 16%); font-size: 14.5px; color: #fff; }
+.alts button { border: 0; background: none; color: var(--blush); font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0; }
+.acts { display: flex; align-items: center; gap: 10px; }
+.acts a { color: inherit; font-size: 15px; font-weight: 600; margin-left: 10px; }
+.on-dark.solid { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+.lodging { background: var(--rust); color: var(--cream); }
+.lodging .head { display: flex; align-items: flex-end; gap: 24px; margin-bottom: 26px; }
+.lodging .head p { max-width: 52ch; font-size: 15.5px; opacity: 0.95; }
+.stays { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.stay { padding: 22px; border-radius: 22px; background: rgb(255 255 255 / 12%); border: 1px solid rgb(255 255 255 / 18%); color: #fff; }
+.stay .cap { font-size: 13px; } .stay h3 { font-size: 23px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin: 4px 0 10px; }
+.stay .num { font-size: 44px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; color: var(--cream); }
+.stay dl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin: 14px 0 18px; font-size: 14.5px; } .stay dt { opacity: 0.88; } .stay dd { margin: 0; text-align: right; font-weight: 600; }
+.stay .acts .pill { border-color: rgb(255 255 255 / 45%); }
+.list-panel .head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
+.rows { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
+.rows li { display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; padding: 14px 0; border-top: 1px solid rgb(255 255 255 / 20%); color: #fff; }
+.rows li b { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; } .rows li span { font-size: 14.5px; opacity: 0.88; grid-column: 1; }
+.rows li em { font-style: normal; font-weight: 800; font-size: 20px; letter-spacing: -0.03em; grid-row: 1 / span 2; grid-column: 2; align-self: center; color: var(--fg); }
+.attractions { background: var(--moss); color: var(--lime); --fg: var(--lime); }
+.transport { background: var(--teal); color: var(--aqua); --fg: var(--aqua); }
+.floaters { position: fixed; left: 28px; right: 28px; bottom: 22px; display: flex; justify-content: space-between; pointer-events: none; }
+.floaters .pill { pointer-events: auto; background: #fff; box-shadow: 0 10px 30px rgb(0 0 0 / 14%); }
+.floaters .pill.solid { background: var(--ink); }
+.review-end { height: 110px; }
+</style>
+</head>
+<body>
+
+<!-- ============ START ============ -->
+<section class="screen" id="start">
+  <header class="top wrap">
+    <a class="brand" href="#start">Tripwright</a><span class="grow"></span>
+    <button class="pill sm">Use the demo trip</button>
+  </header>
+  <main class="wrap start">
+    <h1 class="display mega">Plan a trip.</h1>
+    <p class="lede">A team of agents researches it in parallel. Next you'll pick what sounds good from the places they find, then review every choice and do the booking yourself.</p>
+    <form class="sentence" onsubmit="return false">
+      I'm <label class="blank"><input value="Alex" aria-label="Your name"><small>Your name</small></label>, flying from
+      <label class="blank"><input value="Kansas City" aria-label="Where are you traveling from?"><small>Traveling from</small></label> to
+      <label class="blank"><input value="Japan" aria-label="Where do you want to go?"><small>Where to</small></label> for
+      <label class="blank"><input value="7" aria-label="How long do you want to stay?"><small>1 to 30</small></label> days with
+      <label class="blank"><input value="$2,500" aria-label="What's your total budget?"><small>US dollars, whole trip</small></label> to spend.
+    </form>
+    <div class="start-row">
+      <div><span class="cap">When do you want to go?</span><button class="pill quiet">Leave it to the agents</button></div>
+      <div><span class="cap">How packed should the itinerary be?</span>
+        <div class="seg"><button>Relaxed</button><button class="on">Balanced</button><button>Packed</button></div></div>
+      <span class="grow"></span>
+      <a class="pill solid xl" href="#picks">Start planning →</a>
+    </div>
+  </main>
+</section>
+
+<!-- ============ PICKS ============ -->
+<section class="screen" id="picks">
+  <header class="top wrap">
+    <a class="brand" href="#start">Tripwright</a>
+    <div class="tripline"><span>Kansas City → Japan</span><span>7 days</span></div>
+    <span class="grow"></span>
+    <button class="pill sm quiet">Add a place</button><button class="pill sm quiet">More like my picks</button>
+    <a class="pill sm" href="#start">New trip</a>
+  </header>
+  <main class="wrap">
+    <div class="picks-head">
+      <h1 class="display h-xl">What sounds good?</h1>
+      <p class="lede">Mark what you must do, what interests you, and what is not for you. Leave the rest blank. The agents plan your days and the group's from these.</p>
+    </div>
+    <div id="ideas"></div>
+    <div class="picks-end"></div>
+  </main>
+  <div class="dock">
+    <span><b data-tally="must">0</b>must do</span><span><b data-tally="like">0</b>interested</span>
+    <span><b data-tally="no">0</b>not for me</span><span style="opacity:.75"><b data-tally="none">0</b>unmarked</span>
+    <a class="pill" href="#review">Save my picks →</a>
+  </div>
+</section>
+
+<!-- ============ REVIEW ============ -->
+<section class="screen" id="review">
+  <header class="top wrap">
+    <a class="brand" href="#start">Tripwright</a>
+    <div class="tripline"><span>Japan</span><span>7 days</span><span>Jun 15 – Jun 22</span><span>2 travelers</span></div>
+    <span class="grow"></span>
+    <span class="you">You: <b>Alex</b> · <u>Switch</u></span>
+    <a class="pill sm" href="#start">New trip</a>
+  </header>
+  <main class="wrap">
+    <section class="budget">
+      <div><span class="cap">Alex's budget</span>
+        <div class="display h-xl">$2,737 <span class="of">of $2,500</span></div></div>
+      <div>
+        <span class="over">Over budget by $237</span>
+        <div class="bar">
+          <i style="flex:1874;background:var(--navy)"></i><i style="flex:428;background:var(--rust)"></i>
+          <i style="flex:166;background:var(--moss)"></i><i style="flex:269;background:var(--teal)"></i>
+          <span class="limit"></span>
+        </div>
+        <ul class="legend">
+          <li style="--c:var(--navy)">Flights<b>$1,874</b></li><li style="--c:var(--rust)">Lodging<b>$428</b></li>
+          <li style="--c:var(--moss)">Attractions<b>$166</b></li><li style="--c:var(--teal)">Transport<b>$269</b></li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="strip">
+      <i class="ok"></i><span><b>14 agents finished.</b> Attractions took 2 attempts.</span>
+      <button class="link">Show details</button><span class="grow"></span>
+      <div class="seg"><button class="on">Review</button><button>Itinerary</button></div>
+    </div>
+
+    <section class="panel conflicts">
+      <h2>5 conflicts to resolve</h2>
+      <div><ul>
+        <li>Must-see Akihabara Electric Town is not on the itinerary.</li>
+        <li>Must-see Kamakura Great Buddha (Kotoku-in) is not on the itinerary.</li>
+        <li>Must-see Nikko Toshogu Shrine is not on the itinerary.</li>
+        <li>Alex's plan costs $2,737, $237 over the $2,500 budget.</li>
+        <li>friend2's plan costs $2,914, $114 over the $2,800 budget.</li>
+      </ul><p class="note">You're over budget, and no swap would bring it down.</p></div>
+    </section>
+
+    <section class="panel flights" style="--fg:var(--blush);--bg:var(--navy)">
+      <div>
+        <span class="cap">Flights · Delta</span>
+        <h2>Kansas City to Tokyo Haneda</h2>
+        <div class="facts">
+          <span class="glass">Leaves Tue Jun 15, 10:20</span><span class="glass">Lands Wed Jun 16, 16:15</span>
+          <span class="glass">15h 55m</span><span class="glass">1 stop</span><span class="glass">Flies home Tue Jun 22, 16:20</span>
+        </div>
+        <div class="acts">
+          <button class="pill solid on-dark">Approve</button><button class="pill">Swap</button>
+          <a href="#review">Finish booking on the provider's site ↗</a>
+        </div>
+      </div>
+      <div>
+        <div class="price">$1,874</div>
+        <div class="why" style="margin-top:20px"><b>Why this pick</b>$1,874, shortest at 15h55, 1 stop, lands Haneda 16:15.</div>
+        <ul class="alts">
+          <li><span>United and ANA, lands Wed Jun 16, 21:15 · $1,874</span><button>Swap</button></li>
+          <li><span>Delta, lands Wed Jun 16, 13:05 · $1,874</span><button>Swap</button></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel lodging" style="--fg:var(--cream);--bg:var(--rust)">
+      <div class="head">
+        <div><span class="cap">Lodging · $428 for 6 nights</span><h2>Hotels in Tokyo and Kyoto</h2></div>
+        <p>Most travelers here pick hotel, because hotels offer luggage storage, service and easy transit access that suit a fast-paced Japan trip.</p>
+        <span class="grow"></span><button class="pill sm">Switch to Airbnb</button>
+      </div>
+      <div class="stays">
+        <article class="stay"><span class="cap">Tokyo · Jun 16 to Jun 19</span><h3>the b asakusa</h3><div class="num">$234</div>
+          <dl><dt>3 nights</dt><dd>$78 a night</dd><dt>Asakusa</dt><dd>4.4 from 741 reviews</dd></dl>
+          <div class="acts"><button class="pill sm solid on-dark">Approve</button><button class="pill sm">Swap</button></div></article>
+        <article class="stay"><span class="cap">Kyoto · Jun 19 to Jun 21</span><h3>Oakwood Hotel Oike Kyoto</h3><div class="num">$126</div>
+          <dl><dt>2 nights</dt><dd>$63 a night</dd><dt>Nakagyo</dt><dd>4.4 from 613 reviews</dd></dl>
+          <div class="acts"><button class="pill sm solid on-dark">Approve</button><button class="pill sm">Swap</button></div></article>
+        <article class="stay"><span class="cap">Tokyo · Jun 21 to Jun 22</span><h3>Tosei Hotel Cocone Asakusa</h3><div class="num">$68</div>
+          <dl><dt>1 night</dt><dd>$68 a night</dd><dt>Asakusa</dt><dd>4.2 from 331 reviews</dd></dl>
+          <div class="acts"><button class="pill sm solid on-dark">Approve</button><button class="pill sm">Swap</button></div></article>
+      </div>
+    </section>
+
+    <section class="panel list-panel attractions">
+      <div class="head"><div><span class="cap">Attractions · $166</span><h2>What you'll do</h2></div><button class="pill sm">Show all 21</button></div>
+      <ul class="rows">
+        <li><b>Tokyo Disneyland</b><span>Tokyo · 10h · Both travelers' top must-see park</span><em>$126</em></li>
+        <li><b>Tokyo DisneySea</b><span>Tokyo · 10h · Both travelers' top must-see park</span><em>$126</em></li>
+        <li><b>teamLab Planets</b><span>Tokyo · 2h · Immersive digital art, near Odaiba</span><em>$58</em></li>
+        <li><b>Ghibli Museum</b><span>Tokyo · 3h · Both travelers' must-see animation museum</span><em>$14</em></li>
+        <li><b>Kiyomizu-dera Temple</b><span>Kyoto · 1h 30m · Iconic temple near Gion, great in June</span><em>$8</em></li>
+        <li><b>Fushimi Inari Taisha</b><span>Kyoto · 2h · Famous thousand torii gates friend2 wants</span><em>Free</em></li>
+        <li><b>Meiji Shrine</b><span>Tokyo · 1h 30m · Serene forest shrine near Harajuku</span><em>Free</em></li>
+        <li><b>Senso-ji Temple &amp; Nakamise</b><span>Tokyo · 1h 30m · Iconic Asakusa temple and shopping street</span><em>Free</em></li>
+      </ul>
+    </section>
+
+    <section class="panel list-panel transport">
+      <div class="head"><div><span class="cap">Transport · $269</span><h2>Trains and metro</h2></div></div>
+      <ul class="rows">
+        <li><b>Narita Express: airport to Tokyo</b><span>53m · Direct to Tokyo Station, no transfers.</span><em>$20.50</em></li>
+        <li><b>Shinkansen Nozomi: Tokyo to Kyoto</b><span>2h 15m · Fastest; book a one-way ticket in advance.</span><em>$92.30</em></li>
+        <li><b>Shinkansen Nozomi: Kyoto to Tokyo</b><span>2h 15m · Fastest; book a one-way ticket in advance.</span><em>$92.30</em></li>
+        <li><b>Narita Express: Tokyo to airport</b><span>53m · Direct from Tokyo Station to the airport.</span><em>$20.50</em></li>
+        <li><b>Suica IC card</b><span>Covers ~7 days of subway/JR at ~$6.25/day.</span><em>$43.75</em></li>
+      </ul>
+    </section>
+    <div class="review-end"></div>
+  </main>
+  <div class="floaters"><a class="pill" href="#picks">← Back</a><button class="pill solid xl">Finish →</button></div>
+</section>
+
+<script src="shared.js"></script>
+<script>
+document.getElementById('ideas').innerHTML = byCategory(IDEAS).map(([category, ideas]) => `
+  <section class="group">
+    <h2>${category}<small>${ideas.length} places</small></h2>
+    <div class="tiles">${ideas.map((i) => `
+      <article class="idea" data-idea data-choice="${PRESET[i.name] ?? ''}">
+        <span class="city">${i.city}</span><h3>${i.name}</h3><p>${i.why}</p>
+        <div class="choices"><button data-pick="must">Must do</button><button data-pick="like">Interested</button><button data-pick="no">Not for me</button></div>
+      </article>`).join('')}
+    </div>
+  </section>`).join('')
+</script>
+</body>
+</html>

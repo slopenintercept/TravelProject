@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tripwright — Direction C, Lilac</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  // ?run=live shows an example run in progress
+  const params = new URLSearchParams(location.search)
+</script>
+<style>
+/* SYSTEM — Direction C in the Lilac palette (the chosen direction; the navy original is direction-c-night-flight.html)
+   Idea: one screen for the whole trip: the left column
+         is a feed where agents report and ask you for the next decision; the right is the plan, filling in as
+         you answer. Review and Itinerary stop being two tabs.
+   Type: Bricolage Grotesque for display (800, -0.04em), Figtree for everything else. Scale 84 / 40 / 22 / 16 / 14 / 13.
+   Agents: every headline names the agent behind it, with its status dot and a few words on what it found or is doing.
+           Clicking that tag opens the agent on the board's Agents tab. Start has none: nothing has run yet.
+   Colour: navy ground, blush for headlines and the primary action. Surfaces are the strong colour at
+           7–12% with a 14% hairline. Coral marks problems only.
+   Shape: pills for actions, 24px surfaces. Feed 560px fixed, plan fluid. */
+:root {
+  /* Lilac (soft and airy). Values sampled from the reference screenshot; the purple and lilac are its first two swatches. */
+  --ground: #d8e4fc; --board: #e9f0fe; --tint: #0a54a6;
+  --accent: #0a54a6; --on-accent: #fff;                    /* actions, headlines, agent names */
+  --strong: #07174f; --text: #1d2d62; --dim: #51648a;
+  --pick: #6e57ac; --on-pick: #fff; --pick-soft: #b5a8df;   /* what you marked: must do, interested */
+  --solo: #fcd3de; --solo-edge: #f3a9bf; --on-solo: #2a1245; /* an activity only you are on */
+  --alt: #a9f1d9; --on-alt: #002349;                        /* an activity only the other traveler is on */
+  --ok: #2fb3b8; --bad: #fca58e; --on-bad: #3a0f24;
+  --c-flights: #1698de; --c-lodging: #7cd1cb; --c-attractions: #f185a5; --c-transport: #b5a8df;
+  --glass: rgb(255 255 255 / 50%); --edge: color-mix(in oklab, var(--tint) 24%, transparent);
+  --lift: 0 1px 2px rgb(20 50 120 / 5%), 0 10px 28px rgb(20 50 120 / 7%);
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 400 16px/1.5 Figtree, sans-serif; color: var(--text); background: var(--ground); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, dl, dd { margin: 0; padding: 0; } ul { list-style: none; }
+p { text-wrap: pretty; }
+button, input { font: inherit; color: inherit; }
+.display { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; letter-spacing: -0.04em; line-height: 0.98; color: var(--accent); }
+.screen { display: none; } .screen.on { display: grid; }
+.app { grid-template: "bar bar bar" 64px "strip strip strip" auto "rail feed board" minmax(0, 1fr) / auto var(--feed, 560px) minmax(0, 1fr); height: 100vh; }
+.feed { grid-area: feed; } .board { grid-area: board; }
+.bar { grid-area: bar; display: flex; align-items: center; gap: 14px; padding: 0 28px; font-size: 14px; }
+.brand { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.04em; color: var(--accent); text-decoration: none; }
+.chip { display: inline-flex; align-items: center; height: 32px; padding: 0 14px; border-radius: 999px; background: color-mix(in oklab, var(--tint) 13%, transparent); border: 1px solid transparent; font-size: 14px; font-weight: 500; color: var(--strong); white-space: nowrap; }
+.grow { flex: 1; }
+.pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 999px; border: 1.5px solid var(--edge); background: none; font-weight: 600; font-size: 15px; color: var(--accent); cursor: pointer; white-space: nowrap; text-decoration: none; }
+.pill { background: rgb(255 255 255 / 45%); }
+.pill:hover { border-color: var(--accent); }
+.pill.solid { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.pill.sm { height: 34px; padding: 0 14px; font-size: 14px; }
+.pill.xl { height: 60px; padding: 0 32px; font-size: 19px; }
+.feed { overflow: auto; padding: 8px 28px 48px; }
+.board { overflow: auto; margin: 0 20px 20px 0; padding: 24px; border-radius: 32px; background: var(--board); border: 1px solid #fff; box-shadow: var(--lift); }
+.cap { font-size: 13px; font-weight: 700; color: var(--dim); }
+.card { padding: 20px; border-radius: 24px; background: var(--glass); border: 1px solid rgb(255 255 255 / 80%); box-shadow: var(--lift); }
+.hd { display: flex; align-items: baseline; gap: 14px; margin: 28px 0 10px; }
+.hd h2, .board-h h2 { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.03em; line-height: 1.1; color: var(--accent); white-space: nowrap; }
+.board .hd:first-child { margin-top: 0; }
+.by { display: inline-flex; align-items: center; gap: 7px; min-width: 0; padding: 0; border: 0; background: none; cursor: pointer; font-size: 13.5px; line-height: 1.3; color: var(--dim); white-space: nowrap; }
+.by:hover b { text-decoration: underline; }
+.by b { font-weight: 600; color: var(--text); }
+
+/* ---- Start ---- */
+.hero { font-size: clamp(60px, 5.6vw, 76px); white-space: nowrap; }
+.hd.top { margin-top: 10px; }
+.h-40 { font-size: 34px; white-space: nowrap; }
+.lede { font-size: 18px; color: var(--dim); margin: 14px 0 18px; }
+.ticket { padding: 4px 20px; }
+.ticket label { display: grid; grid-template-columns: 1fr 210px; align-items: center; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--edge); font-size: 15px; }
+.ticket label:last-child { border: 0; }
+.ticket small { display: block; font-size: 13px; color: var(--dim); }
+.ticket input { height: 44px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--edge); background: color-mix(in oklab, var(--tint) 6%, transparent); font-size: 17px; font-weight: 600; color: var(--strong); width: 100%; }
+.ticket input::placeholder { color: var(--dim); font-weight: 400; }
+.ticket input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.seg { display: flex; padding: 3px; border-radius: 14px; background: color-mix(in oklab, var(--tint) 6%, transparent); border: 1px solid var(--edge); }
+.seg button { flex: 1; height: 36px; border: 0; border-radius: 11px; background: none; font-size: 14px; font-weight: 600; cursor: pointer; }
+.seg button.on { background: var(--accent); color: var(--on-accent); }
+.go { display: flex; gap: 10px; margin-top: 18px; }
+.empty { display: flex; flex-direction: column; height: 100%; } .empty > .ph { flex: 1; }
+.ph { display: grid; place-items: center; border-radius: 22px; border: 1.5px dashed color-mix(in oklab, var(--tint) 30%, transparent); color: var(--dim); font-size: 14px; font-weight: 600; text-align: center; padding: 16px; }
+.ghost-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.ghost-days .ph { height: 150px; }
+
+/* ---- Picks ---- */
+.say { font-size: 17px; line-height: 1.45; color: var(--strong); }
+.idea { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 14px; padding: 13px 16px; margin-bottom: 6px; border-radius: 18px; background: var(--glass); border: 1px solid var(--edge); transition: background 160ms ease; }
+.idea b { font-size: 16px; font-weight: 600; color: var(--strong); } .idea b small { font-size: 13px; font-weight: 500; color: var(--dim); margin-left: 6px; }
+.idea p { grid-column: 1; font-size: 14px; line-height: 1.4; color: var(--dim); }
+.idea .choices { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: 4px; }
+.choices button { height: 32px; padding: 0 11px; border-radius: 999px; border: 1px solid var(--edge); background: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+.choices button:hover { border-color: var(--strong); }
+.idea[data-choice="must"] { background: var(--pick); border-color: var(--pick); }
+.idea[data-choice="must"] b, .idea[data-choice="must"] p, .idea[data-choice="must"] b small { color: var(--on-pick); }
+.idea[data-choice="must"] .choices button { color: var(--on-pick); border-color: color-mix(in oklab, var(--on-pick) 40%, transparent); }
+.idea[data-choice="must"] .choices [data-pick="must"] { background: var(--on-pick); border-color: var(--on-pick); color: var(--pick); }
+.idea[data-choice="like"] { border-color: var(--pick-soft); background: color-mix(in oklab, var(--pick-soft) 30%, transparent); }
+.idea[data-choice="like"] [data-pick="like"] { background: var(--pick); border-color: var(--pick); color: var(--on-pick); }
+.idea[data-choice="no"] { background: none; border-style: dashed; }
+.idea[data-choice="no"] b { text-decoration: line-through; color: var(--dim); }
+.idea[data-choice="no"] [data-pick="no"] { background: color-mix(in oklab, var(--tint) 22%, transparent); }
+.board-h { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.draft { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.dcol { padding: 6px; border-radius: 18px; background: var(--glass); border: 1px solid var(--edge); min-height: 170px; }
+.dcol h3 { padding: 4px 4px 0; font-size: 14px; font-weight: 700; color: var(--strong); } .dcol h3 small { display: block; font-size: 13px; font-weight: 500; color: var(--dim); }
+.dcol li { margin-top: 6px; padding: 7px 6px; overflow-wrap: break-word; border-radius: 10px; background: color-mix(in oklab, var(--tint) 10%, transparent); font-size: 13px; line-height: 1.3; color: var(--strong); }
+.dcol li.must { background: var(--pick); color: var(--on-pick); font-weight: 600; }
+.tallies { display: flex; align-items: center; gap: 20px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--edge); font-size: 14px; color: var(--dim); }
+.tallies b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: var(--strong); margin-right: 6px; }
+
+/* ---- Review ---- */
+.need h3 { font-size: 17px; font-weight: 600; color: var(--strong); line-height: 1.3; } .need p { font-size: 14px; color: var(--dim); margin-top: 3px; }
+.need { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin-bottom: 8px; border-color: color-mix(in oklab, var(--bad) 45%, transparent); }
+.need .acts { display: flex; gap: 6px; }
+.choice h3 { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.03em; color: var(--strong); line-height: 1.1; }
+.choice .price { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 40px; letter-spacing: -0.04em; color: var(--accent); line-height: 1; }
+.choice .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0; } .facts .chip { height: 30px; font-size: 13px; padding: 0 12px; }
+.why { font-size: 14.5px; color: var(--text); margin-bottom: 14px; } .why b { color: var(--accent); }
+.stayrow { display: grid; grid-template-columns: 1fr auto auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--edge); }
+.stayrow b { color: var(--strong); font-weight: 600; } .stayrow small { display: block; font-size: 13px; color: var(--dim); }
+.stayrow .n { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: var(--accent); }
+.budget { display: grid; grid-template-columns: auto auto 1fr auto; gap: 22px; align-items: center; margin-bottom: 18px; }
+.budget .fig { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -0.04em; color: var(--strong); line-height: 1; }
+.budget .fig small { font-family: Figtree, sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0; color: var(--dim); }
+.meterbar { position: relative; display: flex; height: 14px; border-radius: 999px; }
+.meterbar i { height: 100%; } .meterbar i:first-child { border-radius: 999px 0 0 999px; } .meterbar i:nth-child(4) { border-radius: 0 999px 999px 0; }
+.meterbar .limit { position: absolute; left: 91.3%; top: -6px; bottom: -6px; width: 2px; background: var(--strong); }
+.over { display: inline-flex; align-items: center; height: 32px; padding: 0 14px; border-radius: 999px; background: var(--bad); color: var(--on-bad); font-size: 14px; font-weight: 700; }
+.view { display: inline-flex; padding: 3px; border-radius: 999px; background: color-mix(in oklab, var(--tint) 6%, transparent); border: 1px solid var(--edge); }
+.view button { height: 30px; padding: 0 14px; border: 0; border-radius: 999px; background: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+.view button.on { background: var(--accent); color: var(--on-accent); }
+.cal { display: grid; grid-template-columns: 44px repeat(7, 1fr); gap: 0 6px; }
+.cal .dh { padding: 0 2px 10px; font-size: 14px; font-weight: 700; color: var(--strong); line-height: 1.3; } .cal .dh small { display: block; font-size: 13px; font-weight: 500; color: var(--dim); }
+.cal .hours { position: relative; } .cal .hours span { position: absolute; right: 6px; font-size: 13px; color: var(--dim); transform: translateY(-50%); }
+.cal .col { position: relative; border-radius: 14px; background: repeating-linear-gradient(to bottom, color-mix(in oklab, var(--tint) 9%, transparent) 0 1px, transparent 1px var(--hour)); }
+.ev { position: absolute; left: 2px; right: 2px; padding: 6px 8px; border-radius: 10px; background: color-mix(in oklab, var(--tint) 10%, transparent); border: 1px solid color-mix(in oklab, var(--tint) 15%, transparent); color: var(--strong); font-size: 13px; font-weight: 600; line-height: 1.3; overflow: hidden; }
+.ev .t { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.ev small { display: block; font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; }
+.ev.fixed { background: none; border-style: dashed; color: var(--text); font-weight: 500; }
+.ev.alex { background: var(--solo); border-color: var(--solo-edge); color: var(--on-solo); right: 50%; } .ev.alex small { color: var(--on-solo); }
+.ev.friend2 { background: var(--alt); border-color: var(--alt); color: var(--on-alt); } .ev.friend2 small { color: var(--on-alt); }
+.ev.friend2.half { left: 50%; }
+.note { display: flex; justify-content: space-between; gap: 20px; margin-top: 14px; font-size: 14px; color: var(--dim); }
+.key { display: flex; gap: 16px; font-size: 13px; color: var(--dim); align-items: center; } .key i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+
+/* ---- Agents: a status dot wherever one is named, and their details as a tab on the board ---- */
+.st { flex: none; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--ok); }
+.st.working { background: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+.st.review { background: none; box-shadow: inset 0 0 0 2.5px var(--accent); }
+.st.idle { background: none; box-shadow: inset 0 0 0 1.5px var(--dim); }
+@keyframes pulse { 50% { opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) { .st.working { animation: none; } }
+.view button { white-space: nowrap; }
+.board-tabs { margin-bottom: 16px; }
+.ag-lanes { display: none; grid-template-columns: 1fr 1fr; gap: 8px; }
+.board.show-agents .board-main { display: none; }
+.board.show-agents .ag-lanes { display: grid; }
+.lane { padding: 14px 16px; border-radius: 18px; background: var(--glass); border: 1px solid rgb(255 255 255 / 80%); }
+.lane.sel { border-color: var(--accent); background: color-mix(in oklab, var(--tint) 14%, transparent); }
+.lane header { display: flex; align-items: center; gap: 8px; } .lane header b { flex: 1; font-weight: 600; color: var(--strong); }
+.lane p { margin-top: 6px; font-size: 14px; line-height: 1.4; color: var(--dim); }
+.stp { font-size: 13px; font-weight: 600; color: var(--dim); } .stp.working, .stp.review { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ============ START ============ -->
+<section class="screen app" id="start">
+  <header class="bar"><a class="brand" href="#start">Tripwright</a><span class="grow"></span><button class="pill sm">Use the demo trip</button></header>
+  <main class="feed">
+    <div class="hd top"><h1 class="display hero">Plan a trip.</h1></div>
+    <p class="lede">A team of agents researches it in parallel. Next you'll pick what sounds good from the places they find, then review every choice and do the booking yourself.</p>
+    <form class="card ticket" onsubmit="return false">
+      <label><span>Your name</span><input value="Alex"></label>
+      <label><span>Where are you traveling from?</span><input value="Kansas City"></label>
+      <label><span>Where do you want to go?</span><input value="Japan"></label>
+      <label><span>How long do you want to stay?<small>Days, 1 to 30</small></span><input value="7"></label>
+      <label><span>When do you want to go?<small>Optional. Blank lets the agents suggest dates.</small></span><input placeholder="mm/dd/yyyy"></label>
+      <label><span>What's your total budget?<small>US dollars, for the whole trip</small></span><input value="$2,500"></label>
+      <label><span>How packed should the itinerary be?</span><span class="seg"><button>Relaxed</button><button class="on">Balanced</button><button>Packed</button></span></label>
+    </form>
+    <div class="go"><a class="pill solid xl" href="#picks" style="flex:1">Start planning →</a></div>
+  </main>
+  <aside class="board">
+    <div class="empty">
+      <div class="hd"><h2>Your route</h2></div>
+      <div class="ph">[ map — your route appears here once the route agent proposes it ]</div>
+      <div><div class="hd"><h2>Your days</h2></div>
+        <div class="ghost-days"><div class="ph">Day 1</div><div class="ph">Day 2</div><div class="ph">Day 3</div><div class="ph">Day 4</div><div class="ph">Day 5</div><div class="ph">Day 6</div><div class="ph">Day 7</div></div></div>
+    </div>
+  </aside>
+</section>
+
+<!-- ============ PICKS ============ -->
+<section class="screen app" id="picks">
+  <header class="bar"><a class="brand" href="#start">Tripwright</a><span class="chip">Kansas City → Japan</span><span class="chip">7 days</span><span class="grow"></span><span>You: <b>Alex</b></span><a class="pill sm" href="#start">New trip</a></header>
+  <main class="feed">
+    <div class="hd top"><h1 class="display h-40">What sounds good?</h1><button class="by" data-agent="Ideas" data-short="24 places"></button></div>
+    <p class="say">Mark what you must do, what interests you, and what is not for you. Leave the rest blank.</p>
+    <div id="ideas"></div>
+    <div class="go"><button class="pill">Add a place</button><button class="pill">More like my picks</button></div>
+  </main>
+  <aside class="board">
+    <div class="view board-tabs"></div>
+    <div class="board-main">
+    <div class="board-h"><h2>Draft plan</h2><button class="by" data-agent="Draft" data-short="13 activities from everyone's picks"></button></div>
+    <div class="ph" style="height:230px">[ map — pins for every place on the list, Tokyo and Kyoto; picked ones filled ]</div>
+    <div class="draft" id="draft"></div>
+    <div class="tallies">
+      <span><b data-tally="must">0</b>must do</span><span><b data-tally="like">0</b>interested</span><span><b data-tally="no">0</b>not for me</span><span><b data-tally="none">0</b>unmarked</span>
+      <span class="grow"></span><a class="pill solid" href="#review">Save my picks →</a>
+    </div>
+  </div>
+    <div class="ag-lanes"></div>
+  </aside>
+</section>
+
+<!-- ============ REVIEW ============ -->
+<section class="screen app" id="review">
+  <header class="bar"><a class="brand" href="#start">Tripwright</a><span class="chip">Japan</span><span class="chip">Jun 15 – Jun 22</span><span class="chip">2 travelers</span><span class="grow"></span><span>You: <b>Alex</b> · <u>Switch</u></span><a class="pill sm" href="#start">New trip</a></header>
+  <main class="feed">
+    <div class="hd top"><h2>Needs you</h2><button class="by" data-agent="Validate" data-short="5 issues, 4 yours"></button></div>
+    <article class="card need"><div><h3>Kamakura Great Buddha didn't fit</h3><p>Your must-see. Not enough free time while it is open.</p></div><div class="acts"><button class="pill sm solid">Swap it in</button><button class="pill sm">Drop</button></div></article>
+    <article class="card need"><div><h3>Nikko Toshogu Shrine didn't fit</h3><p>Your must-see. Not enough free time while it is open.</p></div><div class="acts"><button class="pill sm solid">Swap it in</button><button class="pill sm">Drop</button></div></article>
+    <article class="card need"><div><h3>Akihabara Electric Town didn't fit</h3><p>friend2's must-see. Not enough free time while it is open.</p></div><div class="acts"><button class="pill sm solid">Swap it in</button><button class="pill sm">Drop</button></div></article>
+    <article class="card need"><div><h3>Your plan is $237 over budget</h3><p>$2,737 against $2,500, and no swap would bring it down.</p></div></article>
+
+    <div class="hd"><h2>Your flight</h2><button class="by" data-agent="Flight · Alex" data-short="best of 3 options"></button></div>
+    <article class="card choice">
+      <div class="top"><div><span class="cap">Delta</span><h3>Kansas City to Tokyo Haneda</h3></div><div class="price">$1,874</div></div>
+      <div class="facts"><span class="chip">Leaves Tue Jun 15, 10:20</span><span class="chip">Lands Wed Jun 16, 16:15</span><span class="chip">15h 55m · 1 stop</span><span class="chip">Home Tue Jun 22, 16:20</span></div>
+      <p class="why"><b>Why this pick.</b> $1,874, shortest at 15h55, 1 stop, lands Haneda 16:15.</p>
+      <div class="go" style="margin:0"><button class="pill sm solid">Approve</button><button class="pill sm">Swap · 2 others</button><span class="grow"></span><a class="pill sm" href="#review">Book on provider's site ↗</a></div>
+    </article>
+
+    <div class="hd"><h2>Your stays</h2><button class="by" data-agent="Lodging" data-short="8 options a stay"></button></div>
+    <article class="card choice">
+      <div class="top"><div><span class="cap">Most travelers here pick hotel</span><h3>Three stays, six nights</h3></div><div class="price">$428</div></div>
+      <div style="margin-top:14px">
+        <div class="stayrow"><div><b>the b asakusa</b><small>Tokyo · Jun 16 to 19 · 3 nights · 4.4 from 741</small></div><span class="n">$234</span><button class="pill sm">Swap</button></div>
+        <div class="stayrow"><div><b>Oakwood Hotel Oike Kyoto</b><small>Kyoto · Jun 19 to 21 · 2 nights · 4.4 from 613</small></div><span class="n">$126</span><button class="pill sm">Swap</button></div>
+        <div class="stayrow"><div><b>Tosei Hotel Cocone Asakusa</b><small>Tokyo · Jun 21 to 22 · 1 night · 4.2 from 331</small></div><span class="n">$68</span><button class="pill sm">Swap</button></div>
+      </div>
+      <div class="go"><button class="pill sm solid">Approve all three</button><button class="pill sm">Switch to Airbnb</button></div>
+    </article>
+  </main>
+  <aside class="board">
+    <div class="view board-tabs"></div>
+    <div class="board-main">
+    <div class="budget">
+      <div class="fig">$2,737 <small>of $2,500</small></div>
+      <button class="by" data-agent="Budget" data-short="both travelers over"></button>
+      <div class="meterbar"><i style="flex:1874;background:var(--c-flights)"></i><i style="flex:428;background:var(--c-lodging)"></i><i style="flex:166;background:var(--c-attractions)"></i><i style="flex:269;background:var(--c-transport)"></i><span class="limit"></span></div>
+      <span class="over">Over by $237</span>
+    </div>
+    <div class="board-h"><h2>Your days</h2><button class="by" data-agent="Scheduler" data-short="12 placed, 5 didn't fit" data-doing="re-planning your days…"></button><span class="grow"></span>
+      <div class="view"><button class="on">Everyone</button><button>Just me</button><button>friend2</button></div>
+      <button class="pill sm solid">Finish →</button></div>
+    <div class="cal" id="cal"></div>
+    <div class="note"><span>Drag an activity to another day to move it there. Click one to swap it or take it off.</span>
+      <span class="key"><span><i style="background:var(--solo-edge)"></i>Alex only</span><span><i style="background:var(--alt)"></i>friend2 only</span></span></div>
+  </div>
+    <div class="ag-lanes"></div>
+  </aside>
+</section>
+
+<script src="shared.js"></script>
+<script>
+document.getElementById('ideas').innerHTML = byCategory(IDEAS).map(([category, ideas]) => `
+  <div class="hd"><h2>${category}</h2><button class="by" data-agent="Ideas" data-short="${ideas.length} found"></button></div>
+  ${ideas.map((i) => `<article class="idea" data-idea data-choice="${PRESET[i.name] ?? ''}">
+    <b>${i.name}<small>${i.city}</small></b><p>${i.why}</p>
+    <div class="choices"><button data-pick="must">Must do</button><button data-pick="like">Interested</button><button data-pick="no">No</button></div>
+  </article>`).join('')}`).join('')
+
+// Draft plan: the scheduled activities, with this traveler's must-dos highlighted.
+document.getElementById('draft').innerHTML = DAYS.map((d, i) => `
+  <div class="dcol"><h3>${d.dow} ${d.date.split(' ')[1]}<small>${d.city}</small></h3><ul>${ITEMS.filter((it) => it.day === i && it.kind === 'do')
+    .map((it) => `<li class="${PRESET[it.title] === 'must' ? 'must' : ''}">${it.title}</li>`).join('')}</ul></div>`).join('')
+
+// Calendar: 08:00 to 24:00, one column a day. Split activities sit side by side.
+const HOUR = 35, FROM = 8, TO = 24, LINE = 17
+const split = (it) => it.who !== 'all' && ITEMS.some((o) => o !== it && o.day === it.day && o.who !== 'all' && hours(o.start) < hours(it.end) && hours(it.start) < hours(o.end))
+document.getElementById('cal').innerHTML = `<div></div>${DAYS.map((d) =>
+  `<div class="dh">${d.dow} ${d.date}<small>${d.city} · ${d.hi}° · ${d.rain}% rain</small></div>`).join('')}
+  <div class="hours" style="height:${(TO - FROM) * HOUR}px">${[8, 10, 12, 14, 16, 18, 20, 22].map((h) => `<span style="top:${(h - FROM) * HOUR}px">${h}:00</span>`).join('')}</div>
+  ${DAYS.map((d, i) => `<div class="col" style="--hour:${HOUR}px">${ITEMS.filter((it) => it.day === i).map((it) => {
+    const top = (hours(it.start) - FROM) * HOUR, height = (hours(it.end) - hours(it.start)) * HOUR - 2
+    const cls = [it.kind === 'fixed' ? 'fixed' : '', it.who !== 'all' ? it.who : '', split(it) && it.who === 'friend2' ? 'half' : ''].join(' ')
+    const full = it.who !== 'all' && !split(it) ? 'right:2px;' : ''
+    // Show as many title lines as fit, and the times only where a spare line is left for them.
+    const lines = Math.max(1, Math.floor((height - 12) / LINE)), time = lines >= 3 && !split(it)
+    return `<div class="ev ${cls}" style="top:${top}px;height:${height}px;${full}"><span class="t" style="-webkit-line-clamp:${lines - (time ? 1 : 0)}">${it.title}</span>${time ? `<small>${it.start}–${it.end}</small>` : ''}</div>`
+  }).join('')}</div>`).join('')}`
+
+// ---- Agents. Names and findings are the saved trip's; ?run=live shows an example: the days being re-planned. ----
+const CREW = [
+  ['Route', 'Tokyo (3n) → Kyoto (2n) → Tokyo (1n)'], ['Profile', 'Budget-conscious first-time visitor from Kansas City'],
+  ['Timeframe', 'Nov 15–Nov 22; May 10–May 17; Jun 15–Jun 22'], ['Ideas', '24 places to choose from'],
+  ['Draft', '13 activities, 3 not with everyone'], ['Flight · Alex', '3 options; best is Delta at $1,874'],
+  ['Flight · friend2', '3 options; best is United and ANA at $1,874'],
+  ['Lodging', 'Tokyo: 8 options from $234; Kyoto: 8 options from $126; Tokyo: 8 options from $68'],
+  ['Attractions', '18 attractions, 13 needed by someone', 2], ['Transport', 'Trains and metro; 5 legs, $269'],
+  ['Weather', '7 days; driest is Sat Jun 19'], ['Scheduler', '12 activities over 7 days; 5 did not fit'],
+  ['Budget', 'Alex $2,737 of $2,500; friend2 $2,914 of $2,800'], ['Validate', '5 issues'],
+]
+const LIVE = { Scheduler: 'working', Budget: 'review', Validate: 'idle' } // the days being re-planned after a swap
+const WORD = { done: 'Accepted', working: 'Working', review: 'Under review', idle: 'Waiting' }
+const live = params.get('run') === 'live'
+const statusOf = (name, screen) => (live && screen.id === 'review' && LIVE[name]) || 'done'
+// "Validate agent", "Flight agent · Alex"
+const agent = (name) => (name.includes(' · ') ? name.replace(' · ', ' agent · ') : `${name} agent`)
+
+for (const id of ['picks', 'review']) {
+  const screen = document.getElementById(id)
+  const list = id === 'picks' ? CREW.slice(0, 5) : CREW
+  screen.querySelector('.ag-lanes').innerHTML = list.map(([name, found, tries]) => {
+    const status = statusOf(name, screen)
+    return `<article class="lane" data-lane="${name}"><header><i class="st ${status}"></i><b>${agent(name)}</b><span class="stp ${status}">${WORD[status]}</span></header>
+      ${status === 'done' ? `<p>${found}</p>${tries ? `<p>Sent back by the orchestrator once. Accepted on attempt ${tries}.</p>` : ''}` : ''}</article>`
+  }).join('')
+  screen.querySelector('.board-tabs').innerHTML =
+    `<button data-tab="plan" class="on">${id === 'picks' ? 'Draft plan' : 'Your days'}</button><button data-tab="agents">Agents · ${list.length}</button>`
+}
+
+// The tag beside each headline: status dot, agent name, and a few words. Mid-run it says what the agent is doing.
+document.querySelectorAll('.by').forEach((tag) => {
+  const name = tag.dataset.agent, status = statusOf(name, tag.closest('.screen'))
+  const doing = { working: tag.dataset.doing || 'working…', review: 'under review', idle: 'waiting' }
+  tag.innerHTML = `<i class="st ${status}"></i><b>${agent(name)}</b>${status === 'done' ? tag.dataset.short : doing[status]}`
+  tag.title = 'Show what this agent did'
+})
+
+// The board's tabs; a tag opens the Agents tab on its own agent.
+function showTab(board, which, name) {
+  board.classList.toggle('show-agents', which === 'agents')
+  board.querySelectorAll('[data-tab]').forEach((b) => b.classList.toggle('on', b.dataset.tab === which))
+  board.querySelectorAll('.lane').forEach((lane) => lane.classList.toggle('sel', lane.dataset.lane === name))
+  board.querySelector('.lane.sel')?.scrollIntoView({ block: 'nearest' })
+}
+document.addEventListener('click', (e) => {
+  const tab = e.target.closest('[data-tab]'), tag = e.target.closest('.by')
+  if (tab) showTab(tab.closest('.board'), tab.dataset.tab)
+  if (tag) showTab(tag.closest('.screen').querySelector('.board'), 'agents', tag.dataset.agent)
+})
+</script>
+</body>
+</html>

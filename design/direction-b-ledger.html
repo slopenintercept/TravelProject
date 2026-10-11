@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tripwright — Direction B, Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* SYSTEM — Direction B, "Ledger"
+   Type: IBM Plex Sans for text, IBM Plex Mono for every number, time and price (tabular). Scale 26 / 18 / 15 / 14 / 13 / 12.
+   Colour: warm off-white ground, white surfaces, hairlines. One accent (the reference's navy) for the primary
+           action and the selected state. Category colour appears only as a 8px dot and in the budget bars.
+   Shape: 8px controls, 12px surfaces; pills only for status. No shadows.
+   Rhythm: three fixed panes — 244px rail (where you are, who is in, what the agents did), fluid work area,
+           328px inspector (budget and conflicts). Each pane scrolls on its own; nothing floats. */
+:root {
+  --bg: #f6f6f3; --surface: #fff; --ink: #121214; --muted: #62625d; --line: #e2e2dc; --line-2: #cfcfc7;
+  --accent: oklch(0.3 0.12 268); --accent-soft: oklch(0.95 0.025 268);
+  --flights: oklch(0.3 0.12 268); --lodging: oklch(0.5 0.15 42); --attractions: oklch(0.45 0.08 125); --transport: oklch(0.42 0.07 205);
+  --bad: oklch(0.47 0.17 28); --bad-soft: oklch(0.95 0.03 28); --ok: oklch(0.5 0.13 150);
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 400 14px/1.5 'IBM Plex Sans', sans-serif; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, dl, dd { margin: 0; padding: 0; } ul, ol { list-style: none; }
+button, input { font: inherit; color: inherit; }
+.num, td.n, th.n { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; word-spacing: -0.3em; white-space: nowrap; }
+th.n { font-family: inherit; word-spacing: 0; }
+.muted { color: var(--muted); }
+.screen { display: none; } .screen.on { display: grid; }
+.app { grid-template: 48px 1fr / 244px 1fr 328px; height: 100vh; }
+.app.two { grid-template-columns: 244px 1fr; }
+
+.bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--line); font-size: 13px; }
+.brand { font-weight: 700; font-size: 15px; letter-spacing: -0.02em; color: inherit; text-decoration: none; }
+.crumb { color: var(--muted); } .crumb b { color: var(--ink); font-weight: 600; }
+.grow { flex: 1; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); font-weight: 500; font-size: 13px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn:hover { background: var(--bg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.lg { height: 40px; padding: 0 18px; font-size: 14px; font-weight: 600; }
+.btn.block { width: 100%; }
+
+.rail, .insp { background: var(--surface); overflow: auto; padding: 16px; }
+.rail { border-right: 1px solid var(--line); } .insp { border-left: 1px solid var(--line); display: flex; flex-direction: column; gap: 22px; }
+.work { overflow: auto; padding: 24px 28px 48px; }
+.label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+.rail section + section { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.steps li { display: flex; align-items: center; gap: 10px; height: 30px; font-size: 13.5px; color: var(--muted); }
+.steps i { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--line-2); display: grid; place-items: center; font-style: normal; font-size: 11px; }
+.steps .done { color: var(--ink); } .steps .done i { background: var(--ink); border-color: var(--ink); color: #fff; }
+.steps .now { color: var(--ink); font-weight: 600; } .steps .now i { border-color: var(--accent); box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 9px var(--accent); }
+
+.people li, .agents li { display: flex; align-items: center; justify-content: space-between; height: 28px; font-size: 13px; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--ok)); margin-right: 8px; }
+.tag { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--bg); color: var(--muted); }
+.tag.bad { background: var(--bad-soft); color: var(--bad); } .tag.ok { background: oklch(0.95 0.04 150); color: oklch(0.38 0.1 150); }
+
+h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.2; }
+.sub { color: var(--muted); max-width: 70ch; margin-top: 4px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+
+/* ---- Start ---- */
+.start-grid { display: grid; grid-template-columns: minmax(0, 640px) 300px; gap: 28px; margin-top: 22px; align-items: start; }
+.form { padding: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px 16px; }
+.form label { display: block; font-size: 13px; font-weight: 500; }
+.form input { display: block; width: 100%; height: 38px; margin-top: 6px; padding: 0 11px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); font-size: 14px; }
+.form input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.form small { display: block; margin-top: 5px; font-size: 12px; color: var(--muted); font-weight: 400; }
+.form .foot { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding-top: 18px; border-top: 1px solid var(--line); }
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; margin-top: 6px; }
+.seg button { height: 36px; padding: 0 14px; border: 0; border-right: 1px solid var(--line-2); background: var(--surface); font-size: 13px; font-weight: 500; cursor: pointer; }
+.seg button:last-child { border-right: 0; } .seg button.on { background: var(--ink); color: #fff; }
+.next ol { counter-reset: n; } .next li { counter-increment: n; display: grid; grid-template-columns: 22px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.next li::before { content: counter(n); font-family: 'IBM Plex Mono', monospace; color: var(--muted); }
+
+/* ---- Picks ---- */
+.table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+.table th { text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); padding: 8px 14px; border-bottom: 1px solid var(--line); }
+.table td { padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table tr:last-child td { border-bottom: 0; }
+.table .n { text-align: right; }
+.table td .btn, .pick button { font-family: 'IBM Plex Sans', sans-serif; letter-spacing: 0; word-spacing: 0; }
+#ideas td:first-child { width: 27%; } #ideas td:nth-child(2) { width: 11%; }
+.table tr.grp td { background: var(--bg); font-size: 12.5px; font-weight: 600; padding: 9px 14px; position: sticky; top: -24px; }
+.table tr[data-choice="no"] td:not(:last-child) { color: var(--muted); text-decoration: line-through; }
+.table tr[data-choice="must"] td:first-child { font-weight: 600; }
+.pick { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; }
+.pick button { height: 32px; padding: 0 12px; border: 0; border-right: 1px solid var(--line-2); background: var(--surface); font-size: 12.5px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.pick button:last-child { border-right: 0; } .pick button:hover { background: var(--bg); }
+tr[data-choice="must"] [data-pick="must"] { background: var(--accent); color: #fff; }
+tr[data-choice="like"] [data-pick="like"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+tr[data-choice="no"] [data-pick="no"] { background: var(--ink); color: #fff; }
+.meter { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: 13.5px; }
+.add { display: grid; grid-template-columns: 1fr 88px; gap: 6px; } .add input { height: 34px; padding: 0 11px; border: 1px solid var(--line-2); border-radius: 8px; font-size: 13px; min-width: 0; }
+.insp .end { margin-top: auto; }
+
+/* ---- Review ---- */
+.tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--line); margin: 14px 0 20px; }
+.tabs button { height: 36px; padding: 0; border: 0; border-bottom: 2px solid transparent; background: none; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; margin-bottom: -1px; }
+.tabs button.on { color: var(--ink); border-color: var(--ink); font-weight: 600; }
+.sec { margin-bottom: 22px; }
+.sec-h { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; } .sec-h h2 { font-size: 15px; font-weight: 600; } .sec-h .why { color: var(--muted); font-size: 13px; }
+.opt { display: grid; grid-template-columns: 20px 1.5fr 1fr 1fr 0.8fr 0.6fr 84px; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.opt:last-of-type { border-bottom: 0; }
+.opt.head { font-size: 12px; font-weight: 600; color: var(--muted); padding-block: 8px; }
+.opt .radio { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line-2); }
+.opt.sel { background: var(--accent-soft); } .opt.sel .radio { border-color: var(--accent); box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 8px var(--accent); }
+.opt .price { text-align: right; font-weight: 600; }
+.cardfoot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 13px; }
+.cardfoot a { color: var(--accent); font-weight: 500; }
+.bud-total { font-size: 26px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.2; }
+.bud-total small { font-size: 14px; font-weight: 400; color: var(--muted); letter-spacing: -0.02em; word-spacing: 0; margin-left: 8px; }
+.bud li { padding: 9px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.bud .r { display: flex; justify-content: space-between; align-items: baseline; }
+.track { position: relative; height: 6px; margin-top: 7px; border-radius: 3px; background: var(--bg); overflow: hidden; }
+.track i { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--c); }
+.bud .overrun { color: var(--bad); font-weight: 600; }
+.issues li { display: grid; grid-template-columns: 8px 1fr; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.4; }
+.issues li::before { content: ''; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: var(--bad); }
+</style>
+</head>
+<body>
+
+<!-- ============ START ============ -->
+<section class="screen app two" id="start">
+  <header class="bar"><a class="brand" href="#start">Tripwright</a><span class="crumb">New trip</span><span class="grow"></span><button class="btn">Use the demo trip</button></header>
+  <aside class="rail" data-rail="0"></aside>
+  <main class="work">
+    <h1>Plan a trip</h1>
+    <div class="start-grid">
+      <form class="card form" onsubmit="return false">
+        <label>Your name<input value="Alex"></label>
+        <label>Where are you traveling from?<input value="Kansas City"></label>
+        <label>Where do you want to go?<input value="Japan"></label>
+        <label>How long do you want to stay?<input class="num" value="7"><small>Days, 1 to 30</small></label>
+        <label>When do you want to go?<input class="num" placeholder="mm/dd/yyyy"><small>Optional. Leave it blank and the agents suggest the best dates.</small></label>
+        <label>What's your total budget?<input class="num" value="2500"><small>US dollars, for the whole trip</small></label>
+        <label style="grid-column:1/-1">How packed should the itinerary be?<br>
+          <span class="seg"><button>Relaxed</button><button class="on">Balanced</button><button>Packed</button></span></label>
+        <div class="foot"><span class="grow"></span><a class="btn primary lg" href="#picks">Start planning</a></div>
+      </form>
+      <aside class="next">
+        <div class="label">What happens next</div>
+        <ol>
+          <li>A team of agents researches it in parallel.</li>
+          <li>You pick what sounds good from the places they find.</li>
+          <li>You review every choice and do the booking yourself.</li>
+        </ol>
+      </aside>
+    </div>
+  </main>
+</section>
+
+<!-- ============ PICKS ============ -->
+<section class="screen app" id="picks">
+  <header class="bar"><a class="brand" href="#start">Tripwright</a><span class="crumb"><b>Japan</b> · 7 days · from Kansas City</span><span class="grow"></span><span class="crumb">You: <b>Alex</b></span><a class="btn" href="#start">New trip</a></header>
+  <aside class="rail" data-rail="2"></aside>
+  <main class="work">
+    <h1>What sounds good?</h1>
+    <p class="sub">Mark what you must do, what interests you, and what is not for you. Leave the rest blank. The agents plan your days and the group's from these.</p>
+    <div class="card" style="margin-top:18px"><table class="table" style="margin:0" id="ideas"></table></div>
+  </main>
+  <aside class="insp">
+    <section><div class="label">Your picks</div>
+      <div class="meter">
+        <span>Must do</span><b class="num" data-tally="must">0</b>
+        <span>Interested</span><b class="num" data-tally="like">0</b>
+        <span>Not for me</span><b class="num" data-tally="no">0</b>
+        <span class="muted">Unmarked</span><b class="num muted" data-tally="none">0</b>
+      </div></section>
+    <section><div class="label">Add a place</div>
+      <div class="add"><input placeholder="Place"><input placeholder="City"></div>
+      <button class="btn block" style="margin-top:6px">Add to the list</button></section>
+    <section><div class="label">Want more?</div>
+      <button class="btn block">More like my picks</button></section>
+    <section><div class="label">Group</div>
+      <ul class="people"><li><span>Alex (you)</span><span class="tag">Marking</span></li><li><span>friend2</span><span class="tag ok">Saved</span></li></ul></section>
+    <div class="end"><a class="btn primary lg block" href="#review">Save my picks</a></div>
+  </aside>
+</section>
+
+<!-- ============ REVIEW ============ -->
+<section class="screen app" id="review">
+  <header class="bar"><a class="brand" href="#start">Tripwright</a><span class="crumb"><b>Japan</b> · 7 days · <span class="num">Jun 15 – Jun 22</span> · 2 travelers</span><span class="grow"></span><span class="crumb">You: <b>Alex</b> · <u>Switch</u></span><a class="btn" href="#start">New trip</a></header>
+  <aside class="rail" data-rail="4"></aside>
+  <main class="work">
+    <h1>Review your plan</h1>
+    <nav class="tabs"><button class="on">Review</button><button>Itinerary</button></nav>
+
+    <section class="sec">
+      <div class="sec-h"><i class="dot" style="--c:var(--flights)"></i><h2>Flight</h2><span class="why">$1,874, shortest at 15h55, 1 stop, lands Haneda 16:15.</span></div>
+      <div class="card">
+        <div class="opt head"><span></span><span>Carrier, Kansas City to Haneda</span><span>Leaves</span><span>Lands</span><span>Length</span><span>Stops</span><span class="price">Price</span></div>
+        <div class="opt sel"><i class="radio"></i><b>Delta</b><span class="num">Tue Jun 15 10:20</span><span class="num">Wed Jun 16 16:15</span><span class="num">15h 55m</span><span class="num">1</span><span class="num price">$1,874</span></div>
+        <div class="opt"><i class="radio"></i><span>United and ANA</span><span class="num muted">—</span><span class="num">Wed Jun 16 21:15</span><span class="num">15h 53m</span><span class="num">1</span><span class="num price">$1,874</span></div>
+        <div class="opt"><i class="radio"></i><span>Delta</span><span class="num muted">—</span><span class="num">Wed Jun 16 13:05</span><span class="num">16h 35m</span><span class="num">1</span><span class="num price">$1,874</span></div>
+        <div class="cardfoot"><span class="muted">Flies home <span class="num">Tue Jun 22 16:20</span></span><span class="grow"></span><a href="#review">Finish booking on the provider's site ↗</a><button class="btn">Approve</button></div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="sec-h"><i class="dot" style="--c:var(--lodging)"></i><h2>Stays</h2><span class="why">Most travelers here pick hotel.</span><span class="grow"></span><button class="btn">Switch to Airbnb</button></div>
+      <div class="card"><table class="table" style="margin:0">
+        <tr><th>Stay</th><th>Dates</th><th class="n">Nights</th><th class="n">Rating</th><th class="n">A night</th><th class="n">Total</th><th></th></tr>
+        <tr><td><b>the b asakusa</b><br><span class="muted">Tokyo · Asakusa</span></td><td class="num">Jun 16 – 19</td><td class="n">3</td><td class="n">4.4 <span class="muted">(741)</span></td><td class="n">$78</td><td class="n"><b>$234</b></td><td class="n"><button class="btn">Swap</button> <button class="btn">Approve</button></td></tr>
+        <tr><td><b>Oakwood Hotel Oike Kyoto</b><br><span class="muted">Kyoto · Nakagyo</span></td><td class="num">Jun 19 – 21</td><td class="n">2</td><td class="n">4.4 <span class="muted">(613)</span></td><td class="n">$63</td><td class="n"><b>$126</b></td><td class="n"><button class="btn">Swap</button> <button class="btn">Approve</button></td></tr>
+        <tr><td><b>Tosei Hotel Cocone Asakusa</b><br><span class="muted">Tokyo · Asakusa</span></td><td class="num">Jun 21 – 22</td><td class="n">1</td><td class="n">4.2 <span class="muted">(331)</span></td><td class="n">$68</td><td class="n"><b>$68</b></td><td class="n"><button class="btn">Swap</button> <button class="btn">Approve</button></td></tr>
+      </table></div>
+    </section>
+
+    <section class="sec">
+      <div class="sec-h"><i class="dot" style="--c:var(--attractions)"></i><h2>Attractions</h2><span class="why">8 of 21 shown</span><span class="grow"></span><button class="btn">Show all</button></div>
+      <div class="card"><table class="table" style="margin:0">
+        <tr><th>Activity</th><th>City</th><th>Open</th><th class="n">Length</th><th>Why</th><th class="n">Cost</th></tr>
+        <tr><td><b>Tokyo Disneyland</b></td><td>Tokyo</td><td class="num">09:00–21:00</td><td class="n">10h</td><td class="muted">Both travelers' top must-see park</td><td class="n">$126</td></tr>
+        <tr><td><b>Tokyo DisneySea</b></td><td>Tokyo</td><td class="num">09:00–21:00</td><td class="n">10h</td><td class="muted">Both travelers' top must-see park</td><td class="n">$126</td></tr>
+        <tr><td><b>teamLab Planets</b></td><td>Tokyo</td><td class="num">08:00–22:00</td><td class="n">2h</td><td class="muted">Immersive digital art, near Odaiba</td><td class="n">$58</td></tr>
+        <tr><td><b>Ghibli Museum</b></td><td>Tokyo</td><td class="num">10:00–18:00</td><td class="n">3h</td><td class="muted">Both travelers' must-see animation museum</td><td class="n">$14</td></tr>
+        <tr><td><b>Kiyomizu-dera Temple</b></td><td>Kyoto</td><td class="num">06:00–18:00</td><td class="n">1h 30m</td><td class="muted">Iconic temple near Gion, great in June</td><td class="n">$8</td></tr>
+        <tr><td><b>Fushimi Inari Taisha</b></td><td>Kyoto</td><td>All day</td><td class="n">2h</td><td class="muted">Famous thousand torii gates friend2 wants</td><td class="n">$0</td></tr>
+        <tr><td><b>Meiji Shrine</b></td><td>Tokyo</td><td class="num">05:00–18:30</td><td class="n">1h 30m</td><td class="muted">Serene forest shrine near Harajuku</td><td class="n">$0</td></tr>
+        <tr><td><b>Senso-ji Temple &amp; Nakamise</b></td><td>Tokyo</td><td class="num">06:00–17:00</td><td class="n">1h 30m</td><td class="muted">Iconic Asakusa temple and shopping street</td><td class="n">$0</td></tr>
+      </table></div>
+    </section>
+
+    <section class="sec">
+      <div class="sec-h"><i class="dot" style="--c:var(--transport)"></i><h2>Transport</h2><span class="why">Most travelers here pick trains and metro.</span></div>
+      <div class="card"><table class="table" style="margin:0">
+        <tr><th>Leg</th><th class="n">Length</th><th>Why</th><th class="n">Cost</th><th></th></tr>
+        <tr><td><b>Narita Express</b> · Airport to Tokyo</td><td class="n">53m</td><td class="muted">Direct to Tokyo Station, no transfers.</td><td class="n">$20.50</td><td class="n"><button class="btn">Swap</button></td></tr>
+        <tr><td><b>Shinkansen Nozomi</b> · Tokyo to Kyoto</td><td class="n">2h 15m</td><td class="muted">Fastest; book a one-way ticket in advance.</td><td class="n">$92.30</td><td class="n"><button class="btn">Swap</button></td></tr>
+        <tr><td><b>Shinkansen Nozomi</b> · Kyoto to Tokyo</td><td class="n">2h 15m</td><td class="muted">Fastest; book a one-way ticket in advance.</td><td class="n">$92.30</td><td class="n"><button class="btn">Swap</button></td></tr>
+        <tr><td><b>Narita Express</b> · Tokyo to airport</td><td class="n">53m</td><td class="muted">Direct from Tokyo Station to the airport.</td><td class="n">$20.50</td><td class="n"><button class="btn">Swap</button></td></tr>
+        <tr><td><b>Suica IC card</b> · Local pass</td><td class="n">7 days</td><td class="muted">Covers subway and JR at about $6.25 a day.</td><td class="n">$43.75</td><td></td></tr>
+      </table></div>
+    </section>
+  </main>
+  <aside class="insp">
+    <section><div class="label">Alex's budget</div>
+      <div class="bud-total num">$2,737 <small>of $2,500</small></div>
+      <span class="tag bad" style="margin:8px 0 12px">Over by $237</span>
+      <ul class="bud">
+        <li><div class="r"><span><i class="dot" style="--c:var(--flights)"></i>Flights</span><span class="num overrun">$1,874 / $1,250</span></div><div class="track"><i style="width:100%;--c:var(--bad)"></i></div></li>
+        <li><div class="r"><span><i class="dot" style="--c:var(--lodging)"></i>Lodging</span><span class="num">$428 / $700</span></div><div class="track"><i style="width:61%;--c:var(--lodging)"></i></div></li>
+        <li><div class="r"><span><i class="dot" style="--c:var(--attractions)"></i>Attractions</span><span class="num">$166 / $250</span></div><div class="track"><i style="width:66%;--c:var(--attractions)"></i></div></li>
+        <li><div class="r"><span><i class="dot" style="--c:var(--transport)"></i>Transport</span><span class="num">$269 / $300</span></div><div class="track"><i style="width:90%;--c:var(--transport)"></i></div></li>
+      </ul></section>
+    <section><div class="label">5 conflicts to resolve</div>
+      <ul class="issues">
+        <li>Must-see Akihabara Electric Town is not on the itinerary.</li>
+        <li>Must-see Kamakura Great Buddha (Kotoku-in) is not on the itinerary.</li>
+        <li>Must-see Nikko Toshogu Shrine is not on the itinerary.</li>
+        <li>Alex's plan costs $2,737, $237 over the $2,500 budget.</li>
+        <li>friend2's plan costs $2,914, $114 over the $2,800 budget.</li>
+      </ul>
+      <p class="muted" style="font-size:13px;margin-top:10px">You're over budget, and no swap would bring it down.</p></section>
+    <div class="end" style="display:flex;gap:8px"><a class="btn lg" href="#picks">Back</a><button class="btn primary lg" style="flex:1">Finish</button></div>
+  </aside>
+</section>
+
+<script src="shared.js"></script>
+<script>
+const STEPS = ['Trip details', 'Dates', 'Picks', 'Flights and stays', 'Review', 'Book']
+document.querySelectorAll('[data-rail]').forEach((rail) => {
+  const now = Number(rail.dataset.rail)
+  rail.innerHTML = `
+    <section><div class="label">Steps</div><ol class="steps">${STEPS.map((s, i) =>
+      `<li class="${i < now ? 'done' : i === now ? 'now' : ''}"><i>${i < now ? '✓' : ''}</i>${s}</li>`).join('')}</ol></section>
+    ${now > 0 ? `<section><div class="label">Route</div>
+      <ul class="people">${[['Tokyo', 3], ['Kyoto', 2], ['Tokyo', 1]].map(([city, n]) =>
+        `<li><span>${city}</span><span class="muted num">${n} ${n > 1 ? 'nights' : 'night'}</span></li>`).join('')}</ul></section>
+    <section><div class="label">Travelers</div><ul class="people">
+      <li><span>Alex (you)</span>${now > 3 ? '<span class="tag bad">+$237</span>' : ''}</li>
+      <li><span>friend2</span>${now > 3 ? '<span class="tag bad">+$114</span>' : ''}</li></ul></section>
+    <section><div class="label">Agents</div><ul class="agents">${(now > 3 ? AGENTS : AGENTS.slice(0, 5)).map((a) =>
+      `<li><span><i class="dot"></i>${a}</span>${a === 'Attractions' ? '<span class="muted num">2 tries</span>' : ''}</li>`).join('')}</ul></section>` : ''}`
+})
+
+document.getElementById('ideas').innerHTML = byCategory(IDEAS).map(([category, ideas]) => `
+  <tr class="grp"><td colspan="4">${category} <span class="muted num">${ideas.length}</span></td></tr>
+  ${ideas.map((i) => `<tr data-idea data-choice="${PRESET[i.name] ?? ''}">
+    <td>${i.name}</td><td class="muted">${i.city}</td><td class="muted">${i.why}</td>
+    <td class="n"><span class="pick"><button data-pick="must">Must do</button><button data-pick="like">Interested</button><button data-pick="no">Not for me</button></span></td>
+  </tr>`).join('')}`).join('')
+</script>
+</body>
+</html>

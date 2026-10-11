@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tripwright Redesign — three directions</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; height: 100vh; display: grid; grid-template-rows: 52px 1fr; font: 500 14px/1.4 ui-sans-serif, system-ui, sans-serif; background: #18181b; color: #f4f4f5; }
+  header { display: flex; align-items: center; gap: 18px; padding: 0 16px; }
+  header b { font-weight: 650; }
+  .set { display: flex; padding: 3px; border-radius: 9px; background: #27272a; }
+  .set button { height: 30px; padding: 0 13px; border: 0; border-radius: 7px; background: none; color: #d4d4d8; font: inherit; cursor: pointer; }
+  .set button.on { background: #f4f4f5; color: #18181b; }
+  .grow { flex: 1; }
+  header a, header .ghost { color: #d4d4d8; font: inherit; background: none; border: 0; cursor: pointer; text-decoration: underline; padding: 0; }
+  iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+  main { position: relative; min-height: 0; }
+  #notes { position: absolute; inset: 0 0 0 auto; width: min(560px, 100%); overflow: auto; padding: 28px; background: #fafafa; color: #18181b; box-shadow: -20px 0 60px rgb(0 0 0 / 30%); font-weight: 400; font-size: 15px; line-height: 1.55; }
+  #notes[hidden] { display: none; }
+  #notes h2 { font-size: 20px; margin: 0 0 10px; } #notes h3 { font-size: 15px; margin: 22px 0 4px; }
+  #notes p, #notes ul { margin: 0 0 8px; } #notes ul { padding-left: 18px; } #notes li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <b>Tripwright redesign</b>
+  <div class="set" id="dirs">
+    <button data-v="direction-a-postcard.html">A · Postcard</button>
+    <button data-v="direction-b-ledger.html">B · Ledger</button>
+    <button data-v="direction-c-night-flight.html">C · Night flight</button>
+  </div>
+  <div class="set" id="screens">
+    <button data-v="start">Start</button><button data-v="picks">Picks</button><button data-v="review">Review</button>
+  </div>
+  <span class="grow"></span>
+  <button class="ghost" id="toggle">Design notes</button>
+  <a id="open" target="_blank">Open full page</a>
+</header>
+<main>
+  <iframe id="frame" title="Direction preview"></iframe>
+  <aside id="notes" hidden>
+    <h2>Design notes — draft 1</h2>
+    <p>Three directions in the spirit of the Mindtrip reference, each shown on the same three screens with content copied from a real saved trip (Japan, 7 days, Alex and friend2). Nothing here is wired to the app. The Picks buttons are clickable so you can feel the states.</p>
+    <p>What was taken from the reference: very large, tightly tracked geometric headlines; black-and-white base; fully rounded controls; big rounded panels in deep navy, rust and moss with pale text; translucent chips sitting on those panels. What was not taken: its logo, wordmark, typeface (Circular is licensed; these use Figtree, IBM Plex and Bricolage Grotesque), photography and page layouts.</p>
+
+    <h3>A · Postcard — closest to the reference</h3>
+    <ul>
+      <li>Same steps as today, new skin and new layouts.</li>
+      <li>Start is one sentence you fill in, not a form grid.</li>
+      <li>Picks are tiles that change colour when marked; a floating bar keeps the count and Save.</li>
+      <li>Review is one coloured panel per category, with the price as the loudest thing in it.</li>
+    </ul>
+
+    <h3>B · Ledger — the precise tool</h3>
+    <ul>
+      <li>Three fixed panes: steps, travelers and agents on the left; the work in the middle; budget and conflicts always visible on the right.</li>
+      <li>Every number is monospaced and right-aligned. Flight alternatives are rows you select in place, not a Swap menu.</li>
+      <li>Budget shows spent against each category's allotment. The app computes this today but only reveals it in a hover tooltip.</li>
+    </ul>
+
+    <h3>C · Night flight — the wildcard, and a flow change</h3>
+    <ul>
+      <li>One screen for the whole trip. Left: a feed where agents report and ask for your next decision. Right: the plan, filling in as you answer.</li>
+      <li>Review and Itinerary merge: conflicts become cards with actions, and the calendar is always beside them.</li>
+      <li>The draft plan sits beside Picks, so marking a place visibly changes the days.</li>
+      <li>Includes a map, which the app does not have today. Ideas already carry coordinates, so it is buildable; it is drawn as a labelled placeholder.</li>
+    </ul>
+
+    <h3>Not mocked yet</h3>
+    <p>Date choice, the join and who-are-you screens, the waiting screens while agents work, choosing flights and stays, the Itinerary tab in A and B, and Finish.</p>
+
+    <h3>Open questions</h3>
+    <ul>
+      <li>Photos. The reference leans on photography and Tripwright has none. All three directions work without it. Adding place photos needs an image source.</li>
+      <li>The map in C is new scope.</li>
+      <li>C's "Swap it in" and "Drop" on a conflict are new actions built from ones that exist in the Itinerary tab.</li>
+    </ul>
+  </aside>
+</main>
+<script>
+  const frame = document.getElementById('frame'), open = document.getElementById('open'), notes = document.getElementById('notes')
+  const state = { dir: 'direction-a-postcard.html', screen: 'start' }
+  function show() {
+    const url = `${state.dir}#${state.screen}`
+    // Same file with a new hash would not reload the frame, so set the hash on the loaded page instead.
+    if (frame.dataset.dir === state.dir) frame.contentWindow.location.hash = state.screen
+    else { frame.src = url; frame.dataset.dir = state.dir }
+    open.href = url
+    for (const [id, key] of [['dirs', 'dir'], ['screens', 'screen']])
+      document.querySelectorAll(`#${id} button`).forEach((b) => b.classList.toggle('on', b.dataset.v === state[key]))
+  }
+  document.getElementById('dirs').onclick = (e) => { if (e.target.dataset.v) { state.dir = e.target.dataset.v; show() } }
+  document.getElementById('screens').onclick = (e) => { if (e.target.dataset.v) { state.screen = e.target.dataset.v; show() } }
+  document.getElementById('toggle').onclick = () => { notes.hidden = !notes.hidden }
+  // Following a link inside a mockup (Start planning, Save my picks) keeps the screen buttons in step.
+  frame.addEventListener('load', () => frame.contentWindow.addEventListener('hashchange', () => {
+    state.screen = frame.contentWindow.location.hash.slice(1) || 'start'
+    document.querySelectorAll('#screens button').forEach((b) => b.classList.toggle('on', b.dataset.v === state.screen))
+    open.href = `${state.dir}#${state.screen}`
+  }))
+  show()
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "design/direction-b-ledger.html"
+        ],
+        "createdAt": "2026-10-11T06:50:07.856Z",
+        "reason": "Claude: false positive, the flagged wrappers are a segmented control and table cards whose buttons and cells carry their own 9-14px padding"
+      },
+      {
+        "rule": "repeating-stripes-gradient",
+        "value": "*",
+        "files": [
+          "design/direction-c-night-flight.html"
+        ],
+        "createdAt": "2026-10-11T06:50:07.883Z",
+        "reason": "Claude: false positive, the gradient draws the calendar's hour gridlines, not decoration"
+      },
+      {
+        "rule": "repeating-stripes-gradient",
+        "value": "*",
+        "files": [
+          "design/direction-c-lilac.html"
+        ],
+        "createdAt": "2026-10-11T07:28:32.522Z",
+        "reason": "Claude: false positive, the gradient draws the calendar's hour gridlines, not decoration"
+      }
+    ]
+  }
+}
