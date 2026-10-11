@@ -30,6 +30,7 @@ export default function App() {
   const { view, lanes, busy, sending, error, notice, act, setError, setNotice } = useTrip(tripId)
 
   useEffect(() => actAs(me), [me])
+  const retry = () => tripId && act(api.retry(tripId))
 
   useEffect(() => {
     const onHashChange = () => {
@@ -127,14 +128,17 @@ export default function App() {
             onMore={async (picks) => !!(await act(api.suggestMore(state.id, picks)))}
           />
         ) : choosing && optionsReady ? (
-          <Choose
-            state={state}
-            you={you}
-            sending={sending}
-            onConfirm={async (flightId, stayIds) => {
-              if (await act(api.confirmChoices(state.id, you.id, flightId, stayIds))) window.scrollTo(0, 0)
-            }}
-          />
+          <>
+            <AgentPanel lanes={lanes} travelers={state.travelers} compact onRetry={retry} busy={busy} />
+            <Choose
+              state={state}
+              you={you}
+              sending={sending}
+              onConfirm={async (flightId, stayIds) => {
+                if (await act(api.confirmChoices(state.id, you.id, flightId, stayIds))) window.scrollTo(0, 0)
+              }}
+            />
+          </>
         ) : choosing || stage === 'choosing' ? (
           <>
             <h1>{choosing ? 'Planning your flight and stays' : 'Planning activities around your choices'}</h1>
@@ -143,13 +147,13 @@ export default function App() {
                 ? "The agents are finding your flight and rooms. You'll choose them here as soon as they're ready."
                 : 'The agents are still researching activities, transport and weather. Your days are planned around your flight and rooms as soon as they finish.'}
             </p>
-            <AgentPanel lanes={lanes} travelers={state.travelers} />
+            <AgentPanel lanes={lanes} travelers={state.travelers} onRetry={retry} busy={busy} />
           </>
         ) : stage === 'review' && finishing ? (
           <Finish view={view} you={you} onBack={() => setFinishing(false)} />
         ) : stage === 'review' ? (
           <>
-            <AgentPanel lanes={lanes} travelers={state.travelers} compact />
+            <AgentPanel lanes={lanes} travelers={state.travelers} compact onRetry={retry} busy={busy} />
             <nav className="tabs" role="tablist">
               <button role="tab" aria-selected={tab === 'review'} onClick={() => setTab('review')}>Review</button>
               <button role="tab" aria-selected={tab === 'itinerary'} onClick={() => setTab('itinerary')}>Itinerary</button>
@@ -166,6 +170,7 @@ export default function App() {
             ) : (
               <Itinerary
                 state={state}
+                you={you}
                 busy={busy}
                 onMove={(itemId, day) => act(api.moveItem(state.id, itemId, day))}
                 onSwap={(itemId, attractionId) => act(api.swapItem(state.id, itemId, attractionId))}

@@ -30,6 +30,7 @@ CHAT_MODEL = os.getenv("CHAT_MODEL", "hackathon-chat")
 MODEL_RPM = int(os.getenv("MODEL_RPM", "50"))
 MODEL_CONCURRENCY = int(os.getenv("MODEL_CONCURRENCY", "4"))
 MODEL_MAX_TOKENS = int(os.getenv("MODEL_MAX_TOKENS", "2000"))
+MODEL_OUTPUT_LIMIT = 4096  # the most the workshop endpoint writes in one answer; for agents with long answers
 
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
 

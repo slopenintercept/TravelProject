@@ -1,30 +1,24 @@
 import { useState } from 'react'
-import { clock, daysBetween, money, monthDay, temp, weekday } from '../format'
-import type { ItineraryItem, TripState } from '../types'
+import { clock, money, monthDay, temp, weekday } from '../format'
+import type { Traveler, TripState } from '../types'
+import { CalendarGrid } from './CalendarGrid'
 
 interface Props {
   state: TripState
+  you: Traveler
   busy: boolean
   onMove: (itemId: string, day: string) => void
   onSwap: (itemId: string, attractionId: string) => void
   onRemove: (attractionId: string) => void
 }
 
-export function Itinerary({ state, busy, onMove, onSwap, onRemove }: Props) {
-  const [dragId, setDragId] = useState<string | null>(null)
-  const [overDay, setOverDay] = useState<string | null>(null)
-  const [viewer, setViewer] = useState('') // a traveler id, or '' for everyone
-
+/** The trip's days on a week-view calendar: drag an activity to another day, or click it to swap or remove it. */
+export function Itinerary({ state, you, busy, onMove, onSwap, onRemove }: Props) {
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const { travelers } = state
   const solo = travelers.length < 2
-  const names = (ids: string[]) => travelers.filter((t) => ids.includes(t.id)).map((t) => t.name).join(', ')
-  // Fewer than everyone at an attraction: some travelers split off for it and regroup afterwards.
-  const isSplit = (item: ItineraryItem) => item.kind === 'attraction' && item.travelers.length < travelers.length
-
-  const items = [...state.itinerary].sort((a, b) => (a.day + a.start).localeCompare(b.day + b.start))
-  const days = items.length > 0 ? daysBetween(items[0].day, items[items.length - 1].day) : []
-  // One traveler's view: what they attend, plus the fixed items (flights and intercity travel).
-  const shown = viewer ? items.filter((item) => item.locked || item.travelers.includes(viewer)) : items
+  const names = (ids: string[]) =>
+    ids.length === travelers.length ? 'Everyone' : travelers.filter((t) => ids.includes(t.id)).map((t) => t.name).join(', ')
 
   // Attractions that are not on the calendar: removed in review, or the scheduler could not place them.
   const missed = new Set(state.unscheduled.map((u) => u.attraction_id))
@@ -37,128 +31,82 @@ export function Itinerary({ state, busy, onMove, onSwap, onRemove }: Props) {
     for (const id of violation.item_ids) problems.set(id, [...(problems.get(id) ?? []), violation.message])
   }
 
-  function endDrag() {
-    setDragId(null)
-    setOverDay(null)
+  function weather(day: string) {
+    const w = state.weather.find((x) => x.day === day)
+    if (!w) return undefined
+    const range = w.high_c !== null && w.low_c !== null ? `${temp(w.high_c)} / ${temp(w.low_c)}` : w.summary
+    return w.precip_prob !== null ? `${range} · ${Math.round(w.precip_prob)}% rain` : range
   }
 
-  function drop(day: string) {
-    const item = items.find((i) => i.id === dragId)
-    endDrag()
-    if (item && item.day !== day) onMove(item.id, day)
-  }
+  // The selection can disappear after a re-plan (a move or swap makes new items).
+  const selected = state.itinerary.find((i) => i.id === selectedId && !i.locked)
 
   return (
     <div className="itinerary">
       {state.plan_note && <p className="plan-note">{state.plan_note}</p>}
-      {!solo && (
-        <div className="viewer" role="radiogroup" aria-label="View">
-          <strong>View</strong>
-          <div className="segmented">
-            {[{ id: '', name: 'Everyone' }, ...travelers].map((t) => (
-              <label key={t.id}>
-                <input type="radio" name="viewer" checked={viewer === t.id} onChange={() => setViewer(t.id)} />
-                <span>{t.name}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {days.length === 0 ? (
+      {state.itinerary.length === 0 ? (
         <p className="muted">No itinerary yet. It needs dates, a flight and a place to stay.</p>
       ) : (
-        <div className="calendar">
-          {days.map((day) => {
-            const dayItems = shown.filter((item) => item.day === day)
-            const weather = state.weather.find((w) => w.day === day)
-            const city = [...new Set(dayItems.map((item) => item.city).filter(Boolean))].join(' → ') || weather?.city
-            return (
-              <section
-                key={day}
-                className={overDay === day ? 'day over' : 'day'}
-                onDragOver={(e) => {
-                  if (!dragId) return
-                  e.preventDefault() // allows the drop
-                  setOverDay(day)
-                }}
-                onDragLeave={(e) => {
-                  if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOverDay(null)
-                }}
-                onDrop={(e) => {
-                  e.preventDefault()
-                  drop(day)
+        <>
+          <p className="muted hint">Drag an activity to another day to move it there. Click one to swap it or take it off.</p>
+          <CalendarGrid
+            items={state.itinerary}
+            travelers={travelers}
+            you={you}
+            busy={busy}
+            onMove={(itemId, day) => {
+              setSelectedId(null)
+              onMove(itemId, day)
+            }}
+            onSelect={(item) => setSelectedId(item.id === selectedId ? null : item.id)}
+            selectedId={selected?.id}
+            problems={problems}
+            dayNote={weather}
+          />
+        </>
+      )}
+
+      {selected && (
+        <section className="selected-item panel">
+          <header>
+            <h3>{selected.title}</h3>
+            <button className="link" onClick={() => setSelectedId(null)}>Close</button>
+          </header>
+          <p className="muted">
+            {weekday(selected.day)} {monthDay(selected.day)} · {clock(selected.start)}–{clock(selected.end)} · {selected.city}
+            {!solo && ` · ${names(selected.travelers)}`}
+            {selected.cost_usd > 0 && ` · ${money(selected.cost_usd)}`}
+          </p>
+          {problems.get(selected.id)?.map((message) => <p key={message} className="flag flag-pending">{message}</p>)}
+          <footer>
+            {spare.length > 0 && (
+              <select
+                aria-label={`Swap ${selected.title} for another attraction`}
+                value=""
+                disabled={busy}
+                onChange={(e) => {
+                  setSelectedId(null)
+                  onSwap(selected.id, e.target.value)
                 }}
               >
-                <header>
-                  <h3>{weekday(day)} <span>{monthDay(day)}</span></h3>
-                  {city && <div className="city">{city}</div>}
-                  {weather && (
-                    <div className="weather" title={`${weather.summary} (${weather.kind})`}>
-                      {weather.high_c !== null && weather.low_c !== null
-                        ? `${temp(weather.high_c)} / ${temp(weather.low_c)}`
-                        : weather.summary}
-                      {weather.precip_prob !== null && ` · ${Math.round(weather.precip_prob)}% rain`}
-                    </div>
-                  )}
-                </header>
-
-                {dayItems.length === 0 && <p className="free">Nothing planned</p>}
-                {dayItems.map((item) => (
-                  <article
-                    key={item.id}
-                    className={[
-                      'item',
-                      item.locked && 'locked',
-                      isSplit(item) && 'split',
-                      problems.has(item.id) && 'conflict',
-                      dragId === item.id && 'dragging',
-                    ].filter(Boolean).join(' ')}
-                    title={problems.get(item.id)?.join('\n')}
-                    draggable={!item.locked && !busy}
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData('text/plain', item.id) // Firefox needs data to start a drag
-                      e.dataTransfer.effectAllowed = 'move'
-                      setDragId(item.id)
-                    }}
-                    onDragEnd={endDrag}
-                  >
-                    <div className="time">{clock(item.start)} – {clock(item.end)}</div>
-                    <div className="title">{item.title}</div>
-                    {isSplit(item) && <div className="going">Split-off: {names(item.travelers)}</div>}
-                    {item.cost_usd > 0 && <div className="cost">{money(item.cost_usd)}</div>}
-                    {item.locked ? (
-                      <span className="fixed">fixed</span>
-                    ) : (
-                      <>
-                        {spare.length > 0 && (
-                          <select
-                            aria-label={`Swap ${item.title} for another attraction`}
-                            value=""
-                            disabled={busy}
-                            onChange={(e) => onSwap(item.id, e.target.value)}
-                          >
-                            <option value="" disabled>swap…</option>
-                            {spare.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.city})</option>)}
-                          </select>
-                        )}
-                        {item.ref_id && !needed.has(item.ref_id) && (
-                          <button
-                            aria-label={`Remove ${item.title} from the itinerary`}
-                            disabled={busy}
-                            onClick={() => onRemove(item.ref_id!)}
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </article>
-                ))}
-              </section>
-            )
-          })}
-        </div>
+                <option value="" disabled>Swap for…</option>
+                {spare.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.city})</option>)}
+              </select>
+            )}
+            {selected.ref_id && !needed.has(selected.ref_id) && (
+              <button
+                disabled={busy}
+                onClick={() => {
+                  setSelectedId(null)
+                  onRemove(selected.ref_id!)
+                }}
+              >
+                Take it off the trip
+              </button>
+            )}
+            {selected.ref_id && needed.has(selected.ref_id) && <span className="muted">Someone needs this, so it stays.</span>}
+          </footer>
+        </section>
       )}
 
       {state.unscheduled.length > 0 && (

@@ -180,6 +180,8 @@ class Idea(BaseModel):
     source: Source | None = None
     added_by: str | None = None  # traveler id; None for the agent's suggestions
     suggested_for: str | None = None  # traveler id who asked the agents for more like their picks
+    lat: float | None = None  # looked up for the draft plan
+    lon: float | None = None
 
 
 class Traveler(TravelerIn):
@@ -277,6 +279,18 @@ class Unscheduled(BaseModel):
     wanted_by: list[str] = []  # traveler ids who needed or wanted it
 
 
+class Draft(BaseModel):
+    """A rough sketch of the days from everyone's picks, rebuilt as people save them, before any flights or
+    hotels are found. Durations are typical ones by category; there are no prices or opening hours yet."""
+
+    itinerary: list[ItineraryItem] = []
+    unscheduled: list[Unscheduled] = []
+    plan_note: str = ""  # the scheduler's summary: who splits off or skips what, and when
+    note: str = ""  # the orchestrator's explanation for the group
+    route: RoutePlan | None = None
+    built_at: datetime | None = None
+
+
 class Violation(BaseModel):
     code: str
     message: str
@@ -346,6 +360,7 @@ class TripState(BaseModel):
     weather: list[DayWeather] = []
     itinerary: list[ItineraryItem] = []
     unscheduled: list[Unscheduled] = []
+    draft: Draft | None = None  # before planning: the rough sketch from everyone's picks
     violations: list[Violation] = []
     plan_note: str = ""  # "One shared itinerary", or who splits off and when
     budgets: dict[str, BudgetSummary] = {}  # per traveler id

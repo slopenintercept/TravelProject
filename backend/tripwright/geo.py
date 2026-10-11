@@ -10,6 +10,7 @@ from __future__ import annotations
 from math import asin, cos, radians, sin, sqrt
 
 DEFAULT_HOP_MIN = 30  # used when either stop has no coordinates
+DAY_TRIP_KM = 40  # farther than this is a day trip (Hakone from Tokyo): its duration includes getting there
 DETOUR_FACTOR = 1.4
 TRANSIT_KMH = 22
 FIXED_OVERHEAD_MIN = 10
@@ -25,6 +26,8 @@ def travel_minutes(a, b) -> int:
     """Minutes to get from stop `a` to stop `b` (anything with .lat/.lon)."""
     if None in (a.lat, a.lon, b.lat, b.lon):
         return DEFAULT_HOP_MIN
+    if haversine_km(a.lat, a.lon, b.lat, b.lon) > DAY_TRIP_KM:
+        return DEFAULT_HOP_MIN  # a day trip: the train out and back is part of its own duration
     km = haversine_km(a.lat, a.lon, b.lat, b.lon) * DETOUR_FACTOR
     return max(FIXED_OVERHEAD_MIN, round(km / TRANSIT_KMH * 60) + FIXED_OVERHEAD_MIN)
 

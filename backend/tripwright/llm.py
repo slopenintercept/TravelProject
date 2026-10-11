@@ -20,11 +20,12 @@ from . import config
 TOOL_RESULT_CHARS = 6000
 
 
-def make_model() -> OpenAIModel:
+def make_model(max_tokens: int | None = None) -> OpenAIModel:
+    """`max_tokens` overrides MODEL_MAX_TOKENS for an agent whose answer is long by nature."""
     return OpenAIModel(
         client_args={"api_key": config.OPENAI_API_KEY, "base_url": config.OPENAI_BASE_URL, "timeout": 180},
         model_id=config.CHAT_MODEL,
-        params={"max_tokens": config.MODEL_MAX_TOKENS, "temperature": 0.2},
+        params={"max_tokens": max_tokens or config.MODEL_MAX_TOKENS, "temperature": 0.2},
     )
 
 

@@ -95,7 +95,7 @@ def trip(monkeypatch):
 
 def script(monkeypatch, *models):
     queue = list(models)
-    monkeypatch.setattr(orchestrator, "make_model", lambda: queue.pop(0))
+    monkeypatch.setattr(orchestrator, "make_model", lambda max_tokens=None: queue.pop(0))
 
 
 def statuses(trip, agent):
@@ -189,7 +189,7 @@ async def test_slow_agent_times_out_without_blocking_the_others(trip, monkeypatc
 
 async def test_each_traveler_gets_their_own_flight_agent_and_they_run_in_parallel(trip, monkeypatch):
     trip.travelers.append(Traveler(id="p2", name="Sam", origin="Elsewhere", budget_usd=3000))
-    monkeypatch.setattr(orchestrator, "make_model", lambda: ScriptedModel([[SEARCH], [picks("f2")]], delay=0.4))
+    monkeypatch.setattr(orchestrator, "make_model", lambda max_tokens=None: ScriptedModel([[SEARCH], [picks("f2")]], delay=0.4))
 
     started = time.monotonic()
     await orchestrator.run(trip, orchestrator.planning_graph(["flight:p1", "flight:p2"]), "planning")

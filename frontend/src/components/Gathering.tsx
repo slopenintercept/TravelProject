@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { money } from '../format'
 import type { Traveler, TripState } from '../types'
 import { Chips } from './Chips'
+import { DraftPlan } from './DraftPlan'
 
 interface Props {
   state: TripState
@@ -62,6 +63,8 @@ export function Gathering({ state, you, busy, onRemove, onPlan }: Props) {
           </li>
         ))}
       </ul>
+
+      <DraftPlan state={state} you={you} />
 
       {you.host ? (
         <button className="primary big" disabled={busy} onClick={onPlan}>Everyone's in: plan the trip</button>

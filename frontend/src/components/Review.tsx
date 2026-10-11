@@ -67,7 +67,7 @@ function ItemCard({ card, groupSize, busy, onDecision }: { card: Card; groupSize
         <span className="price">{card.price_usd > 0 ? money(card.price_usd) : 'Free'}</span>
       </header>
       <div className="badges">
-        <span className={`pill card-status-${card.status}`}>{card.status}</span>
+        {removed && <span className={`pill card-status-${card.status}`}>{card.status}</span>}
         {card.must_have && <span className="pill must-have">must-have</span>}
         {card.flag && (
           <span className={`pill status-${card.flag.kind}`} title={card.flag.reason}>
@@ -92,11 +92,7 @@ function ItemCard({ card, groupSize, busy, onDecision }: { card: Card; groupSize
       )}
 
       <footer>
-        {!removed && (
-          <button className="primary" disabled={busy || card.status === 'approved'} onClick={() => onDecision('approve', card.id)}>
-            {card.status === 'approved' ? 'Approved' : 'Approve'}
-          </button>
-        )}
+        {/* No Approve button: approving didn't change anything, so cards only offer what does. */}
         {!removed && card.alternatives.length > 0 && (
           <button disabled={busy} onClick={() => setSwapping(!swapping)}>{swapping ? 'Cancel swap' : 'Swap'}</button>
         )}

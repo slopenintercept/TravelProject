@@ -59,13 +59,26 @@ function LaneCard({ lane, title, detailed }: { lane: Lane; title: string; detail
   )
 }
 
-/** One lane per agent, side by side. `compact` starts the lanes as one-line chips (name and status). */
-export function AgentPanel({ lanes, travelers, compact = false }: { lanes: Lanes; travelers: Traveler[]; compact?: boolean }) {
+const RESEARCH = /^(flight:|lodging$|attractions$|transport$|weather$)/
+
+interface Props {
+  lanes: Lanes
+  travelers: Traveler[]
+  /** Start the lanes as one-line chips (name and status). */
+  compact?: boolean
+  /** Run again the research agents that timed out or fell back to saved results. */
+  onRetry?: () => void
+  busy?: boolean
+}
+
+/** One lane per agent, side by side. */
+export function AgentPanel({ lanes, travelers, compact = false, onRetry, busy }: Props) {
   const [choice, setChoice] = useState<boolean | null>(null)
   const detailed = choice ?? !compact
   const order = [...BEFORE, ...travelers.map((t) => `flight:${t.id}`), ...AFTER]
   const names = [...order, ...Object.keys(lanes).filter((name) => !order.includes(name))].filter((name) => lanes[name])
-  const running = names.filter((name) => ['working', 'under_review'].includes(lanes[name].status)).length
+  const running = names.filter((name) => ['working', 'under_review', 'sent_back'].includes(lanes[name].status)).length
+  const unfinished = names.filter((name) => RESEARCH.test(name) && ['fallback', 'pending', 'failed'].includes(lanes[name].status))
 
   return (
     <section className={detailed ? 'agents detailed' : 'agents'}>
@@ -82,6 +95,16 @@ export function AgentPanel({ lanes, travelers, compact = false }: { lanes: Lanes
         </span>
         {names.length > 0 && (
           <button className="link" onClick={() => setChoice(!detailed)}>{detailed ? 'Hide details' : 'Show details'}</button>
+        )}
+        {onRetry && unfinished.length > 0 && running === 0 && (
+          <button
+            disabled={busy}
+            onClick={onRetry}
+            aria-label={`Retry the ${unfinished.length === 1 ? 'one' : unfinished.length} that didn't finish`}
+            title={unfinished.map((n) => title(n, travelers)).join(', ')}
+          >
+            Retry the {unfinished.length === 1 ? 'one' : unfinished.length} that didn't finish
+          </button>
         )}
       </header>
       <div className="lanes">

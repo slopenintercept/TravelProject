@@ -244,6 +244,16 @@ export interface Unscheduled {
   wanted_by: string[] // traveler ids who needed or wanted it
 }
 
+/** Before planning: a rough sketch of the days from everyone's picks, rebuilt as people save them. */
+export interface Draft {
+  itinerary: ItineraryItem[]
+  unscheduled: Unscheduled[]
+  plan_note: string // who splits off or skips what, and when
+  note: string // the orchestrator's explanation for the group
+  route: RoutePlan | null
+  built_at: string | null
+}
+
 export interface Violation {
   code: string
   message: string
@@ -315,6 +325,7 @@ export interface TripState {
   weather: DayWeather[]
   itinerary: ItineraryItem[]
   unscheduled: Unscheduled[]
+  draft: Draft | null // before planning: the rough sketch from everyone's picks
   violations: Violation[]
   plan_note: string // "One shared itinerary", or who splits off and when
   budgets: Record<string, BudgetSummary> // keyed by traveler id

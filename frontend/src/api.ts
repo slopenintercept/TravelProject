@@ -52,6 +52,7 @@ export const api = {
   addIdea: (id: string, name: string, city: string) => post(`/${id}/ideas`, { name, city }),
   suggestMore: (id: string, picks: Picks) => post(`/${id}/ideas/more`, picks),
   plan: (id: string) => post(`/${id}/plan`),
+  retry: (id: string) => post(`/${id}/retry`),
   confirmChoices: (id: string, travelerId: string, flight_id: string | null, stay_ids: string[]) =>
     request(`/${id}/travelers/${travelerId}/choices`, {
       method: 'PUT',

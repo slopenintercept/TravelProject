@@ -18,6 +18,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, TypeAdapter
 
+from . import config
 from .budget import allotted
 from .geo import haversine_km, same_city
 from .models import (
@@ -30,6 +31,7 @@ from .tools import places
 
 MAX_KM_FROM_CENTER = 20
 SUGGESTIONS = {"relaxed": 3, "balanced": 5, "packed": 8}
+SECONDS_PER_WISH = 8  # extra time the attractions agent gets for each place the travelers asked for
 
 PREAMBLE = (
     "You are the {title} on Tripwright, a team of travel-planning agents led by an orchestrator. "
@@ -791,6 +793,8 @@ class Spec:
     after_fallback: Callable[[TripState], None] | None = None  # extra step when a saved result is used
     review: Callable[[TripState, Any], str] | None = None  # what the reviewer is shown; defaults to describe()
     append: bool = False  # the result is a list added to TripState's field, skipping places already there
+    extra_time: Callable[[TripState], int] | None = None  # seconds beyond AGENT_TIMEOUT_S, for work that grows
+    max_tokens: int | None = None  # a longer answer than MODEL_MAX_TOKENS allows (else it is cut off and empty)
     saved_fallback: bool = True  # on failure, show the last accepted result; off when only a fresh answer fits
 
     def dump(self, value) -> str:
@@ -830,7 +834,9 @@ SPECS = {s.name: s for s in [
     Spec("attractions", "Attractions agent", "attractions", list[Attraction], AttractionsOut, attractions_task,
          build_attractions, lambda t: [t.web_research, t.browse_page],
          lambda a: f"{len(a)} attractions, {sum(x.must_have for x in a)} needed by someone",
-         judged=True, review=review_attractions, after_fallback=relink_wishes),
+         judged=True, review=review_attractions, after_fallback=relink_wishes,
+         # One search per requested place and a longer answer: a big group's picks need more time and room.
+         extra_time=lambda s: SECONDS_PER_WISH * len(wishes(s)), max_tokens=config.MODEL_OUTPUT_LIMIT),
     Spec("transport", "Transport agent", "transport", TransportPlan, TransportOut, transport_task, build_transport,
          lambda t: [t.web_research, t.read_source],
          lambda p: f"{p.common_choice.choice}; {len(p.legs)} legs, ${sum(x.price_usd for x in p.legs):,.0f}",

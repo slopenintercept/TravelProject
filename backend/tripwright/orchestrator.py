@@ -96,10 +96,11 @@ class SpecialistNode(MultiAgentBase):
     async def invoke_async(self, task, invocation_state=None, **kwargs) -> MultiAgentResult:
         state, events = invocation_state["state"], invocation_state["bus"]
         who = state.traveler(self.traveler_id) if self.traveler_id else None
+        limit = config.AGENT_TIMEOUT_S + (self.spec.extra_time(state) if self.spec.extra_time else 0)
         try:
-            await asyncio.wait_for(self._run(state, events, who), timeout=config.AGENT_TIMEOUT_S)
+            await asyncio.wait_for(self._run(state, events, who), timeout=limit)
         except TimeoutError:
-            self._fall_back(state, events, who, f"timed out after {config.AGENT_TIMEOUT_S}s")
+            self._fall_back(state, events, who, f"timed out after {limit}s")
         except Exception as e:
             self._fall_back(state, events, who, f"failed with {type(e).__name__}: {e}")
         return MultiAgentResult(status=Status.COMPLETED)
@@ -151,7 +152,7 @@ class SpecialistNode(MultiAgentBase):
         ctx = RunContext(agent=self.name, state=state, traveler=who)
         tools = spec.tools(Toolbox(ctx))
         agent = Agent(
-            model=make_model(), name=spec.name, tools=tools,
+            model=make_model(spec.max_tokens), name=spec.name, tools=tools,
             system_prompt=PREAMBLE.format(title=spec.title, tools=WITH_TOOLS if tools else NO_TOOLS),
             hooks=[RateLimit(), Activity(self.name, events.emit)], callback_handler=None,
         )
@@ -301,7 +302,8 @@ def planning_graph(specialists: list[str], schedule: bool = True) -> Graph:
             builder.add_edge(name, "scheduler", condition=_all_done(specialists))
         builder.add_edge("scheduler", "budget")
         builder.add_edge("budget", "validate")
-    builder.set_execution_timeout(config.AGENT_TIMEOUT_S + 60)
+    # Each specialist keeps to its own limit (more for a big group's attractions); this is only a backstop.
+    builder.set_execution_timeout(config.AGENT_TIMEOUT_S * 3 + 60)
     return builder.build()
 
 
@@ -363,10 +365,20 @@ async def _set_dates(state: TripState, start: date) -> None:
         state.route.arrival_day_offset = max(set(offsets), key=offsets.count)  # the usual one
     except Exception:
         pass  # keep the route planner's estimate; the flight review still checks the landing day
-    nights = state.request.days - state.route.arrival_day_offset
-    longest = max(state.route.segments, key=lambda s: s.nights)
-    longest.nights += nights - sum(s.nights for s in state.route.segments)  # nights follow the landing day
+    _fit_nights(state.route, state.request.days)
     state.dates = TripDates(start=start, arrival=start + timedelta(days=state.route.arrival_day_offset), end=end)
+
+
+def _fit_nights(route: RoutePlan, days: int) -> None:
+    """Nights follow the landing day: the longest stay absorbs the difference."""
+    longest = max(route.segments, key=lambda s: s.nights)
+    longest.nights += days - route.arrival_day_offset - sum(s.nights for s in route.segments)
+
+
+def fit_route_to_dates(state: TripState) -> None:
+    """A route re-planned after the dates were set keeps the landing day those dates already have."""
+    state.route.arrival_day_offset = (state.dates.arrival - state.dates.start).days
+    _fit_nights(state.route, state.request.days)
 
 
 async def choose_dates(state: TripState, start: date) -> None:
@@ -474,6 +486,31 @@ def recover(state: TripState) -> None:
         state.stage = "awaiting_dates"
     elif state.stage == "planning":
         state.stage = "gathering"
+
+
+UNFINISHED = ("fallback", "pending", "failed")
+
+
+def unfinished(state: TripState) -> list[str]:
+    """Research agents that ended on saved results or nothing (timed out, failed review, site blocked)."""
+    return [n for n in research_nodes(state) if n in state.agents and state.agents[n].status in UNFINISHED]
+
+
+async def retry(state: TripState) -> list[str]:
+    """Run again only the research agents that didn't finish, so they have the browser and model to themselves.
+    New flight or room options undo the affected travelers' confirmations: they choose again from the new ones."""
+    names = unfinished(state)
+    for name in names:
+        if name == "lodging":
+            for t in state.travelers:
+                t.confirmed = False
+        elif name.startswith("flight:"):
+            state.traveler(name.partition(":")[2]).confirmed = False
+    _saved(state)
+    await run(state, planning_graph(names, schedule=False), "retry")
+    if state.stage == "review" or any(t.confirmed for t in state.travelers):
+        await schedule_choices(state)
+    return names
 
 
 async def schedule_choices(state: TripState) -> None:

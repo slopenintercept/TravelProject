@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import config, evidence, orchestrator, store
+from . import config, draft, evidence, orchestrator, store
 from .booking import BookingStep, booking_steps
 from .cards import Card, review_cards
 from .events import bus
@@ -94,7 +94,39 @@ def _trip(trip_id: str) -> TripState:
         _live[trip_id] = state
         if state.stage == "choosing" and any(t.confirmed for t in state.travelers):
             _background(state, orchestrator.schedule_choices(state))  # research was cut off after someone chose
+        if state.stage == "gathering" and state.draft is None:
+            _redraft(state)
     return _live[trip_id]
+
+
+DRAFT_DELAY_S = 10  # saves closer together than this build one draft
+_draft_waits: dict[str, asyncio.Task] = {}  # a draft waiting for the picks to settle, per trip
+_draft_locks: dict[str, asyncio.Lock] = {}
+
+
+def _redraft(state: TripState) -> None:
+    """Rebuild the draft plan shortly after the group's picks change. A save while one is waiting restarts the
+    wait; a save while one is being built queues one more after it."""
+    if state.stage != "gathering" or state.dates is None or state.route is None:
+        return
+    if (waiting := _draft_waits.get(state.id)) and not waiting.done():
+        waiting.cancel()
+    bus(state.id).status(state, "draft", "working", "Waiting a moment for more picks", 1)
+
+    async def later() -> None:
+        await asyncio.sleep(DRAFT_DELAY_S)
+        if _draft_waits.get(state.id) is asyncio.current_task():
+            del _draft_waits[state.id]  # building now: a new save starts a new wait instead of cancelling this
+        async with _draft_locks.setdefault(state.id, asyncio.Lock()):
+            try:
+                await draft.build_draft(state)
+            except Exception as e:
+                bus(state.id).status(state, "draft", "failed", f"{type(e).__name__}: {e}")
+
+    task = asyncio.create_task(later())
+    _draft_waits[state.id] = task
+    _tasks.add(task)
+    task.add_done_callback(_tasks.discard)
 
 
 def _acting(state: TripState, traveler_id: str | None) -> Traveler:
@@ -191,6 +223,7 @@ async def choose_dates(trip_id: str, body: DatesIn, you: You = None) -> TripView
         raise HTTPException(400, "Pick a start date in the future")
     async with _lock(trip_id):
         await orchestrator.choose_dates(state, body.start)
+    _redraft(state)
     return _view(state)
 
 
@@ -201,6 +234,7 @@ async def join(trip_id: str, body: TravelerIn) -> TripView:
     if state.stage in STARTED:
         raise HTTPException(400, "Planning has already started for this trip")
     joined = orchestrator.join(state, body)
+    _redraft(state)
     view = _view(state)
     view.you = joined.id
     return view
@@ -218,6 +252,7 @@ async def leave(trip_id: str, traveler_id: str, you: You = None) -> TripView:
         orchestrator.leave(state, traveler_id)
     except (ValueError, StopIteration) as e:
         raise HTTPException(400, str(e) or "Unknown traveler") from e
+    _redraft(state)
     return _view(state)
 
 
@@ -240,6 +275,7 @@ async def save_picks(trip_id: str, traveler_id: str, body: PicksIn, you: You = N
         orchestrator.save_picks(state, traveler_id, body.need, body.want, body.skip)
     except ValueError as e:
         raise HTTPException(400, str(e)) from e
+    _redraft(state)
     return _view(state)
 
 
@@ -269,6 +305,7 @@ async def suggest_more(trip_id: str, body: PicksIn, you: You = None) -> TripView
         orchestrator.save_picks(state, acting.id, body.need, body.want, body.skip, picked=False)
     except ValueError as e:
         raise HTTPException(400, str(e)) from e
+    _redraft(state)
     bus(trip_id).status(state, f"more_ideas:{acting.id}", "working", "Finding more places like your picks", 1)
     _background(state, orchestrator.suggest_more(state, acting.id), exclusive=False)
     return _view(state)
@@ -281,8 +318,26 @@ async def plan(trip_id: str, you: You = None) -> TripView:
     _host(state, you)
     if state.dates is None:
         raise HTTPException(400, "Choose the dates first")
+    if (waiting := _draft_waits.pop(trip_id, None)) and not waiting.done():
+        waiting.cancel()  # planning makes the real plan; a draft already being built discards itself
     state.stage = "planning"
     _background(state, orchestrator.plan_trip(state))
+    return _view(state)
+
+
+@app.post("/api/trips/{trip_id}/retry")
+async def retry(trip_id: str, you: You = None) -> TripView:
+    """Run again the research agents that timed out or fell back to saved results."""
+    state = _trip(trip_id)
+    _acting(state, you)
+    if state.stage not in ("choosing", "review"):
+        raise HTTPException(400, "Planning hasn't started yet")
+    if _lock(trip_id).locked():
+        raise HTTPException(400, "The agents are still working")
+    if not orchestrator.unfinished(state):
+        raise HTTPException(400, "Every agent finished; there is nothing to retry")
+    _background(state, orchestrator.retry(state))
+    await asyncio.sleep(0)  # let it take the trip's lock, so the response already shows the trip as busy
     return _view(state)
 
 

@@ -77,10 +77,18 @@ class Toolbox:
             depart_date: Day you leave the origin, YYYY-MM-DD.
             return_date: Day you leave the destination, YYYY-MM-DD.
         """
+        depart, back = date.fromisoformat(depart_date), date.fromisoformat(return_date)
         try:
-            found = await self._flights(origin, destination, date.fromisoformat(depart_date), date.fromisoformat(return_date))
+            found = await self._flights(origin, destination, depart, back)
         except Exception as e:
-            return f"Flight search failed: {e}"
+            # Google Flights doesn't answer some airport codes (SEA) that it answers by city name (Seattle).
+            home = self.ctx.traveler.origin if self.ctx.traveler else self.ctx.state.request.origin
+            if home.strip().lower() == origin.strip().lower():
+                return f"Flight search failed: {e}"
+            try:
+                found = await self._flights(home, destination, depart, back)
+            except Exception:
+                return f"Flight search failed: {e}"
         lines = [
             f"{o.id} | {o.airline} | ${o.price_usd:.0f} | leaves {_clock(o.depart_at.isoformat())}, "
             f"lands {o.destination} {_clock(o.arrive_at.isoformat())} | {o.duration_minutes // 60}h{o.duration_minutes % 60:02d} | "

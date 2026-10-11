@@ -8,7 +8,7 @@ import pytest
 from tripwright import orchestrator
 from tripwright.booking import booking_steps
 from tripwright.cards import review_cards
-from tripwright.models import Source, TravelerIn, TripRequest
+from tripwright.models import AgentStatus, Source, TravelerIn, TripRequest
 from tripwright.scheduler import build_frames, to_time
 from tripwright.specialists import AttractionOut, AttractionsOut, Rejected, brief, build_attractions, wishes
 from tripwright.toolbox import RunContext
@@ -78,6 +78,97 @@ def ghibli_on_disneyland_day(group):
     group.attractions.append(attraction(
         "a_ghibli", "Ghibli Museum", "Tokyo", 35.6962, 139.5704, must_have=True, need_by=["p2"], duration_minutes=150,
         ticket_price_usd=7, opens=time(10), closes=time(18), closed_weekdays=[d for d in range(7) if d != friday]))
+
+
+@pytest.fixture
+def trio(group):
+    """The group plus Jo, who asked for nothing in particular."""
+    jo = group.travelers[1].model_copy(deep=True, update={"id": "p3", "name": "Jo", "need": [], "want": []})
+    group.travelers.append(jo)
+    return group
+
+
+def test_a_place_only_one_person_asked_for_is_just_for_them(trio):
+    # Kinkaku-ji: only Sam wants it, so Alex and Jo don't get sent along.
+    trio.attractions[4].want_by = ["p2"]
+    replan(trio)
+    assert going(trio, "a_kinkaku") == ["p2"]
+    assert going(trio, "a_disney") == ["p1"]  # only Alex needs it
+    assert going(trio, "a_sensoji") == ["p1", "p2", "p3"]  # nobody asked for it: the agent's extras are group plans
+    assert "Sam goes to Kinkaku-ji on" in trio.plan_note or "Sam splits off for Kinkaku-ji on" in trio.plan_note
+
+
+def test_a_place_half_the_group_asked_for_is_for_everyone(trio):
+    trio.attractions[4].want_by = ["p2", "p3"]  # Kinkaku-ji: two of three
+    replan(trio)
+    assert going(trio, "a_kinkaku") == ["p1", "p2", "p3"]
+
+
+def test_evening_venues_go_after_the_day_and_can_run_late(trio):
+    trio.attractions.append(attraction("a_bar", "Golden Gai", "Tokyo", 35.6938, 139.7036, want_by=["p1", "p2"],
+                                       duration_minutes=150, opens=time(19), closes=time(23, 59)))
+    replan(trio)
+    bar = next(i for i in trio.itinerary if i.ref_id == "a_bar")
+    assert bar.start >= time(19) and bar.end > time(21)
+    assert all(i.end <= bar.start for i in trio.itinerary if i.day == bar.day and i.kind == "attraction" and i is not bar)
+    assert bar.day != trio.dates.end  # never on the day the flights home leave
+    assert trio.violations == []
+
+
+def test_a_bar_that_closes_after_midnight_is_open_in_the_evening(trio):
+    trio.attractions.append(attraction("a_bar", "Golden Gai", "Tokyo", 35.6938, 139.7036, need_by=["p1"],
+                                       want_by=["p2"], must_have=True, duration_minutes=120, opens=time(19),
+                                       closes=time(2)))
+    replan(trio)
+    bar = next(i for i in trio.itinerary if i.ref_id == "a_bar")
+    assert bar.start >= time(19) and trio.violations == []
+
+
+def test_an_early_opener_starts_before_the_usual_day(trio):
+    trio.attractions.append(attraction("a_sumo", "Sumo practice", "Tokyo", 35.6969, 139.7935, need_by=["p1"],
+                                       must_have=True, duration_minutes=60, opens=time(8), closes=time(9)))
+    replan(trio)
+    sumo = next(i for i in trio.itinerary if i.ref_id == "a_sumo")
+    assert (sumo.start, sumo.end) == (time(8), time(9)) and sumo.travelers == ["p1"]
+    assert trio.violations == []
+
+
+def test_a_must_do_day_trip_skips_a_group_activity_nobody_going_needs(trio):
+    # Sam must do a Hakone day trip; every Tokyo morning already has a group activity.
+    trio.attractions.append(attraction("a_hakone", "Hakone day trip", "Tokyo", 35.23, 139.02, need_by=["p2"],
+                                       must_have=True, duration_minutes=480, opens=time(8), closes=time(18)))
+    replan(trio)
+    hakone = next(i for i in trio.itinerary if i.ref_id == "a_hakone")
+    assert hakone.travelers == ["p2"]
+    overlapping = [i for i in trio.itinerary if i.day == hakone.day and i.kind == "attraction" and i is not hakone
+                   and i.start < hakone.end and hakone.start < i.end]
+    assert all("p2" not in i.travelers for i in overlapping)  # Sam left them; the others still go
+    assert trio.violations == []
+
+
+def test_a_must_do_goes_ahead_without_someone_only_interested_who_is_busy(trio):
+    # Alex must do the Hakone day trip; Sam is only interested but needs Disneyland every possible day.
+    trio.attractions[0].need_by = ["p2"]  # Disneyland: Sam's must-do now
+    trio.attractions.append(attraction("a_hakone", "Hakone day trip", "Tokyo", 35.23, 139.02, need_by=["p1"],
+                                       want_by=["p2"], must_have=True, duration_minutes=480, opens=time(8),
+                                       closes=time(18)))
+    replan(trio)
+    hakone = next(i for i in trio.itinerary if i.ref_id == "a_hakone")
+    assert "p1" in hakone.travelers
+    assert all(i.start >= time(7) for i in trio.itinerary if i.kind == "attraction")  # nothing at dawn
+
+
+def test_a_niche_activity_dragged_to_a_day_stays_there(trio):
+    trio.attractions[4].want_by = ["p2"]  # Kinkaku-ji: only Sam, so a niche activity
+    replan(trio)
+    kinkaku = next(i for i in trio.itinerary if i.ref_id == "a_kinkaku")
+    other = next(f.day for f in build_frames(trio) if f.city == "Kyoto" and f.day != kinkaku.day)
+    kinkaku.day, kinkaku.pinned = other, True  # what a drag to the other Kyoto day does
+    replan(trio)
+    moved = next(i for i in trio.itinerary if i.ref_id == "a_kinkaku")
+    assert (moved.day, moved.pinned) == (other, True)
+    replan(trio)  # and it is still there after the next re-plan
+    assert next(i for i in trio.itinerary if i.ref_id == "a_kinkaku").day == other
 
 
 def test_a_traveler_who_skips_a_place_is_free_and_does_not_pay(group):
@@ -273,6 +364,47 @@ def test_a_choice_made_during_research_is_scheduled_when_it_ends(group, stages):
     group.travelers[1].confirmed = True  # Sam confirmed while the agents were still working
     asyncio.run(orchestrator.plan_trip(group))
     assert stages == ["route", "research", "schedule"] and group.stage == "review"
+
+
+def test_retry_reruns_only_what_did_not_finish_and_reopens_those_choices(group, monkeypatch):
+    ran = []
+
+    async def record(state, graph, stage):
+        ran.append((stage, sorted(graph.nodes)))
+    monkeypatch.setattr(orchestrator, "run", record)
+    group.stage = "choosing"
+    for name, status in (("flight:p1", "accepted"), ("flight:p2", "pending"), ("lodging", "accepted"),
+                         ("attractions", "fallback"), ("transport", "accepted"), ("weather", "accepted")):
+        group.agents[name] = AgentStatus(agent=name, status=status)
+    group.travelers[0].confirmed = group.travelers[1].confirmed = True
+
+    assert asyncio.run(orchestrator.retry(group)) == ["flight:p2", "attractions"]
+    assert ran[0] == ("retry", ["attractions", "flight:p2"])
+    assert [t.confirmed for t in group.travelers] == [True, False]  # only Sam's flight options changed
+    assert ran[1][0] == "schedule"  # Alex is still confirmed, so the days are re-planned
+
+
+async def test_a_flight_search_by_airport_code_falls_back_to_the_home_city(group, monkeypatch):
+    from tripwright.toolbox import Toolbox
+    asked = []
+
+    async def google_flights(origin, destination, depart, return_):
+        asked.append(origin)
+        if origin == "SEA":  # Google Flights never shows results for this code
+            raise TimeoutError("waiting for the results")
+        return {"url": "https://www.google.com/travel/flights?q=x", "evidence_url": None, "fetched_at": None,
+                "options": [group.travelers[0].flights.options[0].model_dump(exclude={"id", "booking_url", "source"})]}
+    monkeypatch.setattr(flights, "search_flights", google_flights)
+    sam = group.travelers[1].model_copy(update={"origin": "Seattle"})
+    tools = Toolbox(RunContext(agent="flight:p2", state=group, traveler=sam))
+    answer = await tools.search_flights(origin="SEA", destination="Tokyo", depart_date="2026-11-10", return_date="2026-11-17")
+    assert asked == ["SEA", "Seattle"] and answer.startswith("f1 | United")
+
+
+def test_agent_time_grows_with_what_the_group_asked_for(group):
+    from tripwright.specialists import SECONDS_PER_WISH, SPECS
+    assert SPECS["attractions"].extra_time(group) == SECONDS_PER_WISH * len(wishes(group))
+    assert SPECS["flight"].extra_time is None
 
 
 def test_research_runs_every_agent_without_scheduling(group):

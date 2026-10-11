@@ -9,7 +9,7 @@ from __future__ import annotations
 from .budget import compute_budget, optimize_budget
 from .geo import same_city, travel_minutes
 from .models import TripState, Violation
-from .scheduler import build_frames, schedule, stay_plan, to_min
+from .scheduler import build_frames, closing_min, day_window, schedule, stay_plan, to_min
 
 
 def validate_itinerary(state: TripState) -> list[Violation]:
@@ -77,7 +77,9 @@ def validate_itinerary(state: TripState) -> list[Violation]:
         if frame is None:
             report("FLIGHT_CONFLICT", f"{item.title} is on {day:%a %b %d}, outside the trip dates.", (item.id,))
             continue
-        if to_min(item.start) < frame.start or to_min(item.end) > frame.end:
+        # The same window the scheduler uses: early openers may start before 09:00, evening venues run late.
+        start, end = day_window(a, frame) if (a := attractions.get(item.ref_id)) else (frame.start, frame.end)
+        if to_min(item.start) < start or to_min(item.end) > end:
             kinds = {f.kind for f in frame.fixed}
             flight = bool(kinds & {"arrival", "departure"})
             blocker = "the flights" if flight else "intercity travel" if kinds else "the day's hours"
@@ -91,7 +93,8 @@ def validate_itinerary(state: TripState) -> list[Violation]:
             continue
         if day.weekday() in a.closed_weekdays:
             report("CLOSED_DAY", f"{a.name} is closed on {day:%A}s.", (item.id,))
-        if (a.opens and item.start < a.opens) or (a.closes and item.end > a.closes):
+        closes = closing_min(a)  # after midnight counts as the next morning
+        if (a.opens and item.start < a.opens) or (closes is not None and to_min(item.end) > closes):
             hours = f"{a.opens:%H:%M}-{a.closes:%H:%M}" if a.opens and a.closes else "its opening hours"
             report("OPENING_HOURS", f"{day:%a %b %d}: {a.name} is scheduled {item.start:%H:%M}-{item.end:%H:%M}, "
                                     f"outside {hours}.", (item.id,))
