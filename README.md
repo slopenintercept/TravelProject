@@ -5,11 +5,24 @@ An agentic trip planner built for Hack Midwest, for one traveler or a group. The
 - **Strands Agents SDK** runs every agent: a Strands `Graph` dispatches specialists in parallel, each a Strands `Agent` with `@tool` functions, Pydantic structured output, hooks and streaming.
 - **Akamai Cloud** hosts it: the hackathon's hosted inference endpoint is the model provider, a Linode runs the API and the Chromium workers, Managed PostgreSQL holds trip state, and Object Storage holds the evidence snapshots.
 
-Demo scenario: 7 days in Japan from Kansas City, $2,500 total, with Tokyo Disneyland and Kyoto's Fushimi Inari marked must do. See [DEMO.md](DEMO.md) for the 3-minute script.
+Demo scenario: 7 days in Japan from Kansas City, $2,500 total, with Tokyo Disneyland and Kyoto's Fushimi Inari marked must do. See [DEMO.md](DEMO.md) for the 3-minute script. **Use the demo trip** replays a recorded live run of this trip in seconds, labelled **Recorded run**; a trip typed into the form is planned live, which takes minutes (see [The demo trip is a recorded run](#the-demo-trip-is-a-recorded-run)).
 
 ![The review screen: what needs you on the left, the budget and the days on the right](design/implemented/03-review.jpg)
 
 To run it, go to [Run locally](#run-locally). To put it on a server, go to [Deploy on Akamai](#deploy-on-akamai).
+
+## Tech stack
+
+| Layer | What |
+| --- | --- |
+| Agents | Strands Agents SDK (Python): one Strands `Agent` per specialist, run in parallel as a Strands `Graph`, with an orchestrator reviewing each result |
+| Model | `hackathon-chat` on Akamai's hosted inference endpoint, through its OpenAI-compatible API |
+| Research | Tavily for web search; Playwright driving headless Chromium to read flight and hotel pages; Open-Meteo for weather; OpenStreetMap (Nominatim) to locate places |
+| Backend | Python 3.11+, FastAPI on Uvicorn, Pydantic, SQLAlchemy, server-sent events for the live agent activity |
+| Frontend | React 19 and TypeScript, built with Vite; Leaflet for the map; one hand-written stylesheet |
+| Payments | Stripe, test mode only |
+| Hosting | Akamai Cloud: one Linode running the app in Docker, Managed PostgreSQL, Object Storage (SQLite and local disk when run locally) |
+| Tests | pytest |
 
 ## How the screen works
 
@@ -22,7 +35,7 @@ A headline that an agent's work is behind names that agent, with a status dot an
 
 | Step | In the feed | On the board |
 | --- | --- | --- |
-| Start | The trip form, and **Use the demo trip** in the top bar | Where the route and days will appear |
+| Start | The trip form, and **Use the demo trip** in the top bar, which fills it in and replays a recorded run | Where the route and days will appear |
 | Picks | Places by category: **Must do**, **Interested** or **No**; **Add a place**; **More like my picks** | The draft plan, the tallies and **Save my picks** |
 | Dates | One card per date window with weather, crowds and the cheapest fare found | The route |
 | Who's coming | The invite link and everyone who has joined | The draft plan from everyone's picks |
@@ -170,7 +183,7 @@ npm run build                   # FastAPI serves frontend/dist
 backend/.venv/bin/uvicorn tripwright.api:app --app-dir backend --port 8000
 ```
 
-Open http://localhost:8000, click **Use the demo trip**, then **Start planning**.
+Open http://localhost:8000, click **Use the demo trip**, then **Start planning**. That replays a recorded run of the demo trip in a few seconds ([below](#the-demo-trip-is-a-recorded-run)). To watch the agents plan a trip live, type one into the form instead; a group trip takes a few minutes.
 
 - `GET /api/health` shows which services are live and which are on their local fallback (SQLite, evidence on disk).
 - **Which database:** a local server uses the SQLite file `data/tripwright.db` and saves page snapshots to `data/evidence`. The hosted database and bucket are named in `.env.hosted`, which only the deploy scripts read, so nothing you run on your own machine touches hosted trips.
@@ -189,7 +202,7 @@ The dev server sends `/api` to the backend on port 8000. To use a backend on ano
 ### Tests
 
 ```bash
-(cd backend && .venv/bin/python -m pytest -q)    # 111 tests: validator, scheduler, budget, review loop, booking links, group trips, picks, API roles
+(cd backend && .venv/bin/python -m pytest -q)    # 130 tests: validator, scheduler, budget, review loop, booking links, group trips, picks, API roles, payments, the recorded demo trip
 (cd frontend && npm run build)                   # the TypeScript check, then the build; there is no frontend test suite
 ```
 
@@ -208,6 +221,17 @@ This creates a seven-traveler Japan trip with dates set and everyone's picks sav
 - The research (flights, rooms, attractions, transport, weather) does not start until the host starts planning. Opening the trip does build the draft plan about ten seconds later, and joining or saving picks rebuilds it: with a key set, each build is one route planner call and one short note from the orchestrator.
 - It writes to the SQLite file `data/tripwright.db`, the one a local server reads.
 
+### The demo trip is a recorded run
+
+A live run takes minutes, and the demo slot is three. So a trip started with **Use the demo trip** replays a live run of that trip recorded on 2026-10-10, kept in [fixtures/recorded.json](backend/tripwright/fixtures/recorded.json):
+
+- **What you see:** the top bar says **Recorded run**. Each agent shows as working for 1 to 9 seconds and then shows its recorded result; its card says "Recorded result" under **Show details**. The list of places appears about 4 seconds after **Start planning**, and planning takes about 10 seconds.
+- **What happens:** no model and no site is asked. The agents' results, and the searches the app makes outside the agents (flights for the landing day, weather, place locations), all come from the recording. Scheduling, budgets and validation run as usual, on whatever the travelers pick.
+- **Where:** on any server, with nothing to switch. Every other trip on the same server plans live.
+- **When it applies:** only while the origin, destination and days are still Kansas City, Japan and 7 when you press **Start planning**. The name and budget can change. A trip typed in by hand is always planned live.
+- **Who can join:** flights are recorded for Chicago and Dallas. A traveler from another city gets a live flight agent, which takes minutes and has its searches answered from the recorded ones.
+- **Limits:** the days can only hold the nine recorded attractions, so a must-do on another place is not planned. The draft plan has no note from the orchestrator. **Switch to Airbnb** and **Add a rental car** replay the same recording, and **More like my picks** asks the model.
+
 ### Without keys, and DEMO_MODE
 
 - **No `OPENAI_API_KEY`:** every specialist goes straight to its fallback. For the demo trip (Kansas City → Japan, 7 days) that is the result of a real live run on 2026-10-10, recorded in [fixtures/recorded.json](backend/tripwright/fixtures/recorded.json) and shown with a "saved result" flag, the list of places on the picks screen included. Any other trip shows the agents as pending.
@@ -216,7 +240,7 @@ This creates a seven-traveler Japan trip with dates set and everyone's picks sav
 
 ## Deploy on Akamai
 
-Needs `linode-cli` configured with a token, and an SSH key at `~/.ssh/id_ed25519`. These create billable resources.
+Needs `linode-cli` configured with a token, and an SSH key at `~/.ssh/id_ed25519` (or set `SSH_KEY` to another one). These create billable resources.
 
 ```bash
 bash deploy/provision.sh   # Object Storage bucket + key, Managed PostgreSQL; writes OBJ_* and DATABASE_URL to .env.hosted
@@ -249,7 +273,7 @@ backend/tripwright/
   tools/            flights (Google Flights), lodging (Google Hotels, Airbnb), browser pool,
                     research (Tavily), places (Open-Meteo, Nominatim)
   llm.py            Akamai inference provider and shared hooks
-  recorded.py       cache / DEMO_MODE replay / fixture recording
+  recorded.py       cache / DEMO_MODE replay / replay for the recorded demo trip / fixture recording
   store.py          PostgreSQL or SQLite
   evidence.py       Object Storage or local disk
   cards.py          review-screen cards
@@ -257,14 +281,14 @@ backend/tripwright/
   payments.py       pay together: a hold per traveler on a test card, charged when everyone is in
   api.py            FastAPI + SSE
   fixtures/         recorded tool results, accepted results and evidence for the demo
-backend/tests/      validator, scheduler, budget, orchestrator (scripted model)
+backend/tests/      validator, scheduler, budget, orchestrator (scripted model), API, payments, the recorded demo trip
 frontend/src/
   App.tsx           the top bar, and which screen a trip is on
   shell.ts          what every screen shares: the trip, who is looking, the agents, the board's open tab
   useTrip.ts        loads the trip and follows its event stream
   styles.css        the one stylesheet: colours, type and every component
   components/       one file per screen (Start, Picks, Timeframe, Gathering, Join, Working, Choose, Review, Finish)
-                    and the shared pieces (Board, Agents, Calendar, Days, DraftPlan, Route)
+                    and the shared pieces (Board, Agents, Calendar, Days, DraftPlan, Route, Map, Pay, TravelerForm, Chips)
 design/             the approved mockup, the handoff it was built from, and screenshots of the result
 deploy/             Akamai provisioning and deploy scripts
 ```
@@ -285,4 +309,5 @@ deploy/             Akamai provisioning and deploy scripts
 - **Trip length:** `days` runs from leaving home to the flight home, so "7 days" from Kansas City is 6 nights in Japan.
 - **Source and evidence links are not shown on the cards.** They were removed from the UI; every card in the API response still carries them (`sources[].url`, `sources[].evidence_url`).
 - **A simple map.** The design mockups show one as a placeholder; the draft plan has a Leaflet map on OpenStreetMap tiles with a pin for every place on the list, your must-do places filled, under the route as a row of cities with the nights in each. The final days have no map.
+- **The demo trip is a recording.** **Use the demo trip** replays a real run from 2026-10-10 and says so in the top bar, because a live run does not fit a three-minute slot. Any other trip is planned live.
 - **Not built:** the monitor agent (stretch goal), and food is not part of the budget.
