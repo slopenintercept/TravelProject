@@ -84,6 +84,7 @@ export function useTrip(tripId: string | null) {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const latest = useRef(0)
+  const noticePayments = useRef('') // the trip's payments when `notice` was shown
 
   /** Show a response unless a newer request has started since (responses can arrive out of order). */
   const load = useCallback(async (request: Promise<TripView>) => {
@@ -103,7 +104,11 @@ export function useTrip(tripId: string | null) {
     dispatch({ type: 'clear' })
     if (!tripId) return
 
-    const refresh = () => load(api.getTrip(tripId)).catch((e: Error) => setError(e.message))
+    // A notice about payments that another tab has since changed is out of date. This tab's own action
+    // refreshes too, but with the payments its response already had, so its notice stays.
+    const refresh = () => load(api.getTrip(tripId))
+      .then((next) => { if (JSON.stringify(next.state.payments) !== noticePayments.current) setNotice('') })
+      .catch((e: Error) => setError(e.message))
     refresh()
 
     let timer: number | undefined
@@ -139,6 +144,7 @@ export function useTrip(tripId: string | null) {
     try {
       const next = await load(request)
       setNotice(next.message)
+      noticePayments.current = JSON.stringify(next.state.payments)
       return next
     } catch (e) {
       setError((e as Error).message)

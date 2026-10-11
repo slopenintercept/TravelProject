@@ -77,3 +77,32 @@ There are no frontend tests in this repo, so the browser is the check.
 ## When you finish
 
 Add a `## Result` section at the end of this file: the files you changed, what you ran and what it showed for each of the six checks, and anything left undone. Write it last and in one go, after the build: the checking chat takes that heading as "ready to commit and deploy".
+
+## Result
+
+Written 2026-10-11 by the chat that made the fix. Nothing is committed, pushed or deployed.
+
+**Changed:** `frontend/src/useTrip.ts` only (7 lines added, 1 replaced). `App.tsx` and `backend/` are untouched.
+
+- `act` remembers the payments its response carried (`noticePayments`, a ref) when it shows a notice.
+- `refresh` (the fetch after a `state` event) clears the notice if the payments it gets back differ from those.
+- This tab's own action refreshes with the same payments its response had, so its own notice stays.
+
+**Checks**, in two tabs (`#…/p1` Alex, `#…/p2` friend2) on the Vite dev server at port 5183 against a scratch backend on port 8013. `/api/health` there read `sqlite`, `local disk`, `holds kept in the app`. The trips were copies of `trip_99aaaeb1` with payments emptied.
+
+1. Pass. `trip_msg1`: Alex approved with Visa. His line read "$2,737 is on hold. Nobody is charged until friend2 approves." and was still there 3 seconds later, after his own refresh.
+2. Pass. friend2 approved. Alex's tab, with no reload: no line, both rows "Paid · Visa ···· 4242". friend2's tab kept "Everyone is in. Every card was charged."
+3. Pass. `trip_msg2`: Alex approved, friend2 backed out. Alex's tab: no line, his row "Hold released". friend2's tab kept "friend2 backed out. Every hold was released and nobody was charged."
+4. Pass. `trip_msg1`, before check 1: the declining card gave "Visa ···· 0002 was declined, so no hold was placed. Try another card." in Alex's tab, still there 2 seconds later. friend2's tab showed no line.
+5. Pass. Dismiss cleared that line.
+6. Pass. `npx tsc --noEmit` printed nothing, before and after the checks.
+
+Then `npm run build` once: `dist/assets/index-3E-sSUu9.js`, built with no errors.
+
+**Left undone or not checked:**
+
+- The built `frontend/dist` was not clicked through; the checks ran on the dev server from the same source.
+- Not tried against Stripe test mode (the scratch backend had an empty `STRIPE_SECRET_KEY`), and not tried with a server that sends no `payments`.
+- One side effect to know about: the rule covers every notice, not only payment ones. A line about something else (a refused calendar move, say) also clears if another traveler changes the payments while it is showing. It does not clear on any other change.
+
+**Cleaned up:** both temporary entries are out of `.claude/launch.json` (the file has no diff), both servers are stopped, and nothing is listening on 8013 or 5183. The scratch database is in this chat's scratchpad, outside the repo. Port 8000 and `trip_479d20ea` were not touched, apart from one read-only `GET` of `trip_99aaaeb1` on port 8000.
