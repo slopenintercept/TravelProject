@@ -169,12 +169,13 @@ async def build_route(state: TripState, ctx: RunContext, out: RouteOut) -> Route
 
 # --- ideas: the shared list of places every traveler marks ----------------------
 
-IDEAS_MIN, IDEAS_MAX = 12, 25
+IDEAS_MIN, IDEAS_MAX = 12, 25  # what the review accepts
+IDEAS_ASK = 16  # what the agents are asked for: enough to choose from, and a shorter answer to wait on
 
 
 class IdeaOut(BaseModel):
     name: str = Field(description="The place or experience, e.g. Fushimi Inari Taisha or a sumo tournament")
-    city: str = Field(description="The city or town it is in")
+    city: str = Field(description="The city or town it is in: the name alone, like Tokyo or Hakone, with no district or region")
     category: str = Field(description="A short category, e.g. Sights, Food, Nature, Culture, Nightlife, Family, Day trips")
     why: str = Field(description="Why a visitor would go, in under 10 words")
     source_id: str = Field(description="Source id from web_research that describes it, e.g. s4")
@@ -248,15 +249,14 @@ def more_ideas_task(state: TripState, who: Traveler | None = None) -> str:
 def ideas_task(state: TripState, who: Traveler | None = None, city: str | None = None) -> str:
     """The whole destination's places or, given `city`, that city's share for an agent working beside the others'."""
     r = state.request
-    low, high, where = IDEAS_MIN + 3, IDEAS_MAX, r.destination
+    count, where = IDEAS_ASK, r.destination
     if city:  # a share of the list in step with the nights spent there
         nights = {c: sum(s.nights for s in state.route.segments if s.city == c) for c in dict.fromkeys(s.city for s in state.route.segments)}
-        high = max(1, high * nights[city] // sum(nights.values()))
-        low = min(high, -(-low * nights[city] // sum(nights.values())))
+        count = max(1, round(count * nights[city] / sum(nights.values())))
         others = " and ".join(c for c in nights if c != city)
         where = (f"and around {city} (day trips from {city} count). Another agent is covering {others} at the "
                  f"same time, so leave {others} to it. These are")
-    return (f"{brief(state)}\n\nSuggest {low} to {high} distinct places and experiences in "
+    return (f"{brief(state)}\n\nSuggest {count} distinct places and experiences in "
             f"{where} for the travelers to choose from. They will mark each one must do, interested or "
             "not for me, and the trip is then planned from their picks, so offer real variety: famous sights and "
             "lesser-known ones, food, nature, culture, nightlife, family attractions and day trips that fit "
