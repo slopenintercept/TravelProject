@@ -6,7 +6,7 @@ Updated 2026-10-11 at about 04:35 Central, for continuing in a new chat. If you 
 
 - **The app is live on Akamai**, and the server runs exactly the committed app code: commit `5360e3b`, deployed at 04:29 on 2026-10-11. Details and commands are in "Hosting on Akamai".
 - **The whole UI was rebuilt on 2026-10-11** to the design the user approved. "What the last chat did" below lists everything in order; "The redesign" says what was built and what the user still has to sign off.
-- **Branch:** `combine-picks-and-group-trips` is where all work happens, and everything is committed and pushed. `main` is at `ffe77ab`: it has the redesign and the new README, but not `5360e3b` (a small change to the agents list) or the handoff updates after it (see Git).
+- **Branch:** `combine-picks-and-group-trips` is where all work happens, and everything is committed and pushed. `main` was fast-forwarded to `d292b70` at about 04:35 on 2026-10-11, so it has all the code and docs. Only handoff-only commits made after that, such as the one recording this, are missing from it (see Git).
 - **What the user was doing when this was written:** trying the new UI themselves.
   - Locally, trip `trip_479d20ea` (Alex and Sam, Dec 11 to Dec 31) finished its research with the Lodging agent timed out (`pending`, no saved result), so neither traveler has stays. "Retry the one that didn't finish" on the board's Agents tab runs it again. Nobody has looked into why it timed out.
   - On the hosted site, trip `trip_f24799b6` was created at 04:24 and is waiting for dates.
@@ -14,10 +14,9 @@ Updated 2026-10-11 at about 04:35 Central, for continuing in a new chat. If you 
 - **Waiting on the user, none urgent:**
   1. Sign-off on the redesign choices listed under "The redesign".
   2. Whether `deploy/deploy.sh` should clear `backend/` and `frontend/` on the server before copying (see Hosting).
-  3. Whether to fast-forward `main` again so it has `5360e3b`.
-  4. Whether local runs should keep using the hosted database and bucket that `.env` now names, or go back to local files.
-  5. Whether to give the hosted site a clean `https://` name. The user asked why the address is an IP with `:8000`, was offered a domain plus Caddy, and said to leave it for now.
-  6. The full planning flow has not been run on the hosted site.
+  3. Whether local runs should keep using the hosted database and bucket that `.env` now names, or go back to local files.
+  4. Whether to give the hosted site a clean `https://` name. The user asked why the address is an IP with `:8000`, was offered a domain plus Caddy, and said to leave it for now.
+  5. The full planning flow has not been run on the hosted site.
 - **Housekeeping left on the Mac:** Docker Desktop may still be running from an earlier test build and can be quit.
 
 ## What the last chat did
@@ -40,7 +39,7 @@ One chat, on 2026-10-11 from about 02:30 to 04:35 Central. The user asked for th
    | `6a50ad6`, `5edada2` | Handoff updates |
    | `5360e3b` | A draft agent that was cut off when planning started is left out of the agents list |
 
-6. **`main`:** the chat's own push to `main` was refused by its permission check, so the user ran the fast-forward themselves; `main` is at `ffe77ab`.
+6. **`main`:** the chat's own push to `main` was refused by its permission check, so the user ran the fast-forward themselves, twice; the second left `main` at `d292b70`, level with the branch at that moment.
 7. **Deployed twice** with `deploy/deploy.sh`: `f1c413e` at 04:04 and `5360e3b` at 04:29. Each time the server's log was checked first, and the second time a trip that had just been started on the hosted site was waited out. After each, the JavaScript the server serves was compared byte for byte with the local build.
 8. **Cleaned the server:** the five deleted components were still in the server's source folder, because the deploy does not remove files. At the user's request they were deleted over SSH after checking they were identical to git's last copies.
 9. **The local server was restarted by the user** at 04:17 (see Gotchas), so it runs today's backend code.
@@ -129,7 +128,7 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 - Remote: `https://github.com/slopenintercept/TravelProject.git` (public).
 - Current branch: `combine-picks-and-group-trips`, pushed. It holds everything: Brandon's picks, per-person links and draft plan, merged with the user's `group-trips-live-run`.
-- `main` was fast-forwarded to this branch several times on 2026-10-10 and again on 2026-10-11, each time because the user asked. The last time, early on 2026-10-11, left it at `ffe77ab`: the redesign, the approval fix, `design/` and the new docs are in it. A chat's own push to `main` is refused by its permission check ("merge without review"), so the user runs the command below themselves. Fast-forwarding is not a standing rule: commits made here are not in `main` until the user asks again.
+- `main` was fast-forwarded to this branch several times on 2026-10-10 and again on 2026-10-11, each time because the user asked. The last time, at about 04:35 on 2026-10-11, left it at `d292b70`: the redesign, the approval fix, `design/`, the agents-list change and the docs are all in it. A chat's own push to `main` is refused by its permission check ("merge without review"), so the user runs the command below themselves. Fast-forwarding is not a standing rule: commits made here are not in `main` until the user asks again.
 - To fast-forward `main` without leaving this branch or touching the working folder: `git push origin origin/combine-picks-and-group-trips:refs/heads/main`, then `git fetch && git branch -f main origin/main`.
 - `group-trips-live-run` is pushed at `b370be3` and is fully contained in the current branch.
 - GitHub push protection once blocked a push because a third-party Mapbox token sat inside scraped page text. It was redacted, not bypassed, and `tools/research.py` now strips such tokens.
