@@ -7,7 +7,9 @@ Written 2026-10-11 at about 06:25 Central by the chat that has been checking the
 Added at 07:00 on 2026-10-11 by the chat that took over the checking.
 
 - The user confirmed the go-ahead carries over: this chat decides when to commit, push, merge and restart the local server, writes no code, and still waits for "deploy now" before every deploy.
-- **Shipped but not deployed:** `7abf6df`, the demo trip replays a recorded run on any server (`handoffs/recorded-demo-trip.md`). 130 backend tests pass. The local server was restarted on it at 07:00, in a Terminal tab titled "Tripwright :8000" that this chat opened. The hosted site still runs `a736182`.
+- **Shipped and deployed:** `7abf6df`, the demo trip replays a recorded run on any server (`handoffs/recorded-demo-trip.md`). 130 backend tests pass. The local server was restarted on it at 07:00, in a Terminal tab titled "Tripwright :8000" that this chat opened.
+- **Deploy at 07:04** (container created 07:04:09), after the user said "deploy now" and the quiet check passed: no hosted trip busy and no write request for 16 minutes. Afterwards: health `postgresql`, `object storage`, `stripe test mode`; the page, JavaScript and stylesheet match `frontend/dist`; all 611 committed files under `backend/` and `frontend/` are on the server with the same checksum; 17 settings, none twice; `trip_paydemo` still has no payments. `comm` on the two checksum lists reported three false differences because the lists sort differently on the two machines; compare by path instead.
+- **One run of the demo trip on the hosted site**, through the API: `trip_efba24a0` (Alex, Sam, Jo), left at `review`, unpaid. Picks list 4.7 s, first agents 6.6 s, dates 0.2 s, group draft 11.6 s after the last save with 24 pins, Alex's choices ready at 9.1 s, planning done at 10.8 s, no flags.
 - The timer is deleted; nothing is with a subagent.
 
 ## Read this first
