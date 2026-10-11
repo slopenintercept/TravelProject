@@ -423,6 +423,11 @@ input, select {
 /* Attractions: who needs it, who wants it, who is going. */
 .card .who { display: flex; flex-wrap: wrap; gap: 6px 18px; }
 .card .who:empty { display: none; }
+/* The card's facts (dates, nights, area, rating) as a row of tags, then the agent's reason in its own box. */
+.facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.facts li { padding: 2px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+.why { padding: 10px 14px; border-radius: 8px; font-size: 15px; color: #374151; background: color-mix(in srgb, var(--cat) 6%, white); }
+.why strong { display: block; margin-bottom: 2px; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--cat); }
 .booking { align-self: flex-start; font-weight: 600; }
 
 .card-status-approved { --s: var(--ok); --s-bg: var(--ok-bg); }
@@ -495,12 +500,12 @@ input, select {
 /* --- finish ------------------------------------------------------------------ */
 
 .finish-button { position: fixed; right: 32px; bottom: 28px; z-index: 5; box-shadow: 0 8px 24px rgb(15 23 42 / 28%); }
+.back-button { position: fixed; left: 32px; bottom: 28px; z-index: 5; box-shadow: 0 8px 24px rgb(15 23 42 / 28%); }
 
 .finish { max-width: 1040px; margin: 0 auto; }
 .steps { display: grid; gap: 12px; margin: 14px 0 0; padding: 0; list-style: none; }
 .step {
   display: grid;
-.back-button { position: fixed; left: 32px; bottom: 28px; z-index: 5; box-shadow: 0 8px 24px rgb(15 23 42 / 28%); }
   grid-template-columns: 36px 1fr auto;
   gap: 18px;
   align-items: start;

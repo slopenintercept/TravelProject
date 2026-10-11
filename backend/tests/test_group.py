@@ -508,7 +508,7 @@ def test_each_traveler_swaps_their_own_way_to_make_a_trip(group):
     for t in group.travelers:
         t.legs[0].alternatives = [bus.model_copy()]
     card = next(c for c in review_cards(group) if c.id == "leg:p2:l_shink")
-    assert [(o.title, o.price_usd, o.detail) for o in card.alternatives] == [("Highway bus", 30, "480 min")]
+    assert [(o.title, o.price_usd, o.detail) for o in card.alternatives] == [("Highway bus", 30, "8H")]
 
     asyncio.run(orchestrator.decide(group, "swap", "leg:p2:l_shink", "l_bus"))  # Sam takes the bus
     assert (alex.legs[0].mode, sam.legs[0].mode) == ("Shinkansen", "Highway bus")

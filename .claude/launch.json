@@ -14,6 +14,18 @@
       "port": 8001
     },
     {
+      "name": "tripwright-8002",
+      "runtimeExecutable": "/Users/deep/Documents/Travel Project/backend/.venv/bin/python",
+      "runtimeArgs": ["-m", "uvicorn", "tripwright.api:app", "--app-dir", "/Users/deep/Documents/Travel Project/backend", "--port", "8002"],
+      "port": 8002
+    },
+    {
+      "name": "tripwright-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/deep/Documents/Travel Project/frontend", "run", "dev", "--", "--port", "5173", "--strictPort"],
+      "port": 5173
+    },
+    {
       "name": "tripwright-windows",
       "runtimeExecutable": "C:\\Users\\brand\\OneDrive\\Documents\\GitHub\\TravelProject\\backend\\.venv\\Scripts\\python.exe",
       "runtimeArgs": ["-m", "uvicorn", "tripwright.api:app", "--app-dir", "C:\\Users\\brand\\OneDrive\\Documents\\GitHub\\TravelProject\\backend", "--port", "8000"],

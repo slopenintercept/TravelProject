@@ -83,8 +83,18 @@ function ItemCard({ card, groupSize, busy, onDecision }: { card: Card; groupSize
           <Chips label="Going" items={whoIsIn(card.going, groupSize)} />
         </div>
       )}
-      {card.detail && <p className="detail">{card.detail}</p>}
-      {card.reasoning && <p className="reasoning">{card.reasoning}</p>}
+      {card.detail && (
+        <ul className="facts">
+          {card.detail.split(' · ').map((fact, i) => <li key={i}>{fact}</li>)}
+        </ul>
+      )}
+      {card.note && <p className="muted">{card.note}</p>}
+      {card.reasoning && (
+        <div className="why">
+          <strong>Why this pick</strong>
+          <p>{card.reasoning}</p>
+        </div>
+      )}
       {card.booking_url && (
         <a className="booking" href={safeHref(card.booking_url)} target="_blank" rel="noreferrer">
           Finish booking on the provider's site ↗

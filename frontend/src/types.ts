@@ -352,7 +352,8 @@ export interface Card {
   kind: 'item' | 'default' // "default" is the most-travelers-pick card
   traveler: string | null // whose flight or stay this is (traveler id); null for shared cards
   title: string
-  detail: string
+  detail: string // short facts joined by " · ", each shown as a tag
+  note: string // a sentence too long for a tag
   price_usd: number
   reasoning: string
   sources: Source[]
