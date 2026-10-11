@@ -90,7 +90,7 @@ Do not run `npm run build` casually: it replaces `frontend/dist`, which the serv
 
 ## Result
 
-Checked on 2026-10-11 between about 05:22 and 05:35 Central by a third chat, at the user's request, against this file and `handoffs/payments.md`. No application code was changed, nothing was deployed and no server on port 8000 or the hosted site was restarted.
+Checked on 2026-10-11 between about 05:22 and 05:30 Central by a third chat, at the user's request, against this file and `handoffs/payments.md`. No application code was changed, nothing was deployed and no server on port 8000 or the hosted site was restarted.
 
 **What was run and what it showed**
 

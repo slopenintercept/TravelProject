@@ -1,12 +1,12 @@
 # Tripwright handoff
 
-Updated 2026-10-11 at about 05:35 Central, for continuing in a new chat. If you only read one section, read "Start here". Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
+Updated 2026-10-11 at about 05:30 Central, for continuing in a new chat. If you only read one section, read "Start here". Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
 
 ## Start here
 
 - **The app is live on Akamai**, and the server runs exactly the committed app code: `backend/` and `frontend/` as of commit `29f5a53`, deployed at about 05:13 on 2026-10-11 with payments, the map and the two agent fixes. Details and commands are in "Hosting on Akamai".
 - **The whole UI was rebuilt on 2026-10-11** to the design the user approved. "What the last chat did" below lists everything in order; "The redesign" says what was built and what the user still has to sign off.
-- **Branch:** `combine-picks-and-group-trips` is where all work happens, and it was pushed at about 05:17 and again at about 05:35 on 2026-10-11 because the user asked, the second time with both chats' handoff files (anything committed later is local: check `git status -sb`); work that is not committed at all is under "Work in progress, not committed". `main` is still at `d292b70` (about 04:35 on 2026-10-11): it has the redesign, but not payments, the map, the two agent fixes or the deploy script change. Nobody has asked for it to be moved since (see Git).
+- **Branch:** `combine-picks-and-group-trips` is where all work happens, and it was pushed at about 05:17 and again at about 05:30 on 2026-10-11 because the user asked, the second time with both chats' handoff files (anything committed later is local: check `git status -sb`); work that is not committed at all is under "Work in progress, not committed". `main` is still at `d292b70` (about 04:35 on 2026-10-11): it has the redesign, but not payments, the map, the two agent fixes or the deploy script change. Nobody has asked for it to be moved since (see Git).
 - **What the user was doing when this was written:** trying the new UI themselves.
   - Locally, trip `trip_479d20ea` (Alex and Sam, Dec 11 to Dec 31) finished its research with the Lodging agent timed out (`pending`, no saved result), so neither traveler has stays. "Retry the one that didn't finish" on the board's Agents tab runs it again. The cause is fixed, and the server on port 8000 was restarted on the new code at about 05:13 on 2026-10-11; nobody has pressed Retry on that trip since (see "Not done or not verified").
   - On the hosted site, trip `trip_f24799b6` was created at 04:24 and is waiting for dates.
