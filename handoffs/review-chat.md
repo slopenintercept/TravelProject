@@ -87,3 +87,28 @@ curl -s http://localhost:8000/api/health
 The hosted address is left out because this repo is public. `deploy/.venv/bin/linode-cli linodes list --label tripwright-app` prints it, and `<address>:8000/api/health` should say `postgresql` and `object storage`.
 
 Do not run `npm run build` casually: it replaces `frontend/dist`, which the server on port 8000 serves. Do not restart that server or deploy without checking that no trip is busy (`GET /api/trips/<id>` returns `busy`).
+
+## Result
+
+Checked on 2026-10-11 between about 05:22 and 05:35 Central by a third chat, at the user's request, against this file and `handoffs/payments.md`. No application code was changed, nothing was deployed and no server on port 8000 or the hosted site was restarted.
+
+**What was run and what it showed**
+
+- `pytest -q`: 126 passed. `npx tsc --noEmit`: passed. `git diff 29f5a53 HEAD -- backend frontend` is empty.
+- **Port 8000:** the process started at 05:13:20, after the last source edit (05:05) and the last build of `frontend/dist` (05:12). Health says `sqlite`, `local disk`, `stripe test mode`. No local trip was busy, and no trip in `data/tripwright.db` has a payment on it.
+- **Hosted site:** health says `postgresql`, `object storage`, `stripe test mode`. The page, the JavaScript and the stylesheet it serves have the same SHA-256 as `frontend/dist` and as port 8000. Over SSH, read-only: every committed file under `backend/` and `frontend/` is on the server with the same checksum and nothing else is there but macOS `._` copies, the pytest cache and `egg-info`; the 27 Python files inside the running container match the committed ones.
+- **Hosted demo trips:** `trip_paycheck` has both travelers `captured` with a `ref`; `trip_paydemo` has no payments. Neither was changed.
+- **Stripe, asked through its API:** the six PaymentIntents in `payments.md` are as it says, all `livemode` false. The account held ten before this check, not six: the two declined attempts are intents too (`requires_payment_method`), and two more `succeeded` at 05:06 belong to a local throwaway copy that was also named `trip_paydemo` (Alex and "Bleh"), not to the hosted one. Nothing is left holding a card.
+- **Pay together clicked in the browser with Stripe on**, the gap `payments.md` lists first. A second backend on port 8003 on a scratch SQLite file, with copies of `trip_99aaaeb1` and the solo `trip_d23a42ee`, in two tabs: the declining card gave "was declined" and no hold; Visa gave "On hold" and "1 of 2 approved"; the other traveler's Back out gave "Hold released" in both tabs with no reload; approving again from both gave "Trip paid. $5,652 charged across 2 cards." in both tabs; the solo trip read "Pay for your trip" and one click gave "Your card was charged." No console errors. Stripe then showed those intents as `requires_payment_method`, `canceled`, and three `succeeded`. The server is stopped and its preview entry removed.
+- **Cases with no test, run as throwaway tests with Stripe off** (not added to the repo): a solo trip is charged at once; with three travelers the first two holds wait for the third; a live key and a Stripe refusal both come back from the route as a 400 with no payment recorded; someone not on the trip gets a 403 and releases nothing.
+- **Secrets:** no value from `.env` or `.env.hosted` is in any commit or in the handoff files, apart from the two public hostnames that are meant to be there; the hosted address is in no tracked file.
+
+**Found**
+
+- After Alex approves, the line at the top of Alex's feed ("$2,737 is on hold. Nobody is charged until … approves.") stays there after the other traveler approves, above "Trip paid", until it is dismissed. It is the app's ordinary message line and it is not wrong about anything that was charged, but in the two-screen demo it reads as a contradiction. Not changed.
+- `HANDOFF.md` disagreed with itself in four places after the two chats' edits crossed (the branch "not pushed", the map "not built yet", port 8000 "has to be restarted", the "Updated" time). Corrected.
+- This file's table says `.claude/launch.json` holds three test entries. It holds two, the map chat's; the payments chat removed its own.
+
+**Still not checked by anyone**
+
+Items 1, 3, 4, 5, 6, 9 and 10 under "Not verified by anyone" above, and in `payments.md`: a capture that fails part-way, a plan changed after a hold, and a hold older than Stripe keeps one. The server's `.env` is still mode 644.
