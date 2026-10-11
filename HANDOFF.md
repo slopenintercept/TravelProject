@@ -1,6 +1,6 @@
 # Tripwright handoff
 
-Updated 2026-10-10 (late evening) for continuing in a new chat. Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
+Updated 2026-10-10 (late night) for continuing in a new chat. Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
 
 ## What it is
 
@@ -19,7 +19,7 @@ Two people commit to the repo: Amandeep Toor (the user) and Brandon Laing (teamm
 2. Agents propose a route and date windows, and an ideas agent lists 15 to 25 places. The host picks dates.
 3. The host shares the invite link. Each traveler joins on their own link (`#<tripId>/<travelerId>`) with their origin and budget, then marks the places must do, interested or not for me. They can add a place or ask for more like their picks. No login; the `X-Traveler` header says who is acting.
 4. While people join, a draft plan sketches the days from everyone's picks (`draft.py`).
-5. The host starts planning: one flight agent per traveler, plus lodging, attractions, transport and weather.
+5. The host starts planning: one flight agent per traveler, one attractions agent per city on the route, plus lodging, transport and weather.
 6. Each traveler confirms their own flight and rooms (stage `choosing`). The days are scheduled on the first confirm and re-planned on each later one: scheduler, per-traveler budget, `validate_itinerary`.
 7. Review screen: each traveler approves, swaps or removes their own cards. The Itinerary tab is a calendar with drag, swap and Remove. "Finish" lists every booking with links that already carry dates, route and guests.
 
@@ -54,7 +54,7 @@ cd backend && .venv/bin/python -m tripwright.scenario
 - Keys live in `.env` at the project root (gitignored). Never print or commit them.
 - `DEMO_MODE=true` replays `backend/tripwright/fixtures/recorded.json` with no network or keys.
 - `RECORD_FIXTURES=true` records live calls into the fixtures.
-- Claude preview configs in `.claude/launch.json`: `tripwright` (port 8000), `tripwright-8001` (same app on port 8001, for when another chat holds 8000) and `tripwright-windows` (Brandon's paths).
+- Claude preview configs in `.claude/launch.json`: `tripwright` (port 8000), `tripwright-8001` and `tripwright-8002` (same app on ports 8001 and 8002, for when another chat holds the earlier ports), `tripwright-frontend` (Vite dev server on port 5173; it proxies `/api` to port 8000) and `tripwright-windows` (Brandon's paths).
 
 ## Where things are
 
@@ -81,7 +81,7 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 - Remote: `https://github.com/slopenintercept/TravelProject.git` (public).
 - Current branch: `combine-picks-and-group-trips`, pushed. It holds everything: Brandon's picks, per-person links and draft plan, merged with the user's `group-trips-live-run`.
-- `main` was fast-forwarded to this branch on 2026-10-10 at the user's request, after 107 tests and the frontend build passed on a clean copy. That was a one-time request, not a standing rule: commits made here afterwards are not in `main` until the user asks for another fast-forward.
+- `main` was fast-forwarded to this branch twice on 2026-10-10, each time at the user's request. The second time it moved to `2b9ae63`, after 108 tests and the frontend type-check passed. Each was a one-time request, not a standing rule: commits made here afterwards are not in `main` until the user asks for another fast-forward.
 - To fast-forward `main` without leaving this branch or touching the working folder: `git push origin origin/combine-picks-and-group-trips:refs/heads/main`, then `git fetch && git branch -f main origin/main`.
 - `group-trips-live-run` is pushed at `b370be3` and is fully contained in the current branch.
 - `agents-faster` is a local-only branch at `0326c82`, the same change as `b370be3`.
@@ -89,6 +89,9 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 ## What changed today, newest first
 
+- `2b9ae63` Review cards show their facts as short tags and the agent's reason in a "Why this pick" box (details below).
+- `6a672ca` A Back button on every screen, fixed bottom-left. It undoes the last move in the app or reopens the previous step where that can still change, and never undoes the agents' work. It replaces "Back to review" in the Finish footer.
+- `33ce425` Attractions are planned by one agent per city on the route, in parallel. Their lists are joined and checked and reviewed once, so there is still one lane, one result and one fallback. Live on the 7-traveler demo trip it was accepted first time in 127s.
 - `2e4606f` The lodging reviewer is told each traveler pays only for their own room. It had been rejecting correct plans (6 of 10 live with the old wording, 0 of 10 with the new).
 - `7fc99a7` (Brandon, commit message is just "e") Draft plan, the ready-made scenario, the calendar grid on the Itinerary tab, a retry route for agents that timed out or fell back.
 - `0fc740e` Brandon merged `group-trips-live-run` into his picks work. Transport cards and "Add a rental car" can only be changed by the traveler they belong to.
@@ -107,9 +110,16 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 - The group's schedule uses the slowest way its travelers have chosen for each ride.
 - Removed legs stay removed when transport is planned again, as long as the route is described the same way.
 
+### How review card tags work
+
+- `cards.py` writes each card's `detail` as short facts joined by ` · `, and `Review.tsx` splits on that to draw one tag per fact. Keep each fact short: "4.5 Rating", "3 Nights", "10H", "Open 09:00 to 21:00", "Flies home Tue Dec 15, 16:25".
+- Anything sentence-length goes in the card's `note` field, shown as plain grey text under the tags. Only attractions use it so far, for the agent's booking advice (`availability_note`). That text is the agent's own wording, saved with the trip.
+- The rating and duration wording is shared with the Swap list (`_rating`, `_duration`).
+- The "Most travelers here pick" card and the Choose screen were left in the older plain-text style.
+
 ## Work in progress, not committed
 
-Another session is changing attractions planning to one agent per city on the route, run in parallel and reviewed as one list. Its edits are uncommitted and not in `main`. When this file was last updated they touched `README.md`, `.claude/launch.json`, `backend/tests/test_orchestrator.py` (new test `test_attractions_are_planned_by_an_agent_per_city_at_once_and_reviewed_as_one_list`), `backend/tripwright/orchestrator.py`, `backend/tripwright/specialists.py`, `frontend/src/components/Review.tsx` and `frontend/src/styles.css`. That session owns them: do not commit, stash or revert them from another chat. The committed state passes 107 tests.
+Nothing. The working folder was clean when this file was last updated, and the committed state passes 108 tests. Several chats share this folder, so check `git status` before assuming that still holds.
 
 ## Not done or not verified
 
@@ -130,7 +140,9 @@ Another session is changing attractions planning to one agent per city on the ro
 
 - The endpoint rejects an empty `tools` array; context is 32k tokens, output at most 4,096.
 - The server does not reload on code changes. Restart it after editing the backend, and rebuild the frontend after editing `frontend/src`.
-- Another chat's preview server can hold port 8000 and keep serving old code; Claude cannot stop a server another chat started. Use `tripwright-8001` or ask the user to restart it.
+- Another chat's preview server can hold port 8000 and keep serving old code; `preview_stop` cannot stop a server another chat started. Use `tripwright-8001` or `tripwright-8002`, or ask the user before restarting it.
+- The servers on ports 8000 and 8001 were restarted late on 2026-10-10 at the user's request, from the shell (`nohup`), because the preview tool still listed those ports under another chat after the old processes were killed. They run the code at `2b9ae63`, belong to no chat's preview list, and are stopped by killing whatever listens on the port.
+- Restarting a server kills any agent run in progress. Check that no trip is busy first (`GET /api/trips/<id>` returns `busy`).
 - To test without touching a real trip, copy it: load it with `store.load_trip`, change `state.id`, and save.
 - Booking.com blocks headless browsers, so hotels come from Google Hotels.
 - `tavily_search` in strands-agents-tools prints a deprecation warning; it still works.
