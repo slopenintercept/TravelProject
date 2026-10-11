@@ -27,6 +27,7 @@ from datetime import date, timedelta
 
 from pydantic import BaseModel, Field
 from strands import Agent
+from strands.agent.conversation_manager import SlidingWindowConversationManager
 from strands.multiagent import GraphBuilder
 from strands.multiagent.base import MultiAgentBase, MultiAgentResult, Status
 from strands.multiagent.graph import Graph, GraphState
@@ -165,11 +166,7 @@ class SpecialistNode(MultiAgentBase):
         prompts, agents, problems = spec.split(state) if spec.split else [spec.task(state, who)], [], []
         for _ in prompts:
             tools = spec.tools(Toolbox(ctx))
-            agents.append(Agent(
-                model=make_model(spec.max_tokens), name=spec.name, tools=tools,
-                system_prompt=PREAMBLE.format(title=spec.title, tools=WITH_TOOLS if tools else NO_TOOLS),
-                hooks=[RateLimit(), Activity(self.name, events.emit)], callback_handler=None,
-            ))
+            agents.append(specialist_agent(spec, tools, self.name, events))
 
         for attempt in range(1, config.MAX_RETRIES + 2):
             events.status(state, self.name, "working",
@@ -212,6 +209,16 @@ class SpecialistNode(MultiAgentBase):
         if result is None or result.structured_output is None:
             raise Rejected(["answer with the structured result"])
         return result.structured_output
+
+
+def specialist_agent(spec: Spec, tools: list, node: str, events: Bus) -> Agent:
+    return Agent(
+        model=make_model(spec.max_tokens), name=spec.name, tools=tools,
+        system_prompt=PREAMBLE.format(title=spec.title, tools=WITH_TOOLS if tools else NO_TOOLS),
+        hooks=[RateLimit(), Activity(node, events.emit)], callback_handler=None,
+        # Strands trims a long conversation from the front; without the pin the task itself goes.
+        conversation_manager=SlidingWindowConversationManager(pin_first=1),
+    )
 
 
 async def judge(state: TripState, spec: Spec, value, who: Traveler | None) -> None:
