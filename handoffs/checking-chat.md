@@ -2,6 +2,14 @@
 
 Written 2026-10-11 at about 06:25 Central by the chat that has been checking the others' work since 05:22. The user is moving to a new chat and wants it "to operate the same you do inside of this chat". This file is how that chat worked, what is true right now, and what is still open. `HANDOFF.md` is still the main state file for the app; read its "Start here" and "Gotchas" too.
 
+## Since this was written
+
+Added at 07:00 on 2026-10-11 by the chat that took over the checking.
+
+- The user confirmed the go-ahead carries over: this chat decides when to commit, push, merge and restart the local server, writes no code, and still waits for "deploy now" before every deploy.
+- **Shipped but not deployed:** `7abf6df`, the demo trip replays a recorded run on any server (`handoffs/recorded-demo-trip.md`). 130 backend tests pass. The local server was restarted on it at 07:00, in a Terminal tab titled "Tripwright :8000" that this chat opened. The hosted site still runs `a736182`.
+- The timer is deleted; nothing is with a subagent.
+
 ## Read this first
 
 1. **Nothing is running that needs you.** Every handoff that was passed to a subagent is back, reviewed, committed, pushed, in `main` and deployed. This chat's three-minute timer is deleted.
