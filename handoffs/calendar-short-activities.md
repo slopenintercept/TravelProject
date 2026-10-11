@@ -1,5 +1,7 @@
 # Handoff: short activities on the calendar are cut off and show no time
 
+**Dropped.** At about 06:20 on 2026-10-11, before this file went to anyone, the user said "honestly no need to do it ignore that part". Nothing here was built. It is kept in case they change their mind.
+
 Written 2026-10-11 at about 06:18 Central by the chat that checks the others' work. You make the fix; that chat checks on it every three minutes, and it is the one that builds, commits, pushes and deploys.
 
 ## What happens
