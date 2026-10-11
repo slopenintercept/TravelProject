@@ -1,8 +1,8 @@
 """The specialist agents: what each is told, which tools it gets, and how its answer is checked.
 
-Every specialist answers with a small structured output (ids, short text, source URLs).
+Every specialist answers with a small structured output (ids, short text, source ids).
 Its `build` function is the deterministic half of the orchestrator's review: it joins
-those ids and URLs back to what the tools really returned and raises `Rejected` with
+those ids back to what the tools really returned and raises `Rejected` with
 specific feedback when something doesn't hold up. Prices and times are never taken
 from the model's own text for flights and lodging.
 """
@@ -34,13 +34,13 @@ PREAMBLE = (
     "{tools} Keep every explanation to one or two plain sentences."
 )
 WITH_TOOLS = (
-    "Gather real data with your tools. Never invent a price, time, option id or URL: use only what "
+    "Gather real data with your tools. Never invent a price, time, option id or source id: use only what "
     "your tools returned. Call only the tools you were given; you cannot delegate to other agents."
 )
 # Told it has tools, a model with none makes some up (WebSearch, Skill) and loses a round trip to the error.
 NO_TOOLS = (
-    "You have no research tools for this step: no web search, no page fetch, no skills. Answer straight "
-    "away from the brief and what you already know."
+    "You have no research tools for this step: no web search, no page fetch, no skills. Give your "
+    "structured answer straight away, from the brief and what you already know, with no other text."
 )
 
 
@@ -86,8 +86,8 @@ def wishes(state: TripState) -> list[tuple[str, str, list[str], list[str]]]:
     return [(f"w{i}", w["text"], w["need"], w["want"]) for i, w in enumerate(merged.values(), 1)]
 
 
-def _sources(ctx: RunContext, urls: list[str]) -> list[Source]:
-    return [s for url in urls if (s := ctx.source(url))]
+def _sources(ctx: RunContext, refs: list[str]) -> list[Source]:
+    return [s for ref in refs if (s := ctx.source(ref))]
 
 
 def _time(text: str) -> time | None:
@@ -147,10 +147,10 @@ async def build_route(state: TripState, ctx: RunContext, out: RouteOut) -> Route
 class WindowPick(BaseModel):
     start_date: str = Field(description="YYYY-MM-DD, a date you checked with window_outlook")
     crowd_level: Literal["low", "moderate", "high"]
-    price_trend: str = Field(description="How fares for this window compare, one sentence")
-    notes: str = Field(description="Closures, festivals or holidays in this window; empty if none")
-    reasoning: str = Field(description="Why this window, one or two sentences")
-    source_urls: list[str] = Field(description="URLs from web_research that support this")
+    price_trend: str = Field(description="How fares for this window compare, under 15 words")
+    notes: str = Field(description="Closures, festivals or holidays in this window, under 15 words; empty if none")
+    reasoning: str = Field(description="Why this window, one sentence under 25 words")
+    source_ids: list[str] = Field(description='Source ids from web_research that support this, e.g. ["s2"]')
 
 
 class TimeframeOut(BaseModel):
@@ -178,7 +178,7 @@ async def build_timeframe(state: TripState, ctx: RunContext, out: TimeframeOut) 
                             f"about {weather['rainy_days']} rainy day{'s' * (weather['rainy_days'] != 1)}",
             crowd_level=pick.crowd_level, cheapest_fare_usd=outlook["fare"], price_trend=pick.price_trend,
             notes=pick.notes, reasoning=pick.reasoning,
-            sources=_sources(ctx, pick.source_urls + [weather["url"]]),
+            sources=_sources(ctx, pick.source_ids + [weather["url"]]),
         ))
     if len(windows) < 2:
         problems.append("propose at least 2 windows, each checked with window_outlook")
@@ -207,7 +207,7 @@ def timeframe_task(state: TripState, who: Traveler | None = None) -> str:
 
 class FlightPick(BaseModel):
     option_id: str = Field(description="An id from search_flights, e.g. f3")
-    tradeoff: str = Field(description="One sentence: price, duration, layovers and arrival time versus the others")
+    tradeoff: str = Field(description="Under 20 words: price, duration, layovers and arrival time versus the others")
 
 
 class FlightsOut(BaseModel):
@@ -253,7 +253,7 @@ def flights_task(state: TripState, who: Traveler) -> str:
     return (f"{brief(state, who)}\n\nFind round-trip flights for {who.name} from {who.origin}. Resolve that origin "
             f"to its nearest major airport(s) and search to {gateway} with search_flights for exactly these dates. "
             f"The flight must land on {state.dates.arrival}. {who.name}'s flight budget is about "
-            f"${allotted(who)['flights']:,.0f}. Pick the 3 best options, best first, and give each a one-sentence "
+            f"${allotted(who)['flights']:,.0f}. Pick the 3 best options, best first, and give each a short "
             "tradeoff (price, duration, layovers, arrival time).")
 
 
@@ -262,25 +262,24 @@ def flights_task(state: TripState, who: Traveler) -> str:
 class StayPick(BaseModel):
     stay: int = Field(description="Stay number from the brief, starting at 1")
     option_id: str = Field(description="An id from search_hotels or search_airbnb")
-    alternative_ids: list[str] = Field(description="Up to 3 other ids from the same search")
-    reasoning: str = Field(description="Why this place: transit, location, rating. One or two sentences. "
+    reasoning: str = Field(description="Why this place: transit, location, rating. One sentence under 25 words. "
                                        "No budgets or traveler names")
 
 
 class LodgingOut(BaseModel):
     most_travelers_pick: Literal["hotel", "airbnb"] = Field(description="What most travelers choose here")
-    because: str = Field(description='Finish the sentence "Most travelers here pick this because ..."')
+    because: str = Field(description='Finish the sentence "Most travelers here pick this because ...", in under 20 words')
     neighborhoods: list[str] = Field(description="Neighborhoods most travelers stay in, per city")
-    source_urls: list[str] = Field(description="URLs from web_research backing the claim")
+    source_ids: list[str] = Field(description='Source ids from web_research backing the claim, e.g. ["s1"]')
     stays: list[StayPick] = Field(description="One pick per stay in the brief")
 
 
 async def build_lodging(state: TripState, ctx: RunContext, out: LodgingOut) -> LodgingPlan:
     problems, stays = [], []
     want = state.lodging_override or out.most_travelers_pick
-    sources = _sources(ctx, out.source_urls)
+    sources = _sources(ctx, out.source_ids)
     if not sources:
-        problems.append("the most-travelers-pick claim needs source_urls returned by web_research")
+        problems.append("the most-travelers-pick claim needs source_ids shown by web_research")
 
     for i, (city, check_in, check_out) in enumerate(stay_plan(state), 1):
         pick = next((p for p in out.stays if p.stay == i), None)
@@ -300,7 +299,7 @@ async def build_lodging(state: TripState, ctx: RunContext, out: LodgingOut) -> L
             problems.append(f"{label}: {room.name} is too far from central {city}; stay near transit and the attractions")
         others = [r for r in ctx.rooms.values() if r.id != room.id and r.kind == room.kind
                   and (r.city, r.check_in, r.check_out) == (room.city, room.check_in, room.check_out)]
-        others.sort(key=lambda r: (r.id not in pick.alternative_ids, r.price_total_usd))
+        others.sort(key=lambda r: r.price_total_usd)
         options = [room, *others[:7]]
         tightest = min(state.travelers, key=lambda t: t.budget_usd)
         cap = _nightly_cap(state, tightest)
@@ -361,9 +360,9 @@ def lodging_task(state: TripState, who: Traveler | None = None) -> str:
             f"their own budget from what you find. Nightly lodging budgets: {caps}. "
             f"First use web_research to find what most travelers to {state.request.destination} "
             "choose for this kind of trip, hotel or Airbnb, and which neighborhoods they stay in (near transit, "
-            "central to the attractions, easy for the airport, budget-friendly). Keep the source URLs. "
+            "central to the attractions, easy for the airport, budget-friendly). Keep the source ids. "
             f"{override}Then search within that choice once per stay, with max_nightly_usd at ${highest:,.0f}, the "
-            "highest budget, and pick one place per stay plus up to 3 alternatives at different prices. Every "
+            "highest budget, and pick one place per stay; the rest of that search is kept as the alternatives. Every "
             f"stay needs at least one option at or under ${lowest:,.0f} a night, the lowest budget. In each "
             "stay's reasoning describe the place only; each traveler's card states their own budget, so leave "
             "budgets and traveler names out.")
@@ -375,7 +374,7 @@ class AttractionOut(BaseModel):
     name: str
     city: str = Field(description="The route city you would visit it from")
     wish_ids: list[str] = Field(description="Ids of the travelers' requests this covers, e.g. [\"w1\"]; empty for your own suggestions")
-    why: str = Field(description="Why it fits this group, one short sentence")
+    why: str = Field(description="Why it fits this group, under 12 words")
     duration_minutes: int = Field(description="Typical visit length")
     ticket_price_usd: float = Field(description="Adult ticket in USD; 0 if free")
     opens: str = Field(description="Opening time HH:MM, or empty if always open")
@@ -383,7 +382,7 @@ class AttractionOut(BaseModel):
     closed_weekdays: list[int] = Field(description="Weekdays it is closed, Monday=0; empty if none")
     outdoor: bool = Field(description="True if rain would spoil it")
     availability_note: str = Field(description="Booking advice in under 15 words, e.g. buy tickets in advance")
-    source_url: str = Field(description="URL from your tools where the price and hours were found")
+    source_id: str = Field(description="Source id from your tools, e.g. s4, where the price and hours were found")
     booking_url: str = Field(description="Official ticket page, or empty")
 
 
@@ -401,11 +400,11 @@ async def build_attractions(state: TripState, ctx: RunContext, out: AttractionsO
         mine = [asked[w] for w in a.wish_ids if w in asked]
         need_by = [t for t in order if any(t in need for _, need, _ in mine)]
         want_by = [t for t in order if t not in need_by and any(t in want for _, _, want in mine)]
-        source = ctx.source(a.source_url)
+        source = ctx.source(a.source_id)
         if source is None:
             # Something a traveler needs has to be fixed; an unsourced extra is simply left out.
             if need_by:
-                problems.append(f"{a.name}: source_url was not returned by your tools")
+                problems.append(f"{a.name}: source_id is not an id your tools showed")
             continue
         if not 20 <= a.duration_minutes <= 720:
             problems.append(f"{a.name}: a {a.duration_minutes}-minute visit is not plausible")
@@ -465,7 +464,7 @@ def attractions_task(state: TripState, who: Traveler | None = None) -> str:
             "planned. For each one find the adult ticket price "
             "in USD, opening hours, closed weekdays, typical visit length and booking advice. Work quickly: "
             "one web_research per attraction is enough, and use browse_page only when a search result lacks "
-            "the price or hours. Every source_url must be a URL your tools returned. "
+            "the price or hours. Every source_id must be an id your tools showed, like s4. "
             f"Each attraction's city must be one of: {cities}.")
 
 
@@ -475,8 +474,8 @@ class LegAlternative(BaseModel):
     mode: str = Field(description="e.g. highway bus, Keisei Skyliner")
     duration_minutes: int
     price_usd: float = Field(description="USD per person")
-    notes: str
-    source_url: str = Field(description="URL from your tools where this price was found")
+    notes: str = Field(description="What the traveler must know, under 12 words; empty if nothing")
+    source_id: str = Field(description="Source id from your tools, e.g. s4, where this price was found")
 
 
 class LegOut(BaseModel):
@@ -486,18 +485,18 @@ class LegOut(BaseModel):
     mode: str = Field(description="e.g. Shinkansen Nozomi, Narita Express, Suica IC card")
     duration_minutes: int = Field(description="Travel time; 0 for passes and rentals")
     price_usd: float = Field(description="USD per person, or for the whole rental")
-    notes: str
-    source_url: str = Field(description="URL from your tools where this price was found")
+    notes: str = Field(description="What the traveler must know, under 12 words; empty if nothing")
+    source_id: str = Field(description="Source id from your tools, e.g. s4, where this price was found")
     alternatives: list[LegAlternative] = Field(
         default=[], description="Up to 2 other ways to make this same trip, e.g. a cheaper bus or a faster train")
 
 
 class TransportOut(BaseModel):
     most_visitors_use: str = Field(description="What most visitors use to get around, e.g. trains and metro")
-    because: str = Field(description='Finish the sentence "Most visitors here use this because ..."')
-    alternative: str = Field(description="The main alternative, e.g. rental car")
+    because: str = Field(description='Finish the sentence "Most visitors here use this because ...", in under 20 words')
+    alternative: str = Field(description="The main alternative in a few words, e.g. rental car")
     rideshare_note: str = Field(description="Whether rideshare is common there, one sentence")
-    source_urls: list[str] = Field(description="URLs from web_research backing the claim")
+    source_ids: list[str] = Field(description='Source ids from web_research backing the claim, e.g. ["s1"]')
     legs: list[LegOut] = Field(description="One entry per trip the traveler makes, plus passes")
 
 
@@ -519,27 +518,27 @@ def _missing_hops(state: TripState, legs: list[TransportLeg]) -> list[str]:
 
 async def build_transport(state: TripState, ctx: RunContext, out: TransportOut) -> TransportPlan:
     problems, legs = [], []
-    sources = _sources(ctx, out.source_urls)
+    sources = _sources(ctx, out.source_ids)
     if not sources:
-        problems.append("the most-visitors-use claim needs source_urls returned by web_research")
+        problems.append("the most-visitors-use claim needs source_ids shown by web_research")
     for leg in out.legs:
         label = f"{leg.mode} {leg.from_place} to {leg.to_place}".strip()
-        source = ctx.source(leg.source_url)
+        source = ctx.source(leg.source_id)
         if source is None:
-            problems.append(f"{label}: source_url was not returned by your tools")
+            problems.append(f"{label}: source_id is not an id your tools showed")
             continue
         if not 0 <= leg.price_usd <= 2000 or (leg.kind == "intercity" and (leg.price_usd <= 0 or leg.duration_minutes <= 0)):
             problems.append(f"{label}: ${leg.price_usd:.0f} / {leg.duration_minutes} min is not plausible")
         others = [
             TransportLeg(id=new_id("l"), kind=leg.kind, from_place=leg.from_place, to_place=leg.to_place, source=found,
-                         **alt.model_dump(exclude={"source_url"}))
+                         **alt.model_dump(exclude={"source_id"}))
             for alt in leg.alternatives
             # An alternative without a source or a believable price is left out rather than sent back.
-            if (found := ctx.source(alt.source_url)) and 0 < alt.price_usd <= 2000
+            if (found := ctx.source(alt.source_id)) and 0 < alt.price_usd <= 2000
             and (leg.kind != "intercity" or alt.duration_minutes > 0)
         ]
         legs.append(TransportLeg(id=new_id("l"), per_person=leg.kind != "rental_car", source=source, alternatives=others,
-                                 **leg.model_dump(exclude={"source_url", "alternatives"})))
+                                 **leg.model_dump(exclude={"source_id", "alternatives"})))
 
     problems += _missing_hops(state, legs)
     cars = [leg for leg in legs if leg.kind == "rental_car"]
@@ -582,12 +581,12 @@ def transport_task(state: TripState, who: Traveler | None = None) -> str:
                 "other leg for someone without one. ") if any(t.rental_car for t in state.travelers) else ""
     return (f"{brief(state)}\n\nFirst use web_research to find how most visitors get around "
             f"{state.request.destination} (trains and transit, rental car, or rideshare) and whether rideshare "
-            f"is common. Keep the source URLs. {override}Then price each leg this trip needs, one entry per "
+            f"is common. Keep the source ids. {override}Then price each leg this trip needs, one entry per "
             f"trip: intercity legs ({hops or 'none'}); an airport_transfer from the arrival airport to "
             f"{plan[0][0]} and one back for the flight home; and a local_pass covering daily transit for "
             f"{state.request.days} days. Each traveler picks their own way to make each trip, so give every "
             "intercity leg and airport transfer up to 2 alternatives (a cheaper way, a faster way), each with "
-            "its own price, duration and source_url. Prices are USD per person.")
+            "its own price, duration and source_id. Prices are USD per person.")
 
 
 # --- weather (no LLM: Open-Meteo only) -----------------------------------------

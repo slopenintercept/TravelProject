@@ -105,10 +105,28 @@ def test_wishes_merge_what_everyone_asked_for(group):
     ]
 
 
-def found(name, city, wish_ids, url="https://example.com/a"):
+def found(name, city, wish_ids, source_id="s1"):
     return AttractionOut(name=name, city=city, wish_ids=wish_ids, why="", duration_minutes=90, ticket_price_usd=5,
                          opens="09:00", closes="17:00", closed_weekdays=[], outdoor=False, availability_note="",
-                         source_url=url, booking_url="")
+                         source_id=source_id, booking_url="")
+
+
+async def test_tools_show_each_source_a_short_id_that_agents_cite_instead_of_its_url(group, monkeypatch):
+    from tripwright.toolbox import Toolbox
+    from tripwright.tools import research
+
+    async def search(query):
+        return [{"title": query, "url": f"https://example.com/{query}", "excerpt": "", "evidence_url": "/e", "fetched_at": None},
+                {"title": "Guide", "url": "https://www.example.com/guide/", "excerpt": "", "evidence_url": "/e", "fetched_at": None}]
+    monkeypatch.setattr(research, "search", search)
+    ctx = RunContext(agent="transport", state=group)
+
+    first, second = await Toolbox(ctx).web_research("trains"), await Toolbox(ctx).web_research("buses")
+
+    assert first.startswith("[s1] trains") and "[s2] Guide" in first
+    assert "[s3] buses" in second and "[s2] Guide" in second  # the same page keeps its id
+    assert ctx.source("s3").url == "https://example.com/buses" and ctx.source("[S2]").title == "Guide"
+    assert ctx.source("http://example.com/guide").title == "Guide" and ctx.source("s4") is None
 
 
 async def test_attractions_agent_result_is_tied_back_to_who_asked(group, monkeypatch):
@@ -121,7 +139,7 @@ async def test_attractions_agent_result_is_tied_back_to_who_asked(group, monkeyp
     plan = await build_attractions(group, ctx, AttractionsOut(attractions=[
         found("Tokyo Disneyland", "Tokyo", ["w1"]), found("Fushimi Inari", "Kyoto", ["w2"]),
         found("Ghibli Museum", "Tokyo", ["w3"]), found("teamLab Planets", "Tokyo", ["w4"]),
-        found("Senso-ji", "Tokyo", []), found("Made-up place", "Tokyo", [], url="https://nowhere.example"),
+        found("Senso-ji", "Tokyo", []), found("Made-up place", "Tokyo", [], source_id="s9"),
     ]))
     by_name = {a.name: a for a in plan}
     assert (by_name["Ghibli Museum"].need_by, by_name["Ghibli Museum"].must_have) == (["p2"], True)
@@ -248,10 +266,10 @@ def test_adding_a_rental_car_leaves_everyone_elses_legs_alone(group):
     sam.rental_car = True
     ctx = RunContext(agent="transport", state=group)
     ctx.sources["example.com/a"] = Source(url="https://example.com/a")
-    leg = dict(notes="", source_url="https://example.com/a")
+    leg = dict(notes="", source_id="s1")
     # Asked for the car, the agent plans every leg around it.
     out = TransportOut(most_visitors_use="trains", because="fast", alternative="rental car", rideshare_note="",
-                       source_urls=["https://example.com/a"], legs=[
+                       source_ids=["s1"], legs=[
         LegOut(kind="rental_car", from_place="", to_place="", mode="Economy car", duration_minutes=0, price_usd=450, **leg),
         LegOut(kind="intercity", from_place="Tokyo", to_place="Kyoto", mode="Drive", duration_minutes=300, price_usd=60, **leg),
         LegOut(kind="intercity", from_place="Kyoto", to_place="Tokyo", mode="Drive", duration_minutes=300, price_usd=60, **leg),
