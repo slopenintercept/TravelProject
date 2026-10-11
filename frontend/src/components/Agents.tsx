@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { capitalize, count, money } from '../format'
 import { useShell } from '../shell'
-import type { AgentStatusName, Traveler, TripState } from '../types'
+import { planningStarted, type AgentStatusName, type Traveler, type TripState } from '../types'
 import type { Lane } from '../useTrip'
 
 // Flights are found per traveler, and so are extra ideas: those lanes ("flight:<traveler>") go between these.
@@ -170,11 +170,13 @@ function LaneCard({ lane, name, selected, detailed }: { lane: Lane; name: string
   )
 }
 
-/** The lanes in the order the agents run. */
-export function laneOrder(lanes: Record<string, Lane>, travelers: Traveler[]): string[] {
-  const per = (role: string) => travelers.map((t) => `${role}:${t.id}`)
+/** The agents to list, in the order they run. The draft agent only works until planning starts: after that it
+ *  is listed if it finished, and left out if it was cut off, since its status would read "working" for good. */
+export function laneOrder(lanes: Record<string, Lane>, state: TripState): string[] {
+  const per = (role: string) => state.travelers.map((t) => `${role}:${t.id}`)
   const order = [...BEFORE, ...per('more_ideas'), 'draft', ...per('flight'), ...AFTER]
-  return [...order, ...Object.keys(lanes).filter((name) => !order.includes(name))].filter((name) => lanes[name])
+  const cutOff = (name: string) => name === 'draft' && planningStarted(state.stage) && lanes[name].status !== 'accepted'
+  return [...order, ...Object.keys(lanes).filter((name) => !order.includes(name))].filter((name) => lanes[name] && !cutOff(name))
 }
 
 /** The board's Agents tab: one card per agent, with what it found. The orchestrator's rejections and each agent's
@@ -183,7 +185,7 @@ export function AgentLanes({ detailed = false }: { detailed?: boolean }) {
   const { state, lanes, agent: selected, busy, retry } = useShell()
   const [choice, setChoice] = useState<boolean | null>(null)
   const details = choice ?? detailed
-  const names = laneOrder(lanes, state.travelers)
+  const names = laneOrder(lanes, state)
   const running = names.filter((name) => RUNNING.includes(lanes[name].status)).length
   const unfinished = names.filter((name) => RESEARCH.test(name) && UNFINISHED.includes(lanes[name].status))
   const howMany = unfinished.length === 1 ? 'one' : unfinished.length

@@ -8,7 +8,7 @@ import { DraftPlan } from './DraftPlan'
 /** One line per agent as it reports. Each opens that agent on the board. */
 export function Crew() {
   const { state, lanes } = useShell()
-  const names = laneOrder(lanes, state.travelers)
+  const names = laneOrder(lanes, state)
   if (names.length === 0) return <p className="small">Waiting for the first agent to start…</p>
   return <div className="crew">{names.map((name) => <AgentTag key={name} agent={name} />)}</div>
 }
