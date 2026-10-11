@@ -65,3 +65,33 @@ There are no frontend tests in this repo, so the browser is the check.
 ## When you finish
 
 Add a `## Result` section at the end of this file: what you changed, what you ran and what it showed for each of the five checks, and anything left undone. Write it last and in one go, after your servers are stopped and your launch entries are removed: the checking chat takes that heading as "ready".
+
+## Result
+
+Written 2026-10-11 by the chat that made the fix. Not built, not committed, not deployed: that is the checking chat's.
+
+**What changed.** One line, in `frontend/src/App.tsx`: `key={you.id}` on the `<Choose>` element, as suggested. `Choose.tsx` was not touched.
+
+**How it was checked.** A copy of `trip_479d20ea` saved as `trip_choose1` in a scratch SQLite file, served by a second backend on port 8015 (`/api/health` said `sqlite` and `local disk`) and a Vite dev server on port 5185. One tab; the address was changed by setting `location.hash`, and a marker on `window` survived every change, so the page never reloaded between steps.
+
+| Check | What it showed |
+|---|---|
+| 1. Open `#trip_choose1/p2` | Sam: Alaska and JAL ($1,793, "Agent's pick") selected, a room selected in each of the three stays, "Flight and stays: $2,624 of your $3,000 budget". |
+| 2. Change to `p1`, no reload | Alex: United and ANA ($1,692, "Agent's pick") selected, a room selected in each of the three stays, $2,523. After a reload the selections and the total were the same. |
+| 3. Back to `p2`, no reload | The same as check 1: Alaska and JAL, three rooms, $2,624. |
+| 4. Select another flight for Sam, go to `p1` and back | With United ($1,861) selected Sam's total read $2,692. Alex's screen still read $2,523 with United and ANA. Back on `p2`, Sam was on Alaska and JAL and $2,624 again. |
+| 5. `npx tsc --noEmit` | Passed (exit 0). |
+
+**The check catches the bug.** With the line taken out, the same steps showed the fault from this handoff: on `p1` no flight was selected and the total read $831. With the line back in, it read $2,523.
+
+**The two cases read from the code.** I read both the same way as the handoff, and built nothing for them.
+
+- "Switch" in the top bar links to `#<trip>` with no traveler, so `you` is empty and the "Who are you?" screen replaces Choose.
+- A Retry sets the Lodging agent to `working`, `optionsReady` turns false and the Working screen replaces Choose. Not tried in the browser, since Retry runs the agents.
+
+**Left as it was.**
+
+- "Confirm my flight and stays" was never clicked, and Retry was never pressed.
+- `trip_479d20ea` was only read: afterwards it was still at `choosing`, neither traveler confirmed, selected flights `f4` (Alex) and `f1` (Sam).
+- Both servers are stopped, ports 8015 and 5185 are free, and the two `tripwright-choose` entries are out of `.claude/launch.json`. The port 8000 server was not touched.
+- `npm run build` was not run, so `frontend/dist` and the hosted site still have the fault until the checking chat builds and deploys.

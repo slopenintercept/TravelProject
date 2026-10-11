@@ -177,6 +177,7 @@ export default function App() {
               />
             ) : screen === 'choose' ? (
               <Choose
+                key={you.id}
                 state={state}
                 you={you}
                 sending={sending}
