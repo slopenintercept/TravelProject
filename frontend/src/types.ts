@@ -269,6 +269,17 @@ export interface BudgetSummary {
   remaining_usd: number
 }
 
+/** One traveler's share of the trip on a test card (payments.py). A hold reserves it; nothing is charged
+ *  until every traveler has one. */
+export interface Payment {
+  card: string // "Visa ···· 4242"
+  amount_usd: number
+  status: 'held' | 'captured' | 'declined' | 'released'
+  ref: string // the Stripe PaymentIntent, when Stripe test mode is on
+}
+
+export type TestCard = 'visa' | 'mastercard' | 'declined'
+
 export interface Swap {
   category: string
   action: 'swap' | 'remove'
@@ -330,6 +341,7 @@ export interface TripState {
   plan_note: string // "One shared itinerary", or who splits off and when
   budgets: Record<string, BudgetSummary> // keyed by traveler id
   budget_proposals: Record<string, SwapProposal> // keyed by traveler id
+  payments: Record<string, Payment> // keyed by traveler id
   flags: Record<string, Flag> // keyed by agent name: "flight:<traveler>", "lodging", "attractions", ...
   approvals: Record<string, string> // keyed by card id: the approved flight or room's id, or "approved"
   agents: Record<string, AgentStatus> // keyed by agent name

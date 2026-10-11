@@ -291,6 +291,13 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .step .todo { margin-top: 10px; font-size: 14px; color: var(--text); }
 .step .pill small { font-size: 13px; font-weight: 500; opacity: 0.8; }
 
+/* Paying together, above the bookings: one row per traveler, then your own card and approval. */
+.shares { margin: 14px 0; border-bottom: 1px solid var(--edge); }
+.shares li { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--edge); }
+.shares b { display: block; font-weight: 600; color: var(--strong); }
+.shares .n { font-family: var(--display); font-weight: 700; font-size: 20px; color: var(--accent); }
+.pay .fine { margin-top: 14px; }
+
 .person header { display: flex; align-items: center; gap: 8px; }
 .person h3 { flex: 1; font-size: 17px; font-weight: 600; color: var(--strong); }
 .invite { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin: 16px 0 8px; }

@@ -306,6 +306,16 @@ class BudgetSummary(BaseModel):
     remaining_usd: float
 
 
+class Payment(BaseModel):
+    """One traveler's share of the trip on a test card. A hold reserves it; nothing is charged until every
+    traveler has one."""
+
+    card: str  # "Visa ···· 4242"
+    amount_usd: float
+    status: Literal["held", "captured", "declined", "released"]
+    ref: str = ""  # the Stripe PaymentIntent, when Stripe test mode is on
+
+
 class Swap(BaseModel):
     category: str
     action: Literal["swap", "remove"]
@@ -365,6 +375,7 @@ class TripState(BaseModel):
     plan_note: str = ""  # "One shared itinerary", or who splits off and when
     budgets: dict[str, BudgetSummary] = {}  # per traveler id
     budget_proposals: dict[str, SwapProposal] = {}
+    payments: dict[str, Payment] = {}  # per traveler id: their share of the trip on a test card
     flags: dict[str, Flag] = {}
     # Keyed by card id. The value is what was approved: the chosen flight or room's id, or "approved"
     # for a card with nothing to choose between. Choosing another flight or room withdraws it.

@@ -43,6 +43,9 @@ OBJ_BUCKET = os.getenv("OBJ_BUCKET", "")
 OBJ_ACCESS_KEY = os.getenv("OBJ_ACCESS_KEY", "")
 OBJ_SECRET_KEY = os.getenv("OBJ_SECRET_KEY", "")
 
+# Stripe test mode for the group's payment holds (a key starting sk_test_); empty keeps the holds in the app.
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+
 DEMO_MODE = _flag("DEMO_MODE")  # serve recorded tool results, never browse
 RECORD_FIXTURES = _flag("RECORD_FIXTURES")  # save live tool results as demo fixtures
 BROWSER_WORKERS = int(os.getenv("BROWSER_WORKERS", "4"))  # parallel Chromium sessions

@@ -13,8 +13,9 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from stripe import StripeError
 
-from . import config, draft, evidence, orchestrator, store
+from . import config, draft, evidence, orchestrator, payments, store
 from .booking import BookingStep, booking_steps
 from .cards import Card, review_cards
 from .events import bus
@@ -83,6 +84,10 @@ class MoveIn(BaseModel):
 class SwapIn(BaseModel):
     item_id: str
     attraction_id: str
+
+
+class PayIn(BaseModel):
+    card: Literal["visa", "mastercard", "declined"]  # a test card from payments.CARDS
 
 
 def _trip(trip_id: str) -> TripState:
@@ -185,6 +190,7 @@ def health() -> dict:
         "research": "tavily" if config.TAVILY_API_KEY else "no TAVILY_API_KEY",
         "database": config.DATABASE_URL.split(":", 1)[0],
         "evidence": "object storage" if config.OBJ_BUCKET else "local disk",
+        "payments": "stripe test mode" if config.STRIPE_SECRET_KEY else "holds kept in the app",
         "demo_mode": config.DEMO_MODE,
     }
 
@@ -414,6 +420,33 @@ async def swap_item(trip_id: str, body: SwapIn, you: You = None) -> TripView:
         except StopIteration as e:
             raise HTTPException(400, "Unknown itinerary item") from e
     return _view(state)
+
+
+async def _pay(state: TripState, step, traveler_id: str, *args) -> TripView:
+    """Run a payment step off the event loop (Stripe is a network call), then save and tell every open tab."""
+    async with _lock(state.id):
+        try:
+            message = await asyncio.to_thread(step, state, traveler_id, *args)
+        except (ValueError, StripeError) as e:
+            raise HTTPException(400, str(e)) from e
+        finally:
+            store.save_trip(state)
+            bus(state.id).emit("state")
+    return _view(state, message)
+
+
+@app.post("/api/trips/{trip_id}/payments")
+async def approve_payment(trip_id: str, body: PayIn, you: You = None) -> TripView:
+    """A traveler approves their own share: a hold on a test card. Everyone is charged once everyone is in."""
+    state = _trip(trip_id)
+    return await _pay(state, payments.approve, _acting(state, you).id, body.card)
+
+
+@app.delete("/api/trips/{trip_id}/payments")
+async def back_out(trip_id: str, you: You = None) -> TripView:
+    """A traveler backs out before the trip is paid: every hold is released."""
+    state = _trip(trip_id)
+    return await _pay(state, payments.back_out, _acting(state, you).id)
 
 
 @app.get("/evidence/{path:path}")

@@ -201,7 +201,13 @@ export default function App() {
                 </Working>
               )
             ) : screen === 'finish' ? (
-              <Finish view={view} you={you} />
+              <Finish
+                view={view}
+                you={you}
+                busy={busy}
+                onApprove={(card) => act(api.approvePayment(state.id, card))}
+                onBackOut={() => act(api.backOut(state.id))}
+              />
             ) : screen === 'review' ? (
               <Review
                 view={view}

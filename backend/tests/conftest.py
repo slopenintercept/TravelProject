@@ -5,7 +5,8 @@ from datetime import date, datetime, time
 # Tests get their own database and evidence folder; set before tripwright.config is imported.
 os.environ["DATA_DIR"] = tempfile.mkdtemp(prefix="tripwright-test-")
 # .env may name the hosted database and bucket; an empty value here wins over it, so config falls back to local ones.
-os.environ["DATABASE_URL"] = os.environ["OBJ_BUCKET"] = ""
+# The same goes for the Stripe key: tests keep the payment holds in the app and never call Stripe.
+os.environ["DATABASE_URL"] = os.environ["OBJ_BUCKET"] = os.environ["STRIPE_SECRET_KEY"] = ""
 
 import pytest  # noqa: E402
 

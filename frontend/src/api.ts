@@ -1,4 +1,4 @@
-import type { DecisionAction, Picks, TravelerIn, TripRequest, TripView } from './types'
+import type { DecisionAction, Picks, TestCard, TravelerIn, TripRequest, TripView } from './types'
 
 /** The traveler this tab is acting as (from their own trip link); sent with every request. */
 let traveler = ''
@@ -65,4 +65,6 @@ export const api = {
   moveItem: (id: string, item_id: string, day: string) => post(`/${id}/itinerary/move`, { item_id, day }),
   swapItem: (id: string, item_id: string, attraction_id: string) =>
     post(`/${id}/itinerary/swap`, { item_id, attraction_id }),
+  approvePayment: (id: string, card: TestCard) => post(`/${id}/payments`, { card }),
+  backOut: (id: string) => request(`/${id}/payments`, { method: 'DELETE' }),
 }

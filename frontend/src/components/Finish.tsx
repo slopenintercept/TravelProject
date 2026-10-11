@@ -1,8 +1,9 @@
 import { money, safeHref, whoIsIn } from '../format'
-import type { BookingStep, Category, Traveler, TripView } from '../types'
+import type { BookingStep, Category, TestCard, Traveler, TripView } from '../types'
 import { Board } from './Board'
 import { Chips } from './Chips'
 import { Budget, Days } from './Days'
+import { Pay } from './Pay'
 
 /** What the group books together; each traveler's own flight, stays and transport come first. */
 const SHARED: [Category, string][] = [
@@ -18,11 +19,15 @@ const LINK_LABEL: Record<BookingStep['link'], string> = {
 interface Props {
   view: TripView
   you: Traveler
+  busy: boolean
+  onApprove: (card: TestCard) => void
+  onBackOut: () => void
 }
 
-/** The hand-off: everything to book, in order, each with a link that already carries the trip's details.
- *  Each traveler sees their own flight and stays, and the bookings the group shares. The final days stay beside it. */
-export function Finish({ view, you }: Props) {
+/** The hand-off: the group pays together, then everything to book, in order, each with a link that already
+ *  carries the trip's details. Each traveler sees their own flight and stays, and the bookings the group shares.
+ *  The final days stay beside it. */
+export function Finish({ view, you, busy, onApprove, onBackOut }: Props) {
   const { booking, state } = view
   const { travelers } = state
   const solo = travelers.length < 2
@@ -46,8 +51,10 @@ export function Finish({ view, you }: Props) {
         <div className="hd top"><h1 className="display h-40">Your trip is ready to book</h1></div>
         <p className="say">
           Each link opens the provider with your details already filled in wherever the site accepts them.
-          You book and pay there yourself. Tripwright never does.
+          You book there yourself.
         </p>
+
+        <Pay state={state} you={you} busy={busy} onApprove={onApprove} onBackOut={onBackOut} />
 
         {mine.length > 0 && (
           <section>
