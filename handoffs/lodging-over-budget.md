@@ -75,3 +75,29 @@ Then replace the "The Lodging agent timed out ..." bullet under "Not done or not
 ## When you finish
 
 Add a section `## Result` at the bottom of this file: the files you changed, what you ran and what it showed, and anything left undone. Do the same if you stop early. Another chat reads this file every few minutes to see whether the work is done.
+
+## Result
+
+Done on 2026-10-11 at about 05:40 Central. Nothing is committed, pushed or deployed, and the server on port 8000 was not touched.
+
+Files changed:
+
+- `backend/tripwright/tools/lodging.py`: `_finish` always keeps the cheapest room under the cap, and returns the three cheapest rooms when nothing is under it.
+- `backend/tripwright/toolbox.py`: `_rooms` takes the cap and the place, and starts with "Nothing at or under $44 a night in Asakusa. The cheapest found:" when the rooms are over the cap. Both search tools pass them in.
+- `backend/tripwright/specialists.py`: `build_lodging` no longer rejects a stay for being over the tightest budget (every other check is unchanged). `lodging_task` drops the "Every stay needs at least one option at or under ..." sentence and tells the agent to take the cheapest central room when a search says nothing is in budget, and to search at most two neighbourhoods per stay.
+- `backend/tests/test_lodging_budget.py`: new, five tests.
+- `HANDOFF.md`: the "Lodging agent timed out" bullet and the matching line under "Start here".
+
+What was run:
+
+1. Baseline: 119 passed.
+2. The new tests before the change: 4 failed, 1 passed (the "too far from the centre" test, which checks behaviour that was to stay).
+3. The whole suite after the change: 126 passed. That is the 119, my 5, and 2 in `tests/test_conversation.py` from the chat fixing the ideas agent (those 2 failed in one run midway, before that chat's fix landed).
+4. The saved Asakusa page for 2026-12-30 (16 rooms, cheapest $75) through `_finish` with a cap of 44: it returns the rooms at $75, $79 and $92, and `_rooms` prints "Nothing at or under $44 a night in Asakusa. The cheapest found:" above them.
+5. End to end on port 8012 with a copy of the database in my scratch folder, trip copied as `trip_lodgingfix`, "Retry the one that didn't finish" pressed on the Agents tab as Alex: Lodging was accepted on attempt 1, and the trip stopped being busy about 80 seconds after the press. Both travelers got Guest House Tokyo Samurai in Asakusa at $41 a night for Dec 12 to 28 (within budget), Hotel M's Est Kyoto Station South at $54 for Dec 28 to 30, and BOOK AND BED TOKYO Shinjuku at $57 for Dec 30 to 31. The last two cards read "Cheapest option found at $54 (or $57) a night; that is over Alex's lodging budget of about $44 a night." The server is stopped and its preview entry is removed from `.claude/launch.json` again.
+
+Left undone:
+
+- The user's real trip `trip_479d20ea` is unchanged; its Lodging agent is still `pending`. The server on port 8000 runs the old code until it is restarted, so a retry there will fail the same way until then.
+- One end-to-end run only. The agent kept to the limit of two neighbourhoods that time; nothing in the code enforces it, and the 240-second limit is as it was.
+- When a page has no rooms at all, the search still answers "Nothing found under that price." I left that wording alone.

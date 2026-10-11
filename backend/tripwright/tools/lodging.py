@@ -125,9 +125,18 @@ async def search_airbnb(city: str, check_in: date, check_out: date, guests: int,
 
 
 def _finish(result: dict, prefix: str, city: str, area: str, check_in: date, check_out: date, max_nightly: float) -> dict:
-    """Apply the price cap, keep the best-rated few, and stamp ids, city and dates."""
-    options = [o for o in result["options"] if not max_nightly or o["price_per_night_usd"] <= max_nightly]
-    options = sorted(options, key=lambda o: -(o["rating"] or 0))[:MAX_OPTIONS]
+    """Apply the price cap, keep the best-rated few, and stamp ids, city and dates.
+
+    The cheapest room under the cap is always kept. When nothing is under it, the three
+    cheapest rooms are returned instead, so the caller can see what the page did have.
+    """
+    by_price = sorted(result["options"], key=lambda o: o["price_per_night_usd"])
+    within = [o for o in by_price if not max_nightly or o["price_per_night_usd"] <= max_nightly]
+    options = sorted(within, key=lambda o: -(o["rating"] or 0))[:MAX_OPTIONS]
+    if within and within[0] not in options:
+        options[-1] = within[0]
+    if not within:
+        options = by_price[:3]
     for i, option in enumerate(options, 1):
         # The check-in date keeps ids unique when a route visits the same city twice.
         option.update(id=f"{prefix}-{check_in:%m%d}-{i}", city=city, neighborhood=area,

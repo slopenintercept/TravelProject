@@ -432,11 +432,6 @@ async def build_lodging(state: TripState, ctx: RunContext, out: LodgingOut) -> L
                   and (r.city, r.check_in, r.check_out) == (room.city, room.check_in, room.check_out)]
         others.sort(key=lambda r: r.price_total_usd)
         options = [room, *others[:7]]
-        tightest = min(state.travelers, key=lambda t: t.budget_usd)
-        cap = _nightly_cap(state, tightest)
-        if min(o.price_total_usd / max(o.nights, 1) for o in options) > cap * 1.15:
-            problems.append(f"{label}: nothing fits {tightest.name}'s lodging budget of about ${cap:.0f} a night; "
-                            "search again with a lower max_nightly_usd")
         stays.append(LodgingStay(city=city, check_in=check_in, check_out=check_out, selected_id=room.id,
                                  options=options, reasoning=pick.reasoning))
     if problems:
@@ -483,8 +478,7 @@ def assign_rooms(state: TripState) -> None:
 
 def lodging_task(state: TripState, who: Traveler | None = None) -> str:
     caps = ", ".join(f"{t.name} ${_nightly_cap(state, t):,.0f}" for t in state.travelers)
-    nightly = [_nightly_cap(state, t) for t in state.travelers]
-    lowest, highest = min(nightly), max(nightly)
+    highest = max(_nightly_cap(state, t) for t in state.travelers)
     override = (f"The group has asked for {state.lodging_override}, so search for that, but still report "
                 "what most travelers pick. ") if state.lodging_override else ""
     return (f"{brief(state)}\n\nFind lodging options for the group: each traveler gets their own room, picked to "
@@ -493,8 +487,10 @@ def lodging_task(state: TripState, who: Traveler | None = None) -> str:
             "choose for this kind of trip, hotel or Airbnb, and which neighborhoods they stay in (near transit, "
             "central to the attractions, easy for the airport, budget-friendly). Keep the source ids. "
             f"{override}Then search within that choice once per stay, with max_nightly_usd at ${highest:,.0f}, the "
-            "highest budget, and pick one place per stay; the rest of that search is kept as the alternatives. Every "
-            f"stay needs at least one option at or under ${lowest:,.0f} a night, the lowest budget. In each "
+            "highest budget, and pick one place per stay; the rest of that search is kept as the alternatives. When a "
+            "search has nothing at or under the price it says so and lists the cheapest rooms instead: take the "
+            "cheapest one, as long as the neighborhood is central, and it will be shown as over budget. Search at "
+            "most two neighborhoods per stay. In each "
             "stay's reasoning describe the place only; each traveler's card states their own budget, so leave "
             "budgets and traveler names out.")
 

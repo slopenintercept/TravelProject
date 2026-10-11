@@ -124,9 +124,12 @@ class Toolbox:
         return (f"{start_date} to {end}: {city} averages {weather['avg_high_c']}C/{weather['avg_low_c']}C with "
                 f"{weather['rainy_days']} rainy days; cheapest round-trip fare {fare}.")
 
-    async def _rooms(self, result: dict, title: str, lat_lon) -> str:
+    async def _rooms(self, result: dict, title: str, lat_lon, max_nightly: float, where: str) -> str:
         source = self.ctx.add_source(result["url"], title, result["evidence_url"], result["fetched_at"])
         lines = []
+        # The search returns rooms over the price only when the page had nothing at or under it.
+        if any(raw["price_per_night_usd"] > max_nightly > 0 for raw in result["options"]):
+            lines.append(f"Nothing at or under ${max_nightly:.0f} a night in {where}. The cheapest found:")
         for raw in result["options"]:
             raw = {k: v for k, v in raw.items() if k not in ("reviews", "price_per_night_usd")} | {
                 "location_note": f"{raw['reviews']:,} reviews, ${raw['price_per_night_usd']:.0f}/night"}
@@ -150,7 +153,8 @@ class Toolbox:
         try:
             result = await lodging.search_hotels(city, area, date.fromisoformat(check_in), date.fromisoformat(check_out),
                                                  1, max_nightly_usd)
-            return await self._rooms(result, "Google Hotels", await places.geocode(f"{area}, {city}"))
+            return await self._rooms(result, "Google Hotels", await places.geocode(f"{area}, {city}"),
+                                     max_nightly_usd, area or city)
         except Exception as e:
             return f"Hotel search failed: {e}"
 
@@ -167,7 +171,7 @@ class Toolbox:
         try:
             result = await lodging.search_airbnb(city, date.fromisoformat(check_in), date.fromisoformat(check_out),
                                                  1, max_nightly_usd)
-            return await self._rooms(result, "Airbnb", None)
+            return await self._rooms(result, "Airbnb", None, max_nightly_usd, city)
         except Exception as e:
             return f"Airbnb search failed: {e}"
 
