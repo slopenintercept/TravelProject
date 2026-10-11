@@ -1,17 +1,43 @@
 # Tripwright
 
-An agentic trip planner built for Hack Midwest, for one traveler or a group. The host describes the trip (where from, where to, how long, budget) and invites the others with a link; each traveler joins on their own link with where they fly from and their budget, then marks a list of places the agents research for the destination as must do, interested or not for me. A team of AI agents then plans it end to end: dates, a flight, rooms and local transport for each traveler within their own budget, attractions for the group, and a day-by-day itinerary with no scheduling conflicts. Each traveler chooses their own flight and rooms before the days are planned around them. Everyone shares one itinerary while it fits; when it doesn't, someone splits off for an activity (or skips one they marked not for me) and regroups after. The agents gather live data by browsing provider sites, every price is stored with its source URL and a saved snapshot of the page it came from, and each traveler approves, swaps or removes their own decisions before anything is booked.
+An agentic trip planner built for Hack Midwest, for one traveler or a group. The host describes the trip (where from, where to, how long, budget) and invites the others with one link; each traveler opens it on their own device, adds their name, where they fly from and their budget, and from then on has their own link to the trip. They then mark a list of places the agents research for the destination as must do, interested or not for me. A team of AI agents then plans it end to end: dates, a flight, rooms and local transport for each traveler within their own budget, attractions for the group, and a day-by-day itinerary with no scheduling conflicts. Each traveler chooses their own flight and rooms before the days are planned around them. Everyone shares one itinerary while it fits; when it doesn't, someone splits off for an activity (or skips one they marked not for me) and regroups after. The agents gather live data by browsing provider sites, every price is stored with its source URL and a saved snapshot of the page it came from, and each traveler approves, swaps or removes their own decisions before anything is booked.
 
 - **Strands Agents SDK** runs every agent: a Strands `Graph` dispatches specialists in parallel, each a Strands `Agent` with `@tool` functions, Pydantic structured output, hooks and streaming.
 - **Akamai Cloud** hosts it: the hackathon's hosted inference endpoint is the model provider, a Linode runs the API and the Chromium workers, Managed PostgreSQL holds trip state, and Object Storage holds the evidence snapshots.
 
 Demo scenario: 7 days in Japan from Kansas City, $2,500 total, with Tokyo Disneyland and Kyoto's Fushimi Inari marked must do. See [DEMO.md](DEMO.md) for the 3-minute script.
 
+![The review screen: what needs you on the left, the budget and the days on the right](design/implemented/03-review.jpg)
+
+To run it, go to [Run locally](#run-locally). To put it on a server, go to [Deploy on Akamai](#deploy-on-akamai).
+
+## How the screen works
+
+The whole trip happens on one screen with two panes that scroll on their own:
+
+- **The feed, on the left,** is where the agents report and ask for the next decision.
+- **The board, on the right,** is the plan, filling in as you answer. A switch at its top swaps the plan for **Agents**: one card per agent with its status, what it found, how often the orchestrator sent its work back, and its tool log behind **Show details**.
+
+A headline that an agent's work is behind names that agent, with a status dot and a few words on what it found or is doing (on a group trip, **Validate agent** then "5 issues, 4 yours"). Clicking that tag opens the agent's card on the board. Headlines with no agent behind them, such as the start form, the invite and the bookings, have no tag.
+
+| Step | In the feed | On the board |
+| --- | --- | --- |
+| Start | The trip form, and **Use the demo trip** in the top bar | Where the route and days will appear |
+| Picks | Places by category: **Must do**, **Interested** or **No**; **Add a place**; **More like my picks** | The draft plan, the tallies and **Save my picks** |
+| Dates | One card per date window with weather, crowds and the cheapest fare found | The route |
+| Who's coming | The invite link and everyone who has joined | The draft plan from everyone's picks |
+| Agents working | One line per agent as it reports | The Agents tab, open |
+| Choose | Your flight and a room for each stay, as selectable cards | The draft plan; once someone has confirmed and the days are planned around them, the days so far |
+| Review | **Needs you** (must-sees that did not fit, your budget), your flight, your stays, getting around, and what was left off | Your budget by category and a week calendar: drag an activity to another day, or click one to swap it or take it off |
+| Finish | Your bookings in order, then tickets. Flight and stay links open with the trip's details filled in; ticket and transport links open the provider's page, with a note on what to enter there. Places that need no ticket are listed without a link | The final days |
+
+The design this was built from is in [design/](design/): the approved mockup is `direction-c-lilac.html`, and `implemented/` has screenshots of the running app.
+
 ## Architecture
 
 ```mermaid
 flowchart LR
-    UI["React frontend<br/>form, timeframe, review cards,<br/>calendar, budget bar, agent panel"]
+    UI["React frontend<br/>a feed of decisions beside the plan:<br/>calendar, budget, agents"]
     API["FastAPI<br/>trip endpoints + SSE"]
     subgraph Strands["Strands Graph (orchestrator)"]
         direction TB
@@ -40,10 +66,10 @@ Each stage is one run of a Strands `Graph` ([orchestrator.py](backend/tripwright
 ```
 Stage 1  host's form         route ──┬── profile
                                      ├── timeframe (suggests 2-3 date windows)
-                                     └── ideas (15-25 places everyone marks must do / interested / not for me)
+                                     └── ideas (about 16 places everyone marks must do / interested / not for me)
 
-         host picks dates, shares the invite link; each traveler joins on their own link and marks the places
-         ("Suggest more like this" runs the ideas agent again for one traveler)
+         host picks dates, shares the invite link; each traveler joins from it on their own device and marks the places
+         ("More like my picks" runs the ideas agent again for one traveler)
 
 Stage 2  everyone's in       route (again, now with everyone's picks)
                              flight: Alex ──┐
@@ -77,7 +103,7 @@ working ──► under review ──► accepted
                │
                ├─ deterministic checks, every attempt: every id and URL was really returned by a
                │  tool, dates/cities match TripState, prices are plausible, budget share respected
-               ├─ LLM judgment (orchestrator agent), first attempt only, not for flights: plausibility and fit
+               ├─ LLM judgment (orchestrator agent), first attempt only, for lodging, attractions and transport: plausibility and fit
                │
                └─► sent back with specific feedback (up to 2 retries)
                       └─► fallback to the last accepted result (database, then demo fixtures),
@@ -88,7 +114,7 @@ A specialist has a time limit (`AGENT_TIMEOUT_S`). A node never raises, so a slo
 
 ### The key rule: facts and math are code, not the model
 
-- **Prices are never typed by the model.** Tools return a short table and keep the full results in a per-run context keyed by id. The agent answers with ids, reasoning and source URLs; Python joins them back to the real price, times, source URL and evidence snapshot ([toolbox.py](backend/tripwright/toolbox.py), [specialists.py](backend/tripwright/specialists.py)).
+- **Flight and lodging prices, and the fare shown for each date window, are never typed by the model.** Tools return a short table and keep the full results in a per-run context keyed by id. The agent answers with ids, reasoning and source ids; Python joins them back to the real price, times, source URL and evidence snapshot ([toolbox.py](backend/tripwright/toolbox.py), [specialists.py](backend/tripwright/specialists.py)). Attraction ticket prices and transport fares are the exception: the agent reads the amount from a page it researched and gives that page's source id. Code checks that the id is one a tool returned and that the amount is in a plausible range; anything that fails is sent back or left out.
 - **`validate_itinerary`** ([validate.py](backend/tripwright/validate.py)) is deterministic: nobody in two places at once, travel time between stops, opening hours and closed days, conflicts with flights and intercity travel, each traveler's lodging covering every night, wrong-city days, everyone attending what they marked must do and nobody sent to what they marked not for me, each traveler's cost against their budget. It runs after every change.
 - **Budget** ([budget.py](backend/tripwright/budget.py)) and **scheduling** ([scheduler.py](backend/tripwright/scheduler.py)) are deterministic graph nodes. If a traveler is over budget, the optimizer proposes the fewest swaps of their own flight and rooms that fit; shared attractions are left alone.
 - **The landing day comes from real flight results**, not from the model: it is read from a flight search before lodging dates are set.
@@ -102,7 +128,7 @@ A specialist has a time limit (`AGENT_TIMEOUT_S`). A node never raises, so a slo
 | `Agent` with `structured_output_model` (Pydantic) | every specialist and the orchestrator's reviewer; schemas in [specialists.py](backend/tripwright/specialists.py) |
 | `@tool` (class-based, async) | [toolbox.py](backend/tripwright/toolbox.py): `search_flights`, `search_hotels`, `search_airbnb`, `window_outlook`, `web_research`, `read_source`, `browse_page` |
 | Hooks (`HookProvider`) | [llm.py](backend/tripwright/llm.py): `RateLimit` (shared requests/min pacing), `Activity` (streams tool calls to the UI, caps tool results for the 32k context) |
-| Streaming (`agent.stream_async`) | `SpecialistNode._ask` forwards reasoning text to the activity panel |
+| Streaming (`agent.stream_async`) | `SpecialistNode._ask` forwards reasoning text to that agent's log on the board's Agents tab |
 | `OpenAIModel` provider with a custom `base_url` | [llm.py](backend/tripwright/llm.py) `make_model` |
 | Vended tools (`strands_tools.tavily`) | [tools/research.py](backend/tripwright/tools/research.py) wraps `tavily_search` / `tavily_extract` |
 
@@ -121,7 +147,9 @@ Variable names match the [Akamai starter kit](https://github.com/akamai-develope
 
 ## Run locally
 
-Requires Python 3.11+ and Node 20+.
+Requires Python 3.11+ and Node 22.12 or newer (Node 20.19 or a later 20.x also works; that is the range Vite 8 supports).
+
+**First time:**
 
 ```bash
 cp .env.example .env          # add OPENAI_API_KEY (team key) and TAVILY_API_KEY; shell variables override .env
@@ -130,23 +158,61 @@ cd backend
 python3 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 .venv/bin/playwright install chromium
-.venv/bin/pytest                # 89 tests: validator, scheduler, budget, review loop, booking links, group trips, picks, API roles
 
 cd ../frontend
 npm install
 npm run build                   # FastAPI serves frontend/dist
+```
 
-cd ..
+**Every time,** from the project root:
+
+```bash
 backend/.venv/bin/uvicorn tripwright.api:app --app-dir backend --port 8000
 ```
 
-Open http://localhost:8000. `GET /api/health` shows which services are live and which are on their local fallback (SQLite, evidence on disk). For frontend development run `npm run dev` in `frontend/`; it proxies `/api` to port 8000.
+Open http://localhost:8000, click **Use the demo trip**, then **Start planning**.
+
+- `GET /api/health` shows which services are live and which are on their local fallback (SQLite, evidence on disk).
+- **Which database:** with `DATABASE_URL` set in `.env` (which `deploy/provision.sh` does), a local server reads and writes the hosted trips. To keep a local server on the SQLite file `data/tripwright.db`, start it with `DATABASE_URL=` in front of the command.
+- The server does not reload. Restart it after editing the backend, and run `npm run build` again after editing `frontend/src`.
+- Restarting a server stops any agent run in progress: runs live in the server process.
+
+### Work on the frontend
+
+```bash
+cd frontend
+npm run dev                     # http://localhost:5173, with hot reload
+```
+
+The dev server sends `/api` to the backend on port 8000. To use a backend on another port, set `TRIPWRIGHT_BACKEND`, for example `TRIPWRIGHT_BACKEND=http://localhost:8001 npm run dev`.
+
+### Tests
+
+```bash
+(cd backend && .venv/bin/python -m pytest -q)    # 111 tests: validator, scheduler, budget, review loop, booking links, group trips, picks, API roles
+(cd frontend && npm run build)                   # the TypeScript check, then the build; there is no frontend test suite
+```
+
+Both lines run from the project root.
+
+The tests always use a throwaway SQLite file, whatever `.env` says.
+
+### A ready-made group trip
+
+```bash
+cd backend && .venv/bin/python -m tripwright.scenario
+```
+
+This creates a seven-traveler Japan trip with dates set and everyone's picks saved, and prints its links, so you can join as an eighth traveler or switch to the host and start planning.
+
+- The research (flights, rooms, attractions, transport, weather) does not start until the host starts planning. Opening the trip does build the draft plan about ten seconds later, and joining or saving picks rebuilds it: with a key set, each build is one route planner call and one short note from the orchestrator.
+- It writes to whichever database `.env` names. If your server is on the SQLite file, run it as `cd backend && DATABASE_URL= .venv/bin/python -m tripwright.scenario`: the `DATABASE_URL=` has to sit right before `.venv/bin/python`, because in front of `cd` it has no effect.
 
 ### Without keys, and DEMO_MODE
 
-- **No `OPENAI_API_KEY`:** every specialist goes straight to its fallback. For the demo trip (Kansas City → Japan, 7 days) that is the result of a real live run on 2026-10-10, recorded in [fixtures/recorded.json](backend/tripwright/fixtures/recorded.json) and shown with a "saved result" flag. Any other trip shows the agents as pending.
+- **No `OPENAI_API_KEY`:** every specialist goes straight to its fallback. For the demo trip (Kansas City → Japan, 7 days) that is the result of a real live run on 2026-10-10, recorded in [fixtures/recorded.json](backend/tripwright/fixtures/recorded.json) and shown with a "saved result" flag. The exception is the ideas agent: no list of places is recorded, so unless your database already has one from an earlier live run, the picks screen starts empty and you add places yourself with **Add a place**, or save with none. Any other trip shows the agents as pending.
 - **`DEMO_MODE=true`:** tools never touch the network. They replay recorded results (same call, or the closest recorded call to the same tool). The agents still reason live if a key is set, so the demo survives a site changing or blocking us.
-- **`RECORD_FIXTURES=true`:** live tool results and accepted agent results are also written to the fixtures file. To refresh the demo: set it, plan the demo trip once, then `cp -R data/evidence/* backend/tripwright/fixtures/evidence/`.
+- **`RECORD_FIXTURES=true`:** live tool results and accepted agent results are also written to the fixtures file. To refresh the demo: start the server with `RECORD_FIXTURES=true OBJ_BUCKET=` in front of the command, so the snapshots are written to `data/evidence` and not to Object Storage. Plan the demo trip once, then `cp -R data/evidence/* backend/tripwright/fixtures/evidence/`. The list of places is the exception: if the database has one saved for a 7-day Japan trip in the last 30 days, it is reused and not recorded.
 
 ## Deploy on Akamai
 
@@ -157,6 +223,10 @@ bash deploy/provision.sh   # Object Storage bucket + key, Managed PostgreSQL; wr
 bash deploy/deploy.sh      # firewall, Linode, Docker; copies the code and .env; waits for /api/health
 bash deploy/teardown.sh    # deletes everything labelled tripwright-*
 ```
+
+`deploy.sh` is also how you update a server that is already running: it reuses what exists, copies the working folder (uncommitted changes included, so check `git status` first), rebuilds the container and waits for `/api/health`. Rebuilding restarts the app, which stops any trip that is being planned at that moment.
+
+The app answers on `http://<server-ip>:8000`. `linode-cli linodes list --label tripwright-app` prints the address.
 
 ## Safety and booking rules
 
@@ -186,7 +256,14 @@ backend/tripwright/
   api.py            FastAPI + SSE
   fixtures/         recorded tool results, accepted results and evidence for the demo
 backend/tests/      validator, scheduler, budget, orchestrator (scripted model)
-frontend/           React + Vite
+frontend/src/
+  App.tsx           the top bar, and which screen a trip is on
+  shell.ts          what every screen shares: the trip, who is looking, the agents, the board's open tab
+  useTrip.ts        loads the trip and follows its event stream
+  styles.css        the one stylesheet: colours, type and every component
+  components/       one file per screen (Start, Picks, Timeframe, Gathering, Join, Working, Choose, Review, Finish)
+                    and the shared pieces (Board, Agents, Calendar, Days, DraftPlan, Route)
+design/             the approved mockup, the handoff it was built from, and screenshots of the result
 deploy/             Akamai provisioning and deploy scripts
 ```
 
@@ -201,8 +278,9 @@ deploy/             Akamai provisioning and deploy scripts
 - **Travel times between stops are estimates** (great-circle distance at urban transit speed). There is no free transit-routing API for Japan. Intercity legs use the Transport agent's researched durations.
 - **Budget optimizer, scheduler and weather are deterministic graph nodes**, not LLM agents, following the key rule. The scheduler runs before the budget step, because a traveler's ticket costs depend on which activities they attend.
 - **Lodging is one agent, not one per traveler.** Each traveler still gets their own room by their own budget, but the pick is made in code from one agent's research. Running a lodging agent per traveler overloaded the shared endpoint in live tests.
-- **The reviewer model judges each result once.** In live runs it sent back correct results for reasons that were not true, so the code checks run on every attempt and the model's judgment only on the first. Flights are not judged at all: every fact in a flight result comes from the search, and an over-budget first pick is reordered in code.
-- **Invites are a share link with no login.** Anyone with the link can join, and anyone who opens the trip sees the host's controls.
+- **The reviewer model judges lodging, attractions and transport results, once each.** In live runs it sent back correct results for reasons that were not true, so the code checks run on every attempt and the model's judgment only on the first. Flights, the route, the profile, the date windows and the list of places are checked by code only. Flights were judged at first and no longer are: every fact in a flight result comes from the search, and an over-budget first pick is reordered in code.
+- **Invites are a share link with no login.** Anyone with the invite link can join until planning starts, and then has their own link. The host's controls (choosing the dates, removing a traveler, starting planning) show only on the host's link, and the API refuses them from anyone else. This keeps people to their own choices rather than securing them: the bare trip link asks "Who are you?" and lets anyone pick any traveler, the host included.
 - **Trip length:** `days` runs from leaving home to the flight home, so "7 days" from Kansas City is 6 nights in Japan.
 - **Source and evidence links are not shown on the cards.** They were removed from the UI; every card in the API response still carries them (`sources[].url`, `sources[].evidence_url`).
+- **No map.** The design mockups show one as a placeholder; the app shows the route as a row of cities with the nights in each.
 - **Not built:** the monitor agent (stretch goal), and food is not part of the budget.

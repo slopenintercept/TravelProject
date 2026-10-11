@@ -1,16 +1,19 @@
 # Tripwright handoff
 
-Updated 2026-10-11, just after midnight Central, for continuing in a new chat. If you only read one section, read "Start here". Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
+Updated 2026-10-11, early morning Central, for continuing in a new chat. If you only read one section, read "Start here". Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
 
 ## Start here
 
 - **The app is live on Akamai** and the code on the server matches the committed app code. Details and commands are in "Hosting on Akamai".
-- **Branch:** `combine-picks-and-group-trips` is where all work happens and is pushed. `main` matched it when this file was last updated (see Git).
-- **Another chat has uncommitted work in this folder** (see "Work in progress"). Several chats share the folder: run `git status` first, commit only your own files, and never stash or revert someone else's.
+- **Branch:** `combine-picks-and-group-trips` is where all work happens and is pushed. `main` is behind it: it stops at `03125d7`, before the redesign and the new README, so GitHub's front page still shows the old README (see Git).
+- **The whole UI was rebuilt on 2026-10-11** to the design the user approved (see "The redesign"). It is committed, pushed and deployed. The user has not yet looked at the screens that had no mockup.
+- Several chats share the folder: run `git status` first, commit only your own files, and never stash or revert someone else's.
 - **Waiting on the user, none urgent:**
   1. Whether local runs should keep using the hosted database and bucket that `.env` now names, or go back to local files.
   2. Whether to give the hosted site a clean `https://` name. The user asked why the address is an IP with `:8000`, was offered a domain plus Caddy, and said to leave it for now.
   3. The full planning flow has not been run on the hosted site.
+  4. Sign-off on the redesign choices listed under "The redesign".
+  5. Fast-forwarding `main`, so GitHub shows the new README (the command is under Git).
 - **Housekeeping left on the Mac:** Docker Desktop is running from a test build and can be quit. The "Linode sign-in" terminal tab from the earlier chat is finished and can be closed.
 
 ## What it is
@@ -27,12 +30,12 @@ Two people commit to the repo: Amandeep Toor (the user) and Brandon Laing (teamm
 ## User flow
 
 1. The host fills in the trip (origin, destination, days, budget). There are no need/want text fields any more.
-2. Agents propose a route and date windows, and an ideas agent lists 15 to 25 places. The host picks dates.
-3. The host shares the invite link. Each traveler joins on their own link (`#<tripId>/<travelerId>`) with their origin and budget, then marks the places must do, interested or not for me. They can add a place or ask for more like their picks. No login; the `X-Traveler` header says who is acting.
+2. Agents propose a route and date windows, and an ideas agent lists about 16 places. The host picks dates.
+3. The host shares the invite link (`#<tripId>/join`). Each traveler joins from it with their name, origin and budget, gets their own link (`#<tripId>/<travelerId>`), then marks the places must do, interested or not for me. They can add a place or ask for more like their picks. No login; the `X-Traveler` header says who is acting.
 4. While people join, a draft plan sketches the days from everyone's picks (`draft.py`).
 5. The host starts planning: one flight agent per traveler, one attractions agent per city on the route, plus lodging, transport and weather.
 6. Each traveler confirms their own flight and rooms (stage `choosing`). The days are scheduled on the first confirm and re-planned on each later one: scheduler, per-traveler budget, `validate_itinerary`.
-7. Review screen: each traveler approves, swaps or removes their own cards. The Itinerary tab is a calendar with drag, swap and Remove. "Finish" lists every booking with links that already carry dates, route and guests.
+7. Review: the feed on the left asks each traveler for their decisions (must-sees that did not fit, their budget, their flight, stays and transport), and the board on the right holds their budget and a week calendar with drag, swap and take off. "Finish" lists every booking with links that already carry dates, route and guests.
 
 ## Decisions the user has made
 
@@ -61,11 +64,11 @@ cd frontend && npm run build
 cd backend && .venv/bin/python -m tripwright.scenario
 ```
 
-- The last command creates a ready-made seven-traveler Japan trip and prints its links, for trying the flow as an eighth traveler. No agents run until the host starts planning.
+- The last command creates a ready-made seven-traveler Japan trip and prints its links, for trying the flow as an eighth traveler. The script itself runs no agents. Opening the trip does: about ten seconds after it first loads, and again after each join, leave or saved picks, the draft plan is rebuilt, which with an inference key set runs the route planner and one orchestrator call for the note. The flight, lodging, attractions and transport agents wait until the host starts planning.
 - Keys live in `.env` at the project root (gitignored). Never print or commit them.
 - `DEMO_MODE=true` replays `backend/tripwright/fixtures/recorded.json` with no network or keys.
 - `RECORD_FIXTURES=true` records live calls into the fixtures.
-- Claude preview configs in `.claude/launch.json`: `tripwright` (port 8000), `tripwright-8001` and `tripwright-8002` (same app on ports 8001 and 8002, for when another chat holds the earlier ports), `tripwright-frontend` (Vite dev server on port 5173; it proxies `/api` to port 8000) and `tripwright-windows` (Brandon's paths).
+- Claude preview configs in `.claude/launch.json`: `tripwright` (port 8000), `tripwright-8001` and `tripwright-8002` (same app on ports 8001 and 8002, for when another chat holds the earlier ports), `tripwright-frontend` (Vite dev server on port 5173; it proxies `/api` to port 8000, or to whatever `TRIPWRIGHT_BACKEND` names), `design-mockups` (a static server on port 5180 for the `design/` folder) and `tripwright-windows` (Brandon's paths).
 
 ## Where things are
 
@@ -83,7 +86,10 @@ cd backend && .venv/bin/python -m tripwright.scenario
 | `backend/tripwright/validate.py` | `validate_itinerary` and `replan` |
 | `backend/tripwright/cards.py`, `booking.py` | Review cards and Finish-screen links |
 | `backend/tripwright/recorded.py` | Cache, demo replay, fixture recording |
-| `frontend/src/components/` | `TripForm`, `Timeframe`, `Gathering`, `Join`, `Picks`, `DraftPlan`, `Choose`, `Review`, `Itinerary`, `CalendarGrid`, `Finish`, `AgentPanel`, `BudgetBar` |
+| `frontend/src/App.tsx`, `shell.ts` | The top bar and which screen a trip is on; the context every screen shares (trip, viewer, agents, the board's open tab) |
+| `frontend/src/components/` | One per screen: `Start`, `Picks`, `Timeframe`, `Gathering`, `Join`, `Working`, `Choose`, `Review`, `Finish`. Shared: `Board` (plan or Agents tab), `Agents` (tags and the Agents tab), `Calendar`, `Days` (budget row and "Your days"), `DraftPlan`, `Route` |
+| `frontend/src/styles.css` | The one stylesheet; the colour tokens are at the top |
+| `design/` | The approved mockup (`direction-c-lilac.html`), the handoff the UI was built from (`REDESIGN-HANDOFF.md`), reference screenshots, and screenshots of the built app (`implemented/`) |
 | `docs/superpowers/` | Brandon's design specs and plans for picks and for choosing flights and stays first |
 
 Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep full results in `RunContext`; agents answer with option ids and source ids; `build_*` joins them back and raises `Rejected(problems)` to send the agent back.
@@ -92,13 +98,16 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 - Remote: `https://github.com/slopenintercept/TravelProject.git` (public).
 - Current branch: `combine-picks-and-group-trips`, pushed. It holds everything: Brandon's picks, per-person links and draft plan, merged with the user's `group-trips-live-run`.
-- `main` was fast-forwarded to this branch several times on 2026-10-10 and again on 2026-10-11, each time because the user asked, and it matched the branch when this file was last updated. That is not a standing rule: commits made here afterwards are not in `main` until the user asks again.
+- `main` was fast-forwarded to this branch several times on 2026-10-10 and again on 2026-10-11, each time because the user asked. The last time left it at `03125d7`, so it does not have the 16-places change, the approval fix, the UI rebuild, `design/` or the new docs. On 2026-10-11 the user asked for the README to be put on GitHub, but the chat's push to `main` was refused by its permission check ("merge without review"), so the user has to run the command below themselves. Fast-forwarding is not a standing rule: commits made here are not in `main` until the user asks again.
 - To fast-forward `main` without leaving this branch or touching the working folder: `git push origin origin/combine-picks-and-group-trips:refs/heads/main`, then `git fetch && git branch -f main origin/main`.
 - `group-trips-live-run` is pushed at `b370be3` and is fully contained in the current branch.
 - GitHub push protection once blocked a push because a third-party Mapbox token sat inside scraped page text. It was redacted, not bypassed, and `tools/research.py` now strips such tokens.
 
 ## What changed today, newest first
 
+- The UI was rebuilt to the Direction C design (see "The redesign"), with a README and demo script to match.
+- An approval now remembers which flight or room was approved (`TripState.approvals` holds its id), so choosing another one, by any route, puts the card back to proposed. The redesign brought the Approve buttons back, which made this matter.
+- `889cd5e` The ideas agents are asked for 16 places, shared out by the nights in each city; the review still accepts 12 to 25.
 - Tests are kept off the hosted database: `backend/tests/conftest.py` blanks `DATABASE_URL` and `OBJ_BUCKET` before the app's settings load (see Hosting for why).
 - Hosted on Akamai (see Hosting). `deploy/provision.sh` got the temporary-key fix (`560ff83`).
 - `b8b92f9` The ideas agent gives each place's reason in under 10 words.
@@ -125,10 +134,30 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 ### How review card tags work
 
-- `cards.py` writes each card's `detail` as short facts joined by ` · `, and `Review.tsx` splits on that to draw one tag per fact. Keep each fact short: "4.5 Rating", "3 Nights", "10H", "Open 09:00 to 21:00", "Flies home Tue Dec 15, 16:25".
-- Anything sentence-length goes in the card's `note` field, shown as plain grey text under the tags. Only attractions use it so far, for the agent's booking advice (`availability_note`). That text is the agent's own wording, saved with the trip.
+- `cards.py` writes each card's `detail` as short facts joined by ` · `. `Review.tsx` splits on that to draw one tag per fact on the flight card and on the activity opened from the calendar; stays and legs show the same facts as one small line under the name. Keep each fact short: "4.5 Rating", "3 Nights", "10H", "Open 09:00 to 21:00", "Flies home Tue Dec 15, 16:25".
+- Anything sentence-length goes in the card's `note` field, shown as a line of text under the tags on the opened activity. Only attractions use it so far, for the agent's booking advice (`availability_note`). That text is the agent's own wording, saved with the trip.
 - The rating and duration wording is shared with the Swap list (`_rating`, `_duration`).
-- The "Most travelers here pick" card and the Choose screen were left in the older plain-text style.
+- The "Most travelers here pick" cards (`lodging` and `transport`, `kind="default"` in `cards.py`) are no longer drawn as cards of their own. Their title is the small caption on "Your stays" and "Getting around", and their reasoning is the "Why this pick" line on those two cards. Their `detail` is not shown. The Choose screen lists each option's facts as plain text, not tags.
+
+## The redesign
+
+Built on 2026-10-11 from `design/REDESIGN-HANDOFF.md`. Every screen is one layout: a 560px feed on the left where agents report and ask for decisions, and the plan (the board) on the right. Once you are a traveler on a trip, the board has a switch between the plan and an Agents tab; Start, Join and "Who are you?" show the plan with no switch. A headline about one agent's work carries a tag naming that agent: "What sounds good?" and its categories on Picks, the dates headline, every section on Review, "Your flight" and each stay on Choose, the draft plan until planning starts, the budget figure and "Your days". Clicking a tag opens that agent on the Agents tab. Other headlines have no tag: "Plan a trip.", "Who's coming?", "Choose your flight and stays", the agents-working headline (that screen lists one tag per agent under it), Join, "Who are you?" and the feed on Finish. The README has a table of what each step shows.
+
+Choices made while building that the user has not confirmed:
+
+- **No map.** The mockup's map placeholder became the route as city chips with nights.
+- **Purple for marked places** (Must do, Interested), as mocked.
+- **No attraction cards in the feed.** Clicking an activity on the calendar opens its card at the top of the feed. Places off the calendar are under "Left off your days".
+- **"Swap it in"** opens a list of the activities the place could replace: same city, on a day it is open. The replaced one comes off the trip (that is what `swap_item` does).
+- **Approve** is back on the flight and the stays, as mocked. It gates nothing.
+- **"Getting around"** and **"Things to do"** sections were added to the Review feed (legs; the attractions agent's saved-result notice).
+- The screens with no mockup (dates, who's coming, join, agents working, choose, finish) follow the handoff's recommended layouts.
+- Fonts load from Google Fonts in `frontend/index.html`.
+
+How it was checked:
+
+- By hand in the browser against a second backend on a throwaway SQLite copy of two real trips, so no real trip was touched, plus one live run in `DEMO_MODE` from Start to Review.
+- A review by six agents with two verifiers per finding: 29 findings, 27 confirmed (about 17 distinct, none severe), all fixed. The larger ones: the stale approval above, "Swap it in" offering swaps that could not work, the calendar not fitting at 1280px, a class name shared by the budget pill and the calendar's drop highlight, and failed transport or attractions research leaving no trace in the feed.
 
 ## Hosting on Akamai
 
@@ -143,7 +172,8 @@ Tripwright has been live since 2026-10-11 (early morning, Central) on the user's
 
 - **Address:** `http://<ip>:8000`, plain HTTP on the server's IP with no domain name. This file is in a public repo, so the IP is left out on purpose; get it with `deploy/.venv/bin/linode-cli linodes list --label tripwright-app`. Akamai also gives the server a hostname of the form `<ip-with-dashes>.ip.linodeusercontent.com`, which works on port 8000 too.
 - **No login.** Anyone with the address can start trips and spend the inference and Tavily quota.
-- **Deployed code:** commit `ae2f516`, redeployed on 2026-10-11 at about 00:18 with `deploy/deploy.sh` (health passed, and the server's copy has `ideas_split`). Nobody could check first whether a trip was mid-run on the hosted server: reading the hosted database from a chat was blocked. The deploy copies the working folder, uncommitted changes included, so check `git status` first.
+- **Deployed code:** commit `f1c413e` (the UI rebuild and the approval fix), redeployed on 2026-10-11 at about 04:04 with `deploy/deploy.sh` (health passed, and the JavaScript the server serves is byte for byte the local build). The server's request log was read over SSH first (`docker compose logs` in `/opt/tripwright`): the last request that started or changed anything was two hours earlier, at 02:04. Reading a trip's data from the hosted site was blocked for the chat, so the log is how to check. The deploy copies the working folder, uncommitted changes included, so check `git status` first.
+- **The deploy does not delete files that were removed locally.** The server's `frontend/src/components` still holds the five old components (`AgentPanel`, `BudgetBar`, `CalendarGrid`, `Itinerary`, `TripForm`). The build ignores them while they still compile; if a later change breaks one, the server's build will fail on a file that is not in the repo. Deleting them on the server, or having `deploy.sh` clear `backend/` and `frontend/` before it copies, fixes it. Not done: it means deleting files on the live server.
 - **Redeploy:** `PATH="$PWD/deploy/.venv/bin:$PATH" SSH_KEY=~/.ssh/tripwright_ed25519 bash deploy/deploy.sh` from the project root. It reuses what exists, rebuilds the container and waits for `/api/health`.
 - **Tools on this Mac:** `linode-cli` and `boto3` live in `deploy/.venv` (gitignored); the user signed the CLI in themselves. The deploy SSH key is `~/.ssh/tripwright_ed25519`, made for this and with no passphrase. `ssh -i ~/.ssh/tripwright_ed25519 root@<ip>` gets a shell.
 - **`.env` changed at 23:47 on 2026-10-10.** `provision.sh` wrote `OBJ_*` and `DATABASE_URL` into the local `.env`, so any local server or script started after that uses the hosted Postgres and bucket, not `data/tripwright.db`. The local trips are still in the SQLite file; they are just not what a newly started server reads. The server on port 8000 was restarted at 00:20 on 2026-10-11 in a Terminal tab as `DATABASE_URL= .venv/bin/python -m uvicorn tripwright.api:app --port 8000`, so it stays on SQLite; started any other way (the `tripwright` preview configuration, for example) it would use the hosted Postgres. The user has been told and has not said whether to separate them.
@@ -154,10 +184,13 @@ Tripwright has been live since 2026-10-11 (early morning, Central) on the user's
 
 ## Work in progress, not committed
 
-Nothing. The ideas agent changes (all searches in one batch, one agent per city, and reusing a saved list for the same destination and length) are committed as `ae2f516` and deployed. `main` does not have that commit yet.
+Nothing. `.claude/skills/` and `.claude/agents/` are on this Mac only and ignored by git on purpose: they are third-party tooling (20 MB, with a macOS binary) and the repo is public. `skills-lock.json` records the 23 skills listed in it.
 
 ## Not done or not verified
 
+- Redesign: a real mouse drag on the calendar was not tried (the drag events were fired from a script, and the move and the refusal both worked). Phone widths were not checked; under 960px the panes stack. "Apply swaps", "Switch to Airbnb", "Add a rental car", "More like my picks", removing a traveler and the retry button were not clicked after the rebuild; their handlers are unchanged.
+- In the `DEMO_MODE` test run the ideas agent was sent back once with `BadRequestError 400: No user query found in messages`, then timed out, so the picks list was empty. Not looked into.
+- `DEMO.md` was updated for the new screen but has not been rehearsed against it.
 - The hosted site has only been run through the first stage (route, profile, timeframe, ideas). Planning, choosing and review have not been run there.
 - `deploy/teardown.sh` has not been run. Its `linode-cli obj rb` line will fail the way bucket creation did (see Hosting) until it is given a key the same way.
 - Split-offs have only happened in tests, never in a live run.
@@ -177,9 +210,11 @@ Nothing. The ideas agent changes (all searches in one batch, one agent per city,
 - The endpoint rejects an empty `tools` array; context is 32k tokens, output at most 4,096.
 - The server does not reload on code changes. Restart it after editing the backend, and rebuild the frontend after editing `frontend/src`.
 - Another chat's preview server can hold port 8000 and keep serving old code; `preview_stop` cannot stop a server another chat started. Use `tripwright-8001` or `tripwright-8002`, or ask the user before restarting it.
-- One local server is running, on port 8000, started from a shell at 23:45 on 2026-10-10. It belongs to no chat's preview list and is stopped by killing whatever listens on the port. Nothing is listening on 8001 or 8002. Preview configs: `tripwright` (8000), `tripwright-8001`, `tripwright-8002`, `tripwright-frontend`, `tripwright-windows`.
+- One app server is running locally, on port 8000, restarted at 00:20 on 2026-10-11 from a Terminal tab with `DATABASE_URL=` in front, so it is on SQLite (see Hosting). It belongs to no chat's preview list and is stopped by killing whatever listens on the port. It serves `frontend/dist`, so it shows the rebuilt UI. The `design-mockups` static server may also be up, on port 5180. Nothing is listening on 8001 or 8002. Preview configs: `tripwright` (8000), `tripwright-8001`, `tripwright-8002`, `tripwright-frontend`, `design-mockups` (5180), `tripwright-windows`.
 - Restarting a server kills any agent run in progress. Check that no trip is busy first (`GET /api/trips/<id>` returns `busy`).
 - To test without touching a real trip, copy it: load it with `store.load_trip`, change `state.id`, and save.
+- To click through the UI without touching any real data, start a second backend with `DATABASE_URL= OBJ_BUCKET= DATA_DIR=<a temporary folder>` on another port, save copies of trips into its SQLite file, and run `TRIPWRIGHT_BACKEND=http://localhost:<port> npm run dev -- --port 5174`. Check `/api/health` says `sqlite` first.
+- After renaming or deleting a file under `frontend/src`, restart the Vite dev server; it kept serving the old module path.
 - Booking.com blocks headless browsers, so hotels come from Google Hotels.
 - `tavily_search` in strands-agents-tools prints a deprecation warning; it still works.
 - `load_dotenv` does not override shell variables, so flags set in the shell win over `.env`.
