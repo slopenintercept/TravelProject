@@ -1,7 +1,7 @@
 """Budget math and the swap optimizer, per traveler. Deterministic: no LLM calls in here.
 
 Each traveler's budget covers their own flight and lodging, tickets for the
-attractions they attend, and their share of transport.
+attractions they attend, and the transport legs they keep.
 """
 
 from __future__ import annotations
@@ -29,11 +29,7 @@ def category_costs(state: TripState, traveler: Traveler) -> dict[str, float]:
         "flights": traveler.flights.selected.price_usd if traveler.flights else 0.0,
         "lodging": sum(s.selected.price_total_usd for s in traveler.lodging.stays) if traveler.lodging else 0.0,
         "attractions": tickets,
-        "transport": sum(
-            leg.price_usd if leg.per_person else leg.price_usd / len(state.travelers)
-            for leg in (state.transport.legs if state.transport else [])
-            if leg.included
-        ),
+        "transport": sum(leg.price_usd for leg in traveler.legs if leg.included),
     }
 
 

@@ -14,8 +14,8 @@ def ctx(state, who=None):
     return run
 
 
-def idea(name, city="Tokyo", url="https://example.com/a"):
-    return IdeaOut(name=name, city=city, category="Sights", why="x", source_url=url)
+def idea(name, city="Tokyo", source_id="s1"):
+    return IdeaOut(name=name, city=city, category="Sights", why="x", source_id=source_id)
 
 
 def places(n):
@@ -29,8 +29,8 @@ async def test_ideas_are_kept_with_their_sources(state):
 
 
 async def test_ideas_review_rejects(state):
-    with pytest.raises(Rejected, match="Fake: source_url was not returned by your tools"):
-        await build_ideas(state, ctx(state), IdeasOut(ideas=places(14) + [idea("Fake", url="https://nowhere.example")]))
+    with pytest.raises(Rejected, match="Fake: source_id is not an id your tools showed"):
+        await build_ideas(state, ctx(state), IdeasOut(ideas=places(14) + [idea("Fake", source_id="s9")]))
     with pytest.raises(Rejected, match="suggest at least 12 places"):
         await build_ideas(state, ctx(state), IdeasOut(ideas=places(5)))
     with pytest.raises(Rejected, match="suggest at most 25 places"):

@@ -3640,7 +3640,7 @@
  },
  "result:flight:kansas city:japan:7": {
   "start": "2027-01-18",
-  "value": "{\"origin_airports\":[\"MCI\"],\"options\":[{\"id\":\"f2\",\"airline\":\"United\",\"origin\":\"Kansas City International Airport\",\"destination\":\"Narita International Airport\",\"depart_at\":\"2027-01-18T08:50:00\",\"arrive_at\":\"2027-01-19T15:35:00\",\"return_depart_at\":\"2027-01-25T17:40:00\",\"return_arrive_at\":\"2027-01-25T16:09:00\",\"duration_minutes\":945,\"stops\":1,\"layovers\":[\"Denver International Airport (1 hr 15 min)\"],\"price_usd\":1166.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-mci-tokyo-2027-01-18-3145184.png\",\"fetched_at\":\"2026-10-10T15:12:25.189995\"},\"tradeoff\":\"At $1,166 it's the cheapest single-stop option landing on 01-19, with the shortest total duration (15h45) and a 15:35 Narita arrival, though it departs later (08:50) than the other morning flights.\"},{\"id\":\"f1\",\"airline\":\"United and ANA\",\"origin\":\"Kansas City International Airport\",\"destination\":\"Narita International Airport\",\"depart_at\":\"2027-01-18T07:31:00\",\"arrive_at\":\"2027-01-19T15:00:00\",\"return_depart_at\":\"2027-01-25T17:40:00\",\"return_arrive_at\":\"2027-01-25T16:09:00\",\"duration_minutes\":989,\"stops\":1,\"layovers\":[\"Chicago O'Hare International Airport (1 hr 12 min)\"],\"price_usd\":1166.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-mci-tokyo-2027-01-18-3145184.png\",\"fetched_at\":\"2026-10-10T15:12:25.189995\"},\"tradeoff\":\"Same $1,166 price with one stop, but a slightly longer 16h29 duration and an earlier 07:31 departure, landing at Narita at 15:00.\"},{\"id\":\"f9\",\"airline\":\"Delta\",\"origin\":\"Kansas City International Airport\",\"destination\":\"Haneda Airport\",\"depart_at\":\"2027-01-18T07:30:00\",\"arrive_at\":\"2027-01-19T15:05:00\",\"return_depart_at\":\"2027-01-25T17:20:00\",\"return_arrive_at\":\"2027-01-25T16:54:00\",\"duration_minutes\":995,\"stops\":1,\"layovers\":[\"Seattle-Tacoma International Airport (1 hr 53 min)\"],\"price_usd\":1166.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-mci-tokyo-2027-01-18-3145184.png\",\"fetched_at\":\"2026-10-10T15:12:25.189995\"},\"tradeoff\":\"Also $1,166 with one stop and a 16h35 duration, but it lands at Haneda (closer to central Tokyo) at 15:05, trading a later 07:30 departure for a more convenient arrival airport.\"}],\"selected_id\":\"f2\"}"
+  "value": "{\"origin_airports\":[\"MCI\"],\"options\":[{\"id\":\"f2\",\"airline\":\"United\",\"origin\":\"Kansas City International Airport\",\"destination\":\"Narita International Airport\",\"depart_at\":\"2027-01-18T08:50:00\",\"arrive_at\":\"2027-01-19T15:35:00\",\"return_depart_at\":\"2027-01-25T17:40:00\",\"return_arrive_at\":\"2027-01-25T16:09:00\",\"duration_minutes\":945,\"stops\":1,\"layovers\":[\"Denver International Airport (1 hr 15 min)\"],\"price_usd\":1166.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-mci-tokyo-2027-01-18-3145184.png\",\"fetched_at\":\"2026-10-10T15:12:25.189995\"},\"tradeoff\":\"At $1,166 it's the shortest flight (15h45) with one stop in Denver, landing Narita 01-19 at 15:35, beating the others on duration.\"},{\"id\":\"f7\",\"airline\":\"Delta\",\"origin\":\"Kansas City International Airport\",\"destination\":\"Haneda Airport\",\"depart_at\":\"2027-01-18T05:40:00\",\"arrive_at\":\"2027-01-19T14:05:00\",\"return_depart_at\":\"2027-01-25T17:20:00\",\"return_arrive_at\":\"2027-01-25T16:54:00\",\"duration_minutes\":1045,\"stops\":1,\"layovers\":[\"Hartsfield-Jackson Atlanta International Airport (52 min)\"],\"price_usd\":1166.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-mci-tokyo-2027-01-18-3145184.png\",\"fetched_at\":\"2026-10-10T15:12:25.189995\"},\"tradeoff\":\"Same $1,166 price with one stop in Atlanta, it lands earliest (Haneda 01-19 14:05) but runs a bit longer at 17h25.\"},{\"id\":\"f1\",\"airline\":\"United and ANA\",\"origin\":\"Kansas City International Airport\",\"destination\":\"Narita International Airport\",\"depart_at\":\"2027-01-18T07:31:00\",\"arrive_at\":\"2027-01-19T15:00:00\",\"return_depart_at\":\"2027-01-25T17:40:00\",\"return_arrive_at\":\"2027-01-25T16:09:00\",\"duration_minutes\":989,\"stops\":1,\"layovers\":[\"Chicago O'Hare International Airport (1 hr 12 min)\"],\"price_usd\":1166.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MCI%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-mci-tokyo-2027-01-18-3145184.png\",\"fetched_at\":\"2026-10-10T15:12:25.189995\"},\"tradeoff\":\"Also $1,166 with one stop in Chicago, it's a solid 16h29 flight landing Narita 01-19 at 15:00, slightly longer than f2 but with an earlier 07:31 departure.\"}],\"selected_id\":\"f2\"}"
  },
  "geocode:asakusa, tokyo": [
   35.7175966,
@@ -3685,11 +3685,11 @@
  ],
  "result:attractions:kansas city:japan:7": {
   "start": "2027-01-18",
-  "value": "[{\"id\":\"a_911276d9\",\"name\":\"Tokyo Disneyland\",\"city\":\"Tokyo\",\"must_have\":true,\"why\":\"The traveler's top must-see and the centerpiece of the Tokyo leg.\",\"duration_minutes\":600,\"ticket_price_usd\":59.19,\"opens\":\"09:00:00\",\"closes\":\"21:00:00\",\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"Buy the 1-Day Passport online in advance; prices are date-tiered (¥8,900–10,900), so a weekday is cheapest.\",\"lat\":35.6362546,\"lon\":139.8813287,\"booking_url\":\"https://www.tokyodisneyresort.jp/en/ticket/index.html\",\"source\":{\"url\":\"https://www.tokyodisneyresort.jp/en/ticket/index.html\",\"title\":\"[Official]Park Tickets|Tokyo Disney Resort\",\"evidence_url\":\"/evidence/20261010/search-https-www-tokyodisneyresort-jp-en-ticket-index-html-3142110.txt\",\"fetched_at\":\"2026-10-10T15:12:22.111331\"},\"included\":true},{\"id\":\"a_8883793f\",\"name\":\"Kinkaku-ji (Golden Pavilion)\",\"city\":\"Kyoto\",\"must_have\":true,\"why\":\"Kyoto's most iconic sight and the best single representative of the must-see city.\",\"duration_minutes\":90,\"ticket_price_usd\":3.4,\"opens\":\"09:00:00\",\"closes\":\"17:00:00\",\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"No reservation needed; buy the ¥500 ticket at the gate and go early to beat crowds.\",\"lat\":null,\"lon\":null,\"booking_url\":null,\"source\":{\"url\":\"https://www.insidekyoto.com/kinkaku-ji-temple-the-golden-pavilion\",\"title\":\"The Golden Pavilion (Kinkaku-ji)\",\"evidence_url\":\"/evidence/20261010/search-https-www-insidekyoto-com-kinkaku-ji-temple-the-golde-2948783.txt\",\"fetched_at\":\"2026-10-10T15:09:08.783646\"},\"included\":true},{\"id\":\"a_6002aaf4\",\"name\":\"Fushimi Inari Taisha\",\"city\":\"Kyoto\",\"must_have\":true,\"why\":\"Kyoto's free, always-open shrine with the famous thousand torii gates — a second top sight for the must-see city.\",\"duration_minutes\":120,\"ticket_price_usd\":0.0,\"opens\":null,\"closes\":null,\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"Free and open 24/7; arrive early morning (7–8am) to avoid crowds.\",\"lat\":34.9675192,\"lon\":135.7797101,\"booking_url\":null,\"source\":{\"url\":\"https://www.japan-guide.com/e/e3915.html\",\"title\":\"Fushimi Inari Shrine (Fushimi Inari Taisha) - Kyoto Travel\",\"evidence_url\":\"/evidence/20261010/search-https-www-japan-guide-com-e-e3915-html-2948971.txt\",\"fetched_at\":\"2026-10-10T15:09:08.971893\"},\"included\":true},{\"id\":\"a_c1d16c20\",\"name\":\"Kiyomizu-dera Temple\",\"city\":\"Kyoto\",\"must_have\":false,\"why\":\"One of Kyoto's most famous temples with sweeping city views, close to the other Kyoto sights.\",\"duration_minutes\":120,\"ticket_price_usd\":3.4,\"opens\":\"06:00:00\",\"closes\":\"18:00:00\",\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"No advance booking; bring cash for the ¥500 gate ticket.\",\"lat\":34.9978412,\"lon\":135.7771061,\"booking_url\":null,\"source\":{\"url\":\"https://onedayawaytravel.com/kiyomizudera-tickets\",\"title\":\"Kiyomizu-dera 2026 Guide: Admission Fee, Hours, Tickets & Night Viewing Dates - One Day Away\",\"evidence_url\":\"/evidence/20261010/search-https-onedayawaytravel-com-kiyomizudera-tickets-2958606.txt\",\"fetched_at\":\"2026-10-10T15:09:18.606855\"},\"included\":true},{\"id\":\"a_4bd23021\",\"name\":\"Arashiyama Bamboo Grove\",\"city\":\"Kyoto\",\"must_have\":false,\"why\":\"A free, iconic Kyoto experience that pairs well with a morning in western Kyoto.\",\"duration_minutes\":45,\"ticket_price_usd\":0.0,\"opens\":null,\"closes\":null,\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"Free and open 24/7; go before 9am to beat the crowds.\",\"lat\":35.0167419,\"lon\":135.6711482,\"booking_url\":null,\"source\":{\"url\":\"https://arashiyamabambooforest.org\",\"title\":\"Arashiyama Bamboo Forest: Beat the Crowds, Then Stay Longer\",\"evidence_url\":\"/evidence/20261010/search-https-arashiyamabambooforest-org-2948334.txt\",\"fetched_at\":\"2026-10-10T15:09:08.335227\"},\"included\":true},{\"id\":\"a_7c01ca6e\",\"name\":\"Nishiki Market\",\"city\":\"Kyoto\",\"must_have\":false,\"why\":\"Kyoto's 'kitchen' food market — a cheap, easy way to sample local snacks on a budget.\",\"duration_minutes\":90,\"ticket_price_usd\":0.0,\"opens\":\"09:00:00\",\"closes\":\"18:00:00\",\"closed_weekdays\":[2],\"outdoor\":true,\"availability_note\":\"Free to browse; arrive before 11am as some stalls close early or on Wednesdays.\",\"lat\":35.0050244,\"lon\":135.7655699,\"booking_url\":null,\"source\":{\"url\":\"https://www.insidekyoto.com/nishiki-market-downtown-kyoto\",\"title\":\"Nishiki Market\",\"evidence_url\":\"/evidence/20261010/search-https-www-insidekyoto-com-nishiki-market-downtown-kyo-2957584.txt\",\"fetched_at\":\"2026-10-10T15:09:17.585110\"},\"included\":true},{\"id\":\"a_9a270d52\",\"name\":\"Meiji Shrine\",\"city\":\"Tokyo\",\"must_have\":false,\"why\":\"A serene, free Tokyo shrine near Harajuku that balances the busy Disney day.\",\"duration_minutes\":90,\"ticket_price_usd\":0.0,\"opens\":\"06:40:00\",\"closes\":\"16:20:00\",\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"Free and open daily; January hours are roughly 6:40am–4:20pm (sunrise to sunset).\",\"lat\":35.6748417,\"lon\":139.6996266,\"booking_url\":null,\"source\":{\"url\":\"https://www.meijijingu.or.jp/en/visit\",\"title\":\"How to visit｜Meiji Jingu\",\"evidence_url\":\"/evidence/20261010/search-https-www-meijijingu-or-jp-en-visit-2957162.txt\",\"fetched_at\":\"2026-10-10T15:09:17.162541\"},\"included\":true},{\"id\":\"a_d184d7b6\",\"name\":\"Shibuya Crossing\",\"city\":\"Tokyo\",\"must_have\":false,\"why\":\"A free, iconic first-time Tokyo experience with great free viewing spots.\",\"duration_minutes\":60,\"ticket_price_usd\":0.0,\"opens\":null,\"closes\":null,\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"Free and open 24/7; best at weekday rush hour (5–8pm) for the full crowd.\",\"lat\":35.6594951,\"lon\":139.7004982,\"booking_url\":null,\"source\":{\"url\":\"https://shibuyacrossing.org/faq\",\"title\":\"Shibuya Crossing FAQ (2026): Your Top Questions Answered - Shibuya Crossing\",\"evidence_url\":\"/evidence/20261010/search-https-shibuyacrossing-org-faq-3155711.txt\",\"fetched_at\":\"2026-10-10T15:12:35.711908\"},\"included\":true},{\"id\":\"a_1a7774bd\",\"name\":\"teamLab Planets TOKYO\",\"city\":\"Tokyo\",\"must_have\":false,\"why\":\"An indoor digital-art museum — a great rainy-day option in cold January weather.\",\"duration_minutes\":120,\"ticket_price_usd\":29.08,\"opens\":\"08:00:00\",\"closes\":\"22:00:00\",\"closed_weekdays\":[],\"outdoor\":false,\"availability_note\":\"Book timed-entry tickets online in advance; weekday early slots are least crowded.\",\"lat\":35.64938,\"lon\":139.789728,\"booking_url\":\"https://www.teamlab.art/e/planets\",\"source\":{\"url\":\"https://us.trip.com/travel-guide/attraction/tokyo/teamlab-planets-tokyo-61909015\",\"title\":\"TeamLab Planets TOKYO Tickets [2026] - Promos, Prices, Reviews & Opening Hours | Trip.com\",\"evidence_url\":\"/evidence/20261010/search-https-us-trip-com-travel-guide-attraction-tokyo-teaml-3165349.txt\",\"fetched_at\":\"2026-10-10T15:12:45.350147\"},\"included\":true}]"
+  "value": "[{\"id\":\"a_401265aa\",\"name\":\"Tokyo Disneyland\",\"city\":\"Tokyo\",\"must_have\":true,\"need_by\":[\"p1\",\"p2\"],\"want_by\":[],\"why\":\"A must for Alex and Sam; a full-day park that anchors the Tokyo portion.\",\"duration_minutes\":600,\"ticket_price_usd\":59.19,\"opens\":\"09:00:00\",\"closes\":\"21:00:00\",\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"Buy date-specific 1-day passport online in advance.\",\"lat\":35.6362546,\"lon\":139.8813287,\"booking_url\":\"https://www.tokyodisneyresort.jp/en/ticket/index.html\",\"source\":{\"url\":\"https://www.tokyodisneyresort.jp/en/ticket/index.html\",\"title\":\"[Official]Park Tickets|Tokyo Disney Resort\",\"evidence_url\":\"/evidence/20261010/search-https-www-tokyodisneyresort-jp-en-ticket-index-html-3142110.txt\",\"fetched_at\":\"2026-10-10T15:12:22.111331\"},\"included\":true},{\"id\":\"a_2f9c8446\",\"name\":\"Kinkaku-ji (Golden Pavilion)\",\"city\":\"Kyoto\",\"must_have\":true,\"need_by\":[\"p1\"],\"want_by\":[],\"why\":\"Iconic Kyoto landmark that fulfills Alex's wish to see Kyoto.\",\"duration_minutes\":45,\"ticket_price_usd\":3.3,\"opens\":\"09:00:00\",\"closes\":\"17:00:00\",\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"No booking needed; go early to beat crowds.\",\"lat\":null,\"lon\":null,\"booking_url\":null,\"source\":{\"url\":\"https://www.japan-guide.com/e/e3908.html\",\"title\":\"Kinkakuji (Golden Pavilion) - Kyoto Travel\",\"evidence_url\":\"/evidence/20261010/search-https-www-japan-guide-com-e-e3908-html-183696.txt\",\"fetched_at\":\"2026-10-10T17:09:43.696643\"},\"included\":true},{\"id\":\"a_2f4adf2e\",\"name\":\"Fushimi Inari Taisha\",\"city\":\"Kyoto\",\"must_have\":true,\"need_by\":[\"p3\"],\"want_by\":[],\"why\":\"Jo's must-see; the famous torii-gate mountain trail, free and open always.\",\"duration_minutes\":180,\"ticket_price_usd\":0.0,\"opens\":null,\"closes\":null,\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"Free, no booking; go early morning to avoid crowds.\",\"lat\":34.9675192,\"lon\":135.7797101,\"booking_url\":null,\"source\":{\"url\":\"https://www.japan-guide.com/e/e3915.html\",\"title\":\"Fushimi Inari Shrine (Fushimi Inari Taisha) - Kyoto Travel\",\"evidence_url\":\"/evidence/20261010/search-https-www-japan-guide-com-e-e3915-html-9384275.txt\",\"fetched_at\":\"2026-10-10T16:56:24.275551\"},\"included\":true},{\"id\":\"a_04f1f8be\",\"name\":\"Arashiyama Bamboo Grove\",\"city\":\"Kyoto\",\"must_have\":false,\"need_by\":[],\"want_by\":[\"p3\"],\"why\":\"Jo's wanted highlight; a serene, free bamboo path in northwest Kyoto.\",\"duration_minutes\":60,\"ticket_price_usd\":0.0,\"opens\":null,\"closes\":null,\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"Free, no booking; visit before 8:30am for quiet.\",\"lat\":35.0167419,\"lon\":135.6711482,\"booking_url\":null,\"source\":{\"url\":\"https://arashiyamabambooforest.org/opening-hours\",\"title\":\"Arashiyama Bamboo Forest Hours: Open 24/7, Best at 7am\",\"evidence_url\":\"/evidence/20261010/search-https-arashiyamabambooforest-org-opening-hours-183319.txt\",\"fetched_at\":\"2026-10-10T17:09:43.320215\"},\"included\":true},{\"id\":\"a_e3994a2c\",\"name\":\"Nishiki Market\",\"city\":\"Kyoto\",\"must_have\":false,\"need_by\":[],\"want_by\":[\"p3\"],\"why\":\"Jo's wanted foodie stop; sample street food along the 'Kyoto kitchen' lane.\",\"duration_minutes\":90,\"ticket_price_usd\":0.0,\"opens\":\"09:00:00\",\"closes\":\"18:00:00\",\"closed_weekdays\":[2],\"outdoor\":false,\"availability_note\":\"Free entry; go early, bring cash, some stalls close Wed.\",\"lat\":35.0050244,\"lon\":135.7655699,\"booking_url\":null,\"source\":{\"url\":\"https://www.insidekyoto.com/nishiki-market-downtown-kyoto\",\"title\":\"Nishiki Market\",\"evidence_url\":\"/evidence/20261010/search-https-www-insidekyoto-com-nishiki-market-downtown-kyo-9397659.txt\",\"fetched_at\":\"2026-10-10T16:56:37.666870\"},\"included\":true},{\"id\":\"a_513a8dce\",\"name\":\"teamLab Planets\",\"city\":\"Tokyo\",\"must_have\":false,\"need_by\":[],\"want_by\":[\"p1\"],\"why\":\"Alex's wanted immersive digital art experience in Toyosu.\",\"duration_minutes\":120,\"ticket_price_usd\":25.5,\"opens\":\"08:00:00\",\"closes\":\"22:00:00\",\"closed_weekdays\":[],\"outdoor\":false,\"availability_note\":\"Book timed tickets online in advance; no re-entry.\",\"lat\":35.64938,\"lon\":139.789728,\"booking_url\":\"https://www.teamlab.art/e/planets\",\"source\":{\"url\":\"https://www.teamlab.art/e/planets\",\"title\":\"[Official] teamLab Planets TOKYO, Toyosu\",\"evidence_url\":\"/evidence/20261010/search-https-www-teamlab-art-e-planets-159213.txt\",\"fetched_at\":\"2026-10-10T17:09:19.213404\"},\"included\":true},{\"id\":\"a_1ffe79ff\",\"name\":\"Ghibli Museum, Mitaka\",\"city\":\"Tokyo\",\"must_have\":true,\"need_by\":[\"p2\"],\"want_by\":[],\"why\":\"Sam's must-see; a beloved animated-film museum near Tokyo.\",\"duration_minutes\":150,\"ticket_price_usd\":10.5,\"opens\":\"10:00:00\",\"closes\":\"18:00:00\",\"closed_weekdays\":[1],\"outdoor\":false,\"availability_note\":\"Buy tickets online the prior month; sells out fast.\",\"lat\":35.6962518,\"lon\":139.570451,\"booking_url\":\"https://www.ghibli-museum.jp/en/tickets\",\"source\":{\"url\":\"https://www.ghibli-museum.jp/en/tickets\",\"title\":\"Tickets - Ghibli Museum, Mitaka\",\"evidence_url\":\"/evidence/20261010/search-https-www-ghibli-museum-jp-en-tickets-9383645.txt\",\"fetched_at\":\"2026-10-10T16:56:23.646055\"},\"included\":true},{\"id\":\"a_22ede3c3\",\"name\":\"Shibuya Crossing\",\"city\":\"Tokyo\",\"must_have\":false,\"need_by\":[],\"want_by\":[\"p2\"],\"why\":\"Sam's wanted iconic scramble crossing, free to cross and view.\",\"duration_minutes\":60,\"ticket_price_usd\":0.0,\"opens\":null,\"closes\":null,\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"Free; use free Shibuya Sky Lobby or Mark City view.\",\"lat\":35.6594951,\"lon\":139.7004982,\"booking_url\":null,\"source\":{\"url\":\"https://shibuyacrossing.org\",\"title\":\"Shibuya Crossing (2026 Guide): Tickets, Tours, Viewpoints & Itineraries - Shibuya Crossing\",\"evidence_url\":\"/evidence/20261010/search-https-shibuyacrossing-org-9892888.txt\",\"fetched_at\":\"2026-10-10T17:04:52.889526\"},\"included\":true},{\"id\":\"a_5af25235\",\"name\":\"Kiyomizu-dera Temple\",\"city\":\"Kyoto\",\"must_have\":false,\"need_by\":[],\"want_by\":[],\"why\":\"A free, iconic hillside temple with great city views, close to central Kyoto and easy to add to the Kyoto days.\",\"duration_minutes\":90,\"ticket_price_usd\":3.3,\"opens\":\"06:00:00\",\"closes\":\"18:00:00\",\"closed_weekdays\":[],\"outdoor\":true,\"availability_note\":\"No booking needed; go early for fewer crowds.\",\"lat\":34.9978412,\"lon\":135.7771061,\"booking_url\":null,\"source\":{\"url\":\"https://www.jeepe.jp/en/articles/kinkakuji-3\",\"title\":\"Kinkakuji Kyoto: Golden Pavilion Hours, Fee & Access | JeePe - Japan Travel Guide\",\"evidence_url\":\"/evidence/20261010/search-https-www-jeepe-jp-en-articles-kinkakuji-3-183695.txt\",\"fetched_at\":\"2026-10-10T17:09:43.695724\"},\"included\":true}]"
  },
  "result:transport:kansas city:japan:7": {
   "start": "2027-01-18",
-  "value": "{\"common_choice\":{\"choice\":\"trains and metro (Shinkansen between cities, IC-card metro/subway locally)\",\"because\":\"Japan's rail network is fast, reliable and covers all major cities, so tourists ride the Shinkansen between Tokyo and Kyoto and tap an IC card (Suica/Pasmo) on metro, subway and buses within cities.\",\"alternative\":\"rental car\",\"details\":[],\"sources\":[{\"url\":\"https://www.firebirdtours.com/blog/how-to-get-around-in-japan\",\"title\":\"Japan Transportation Guide: How to Get Around in Japan\",\"evidence_url\":\"/evidence/20261010/search-https-www-firebirdtours-com-blog-how-to-get-around-in-9384606.txt\",\"fetched_at\":\"2026-10-10T16:56:24.606599\"},{\"url\":\"https://www.tripadvisor.com/ShowTopic-g294232-i525-k15495247-Public_transport_or_hire_car_in_Japan_for_5_people-Japan.html\",\"title\":\"Public transport or hire car in Japan for 5 people - Japan Forum\",\"evidence_url\":\"/evidence/20261010/search-https-www-tripadvisor-com-showtopic-g294232-i525-k154-9384606.txt\",\"fetched_at\":\"2026-10-10T16:56:24.606834\"},{\"url\":\"https://japan-dev.com/blog/is-there-uber-in-japan\",\"title\":\"Is Uber a Thing in Japan? The state of Ride-sharing [Apr 2025]\",\"evidence_url\":\"/evidence/20261010/search-https-japan-dev-com-blog-is-there-uber-in-japan-9384071.txt\",\"fetched_at\":\"2026-10-10T16:56:24.071756\"},{\"url\":\"https://www.insidekyoto.com/is-there-uber-in-japan-what-about-taxi-go\",\"title\":\"Is There Uber in Japan? What About Taxi GO? - Inside Kyoto\",\"evidence_url\":\"/evidence/20261010/search-https-www-insidekyoto-com-is-there-uber-in-japan-what-9384071.txt\",\"fetched_at\":\"2026-10-10T16:56:24.072146\"},{\"url\":\"https://us.trip.com/trains/japan/route/tokyo-to-kyoto\",\"title\":\"Shinkansen from Tokyo to Kyoto - Check train times and prices\",\"evidence_url\":\"/evidence/20261010/search-https-us-trip-com-trains-japan-route-tokyo-to-kyoto-9396115.txt\",\"fetched_at\":\"2026-10-10T16:56:36.115707\"},{\"url\":\"https://www.jreast.co.jp/en/multi/nex/tickets\",\"title\":\"N'EX (Narita Express) Tickets | Train & Routes | JR-EAST\",\"evidence_url\":\"/evidence/20261010/search-https-www-jreast-co-jp-en-multi-nex-tickets-9384329.txt\",\"fetched_at\":\"2026-10-10T16:56:24.329421\"},{\"url\":\"https://chasingthechungs.com/japan-ic-card-guide-suica-pasmo-icoca\",\"title\":\"Japan IC Card Guide: Suica vs PASMO vs ICOCA (2026)\",\"evidence_url\":\"/evidence/20261010/search-https-chasingthechungs-com-japan-ic-card-guide-suica--9396113.txt\",\"fetched_at\":\"2026-10-10T16:56:36.115217\"}]},\"rideshare_note\":\"Rideshare is not common in Japan; Uber and Taxi GO only summon regular taxis and are pricier than transit, so most visitors rely on trains and metro instead.\",\"legs\":[{\"id\":\"l_22df3a8b\",\"kind\":\"airport_transfer\",\"from_place\":\"Narita Airport\",\"to_place\":\"Tokyo\",\"mode\":\"Narita Express (N'EX)\",\"duration_minutes\":60,\"price_usd\":25.53,\"per_person\":true,\"notes\":\"One-way ordinary car to Tokyo Station; a 14-day N'EX Tokyo Round-Trip ticket (¥5,200) covers both airport transfers for ~$35 if preferred.\",\"booking_url\":null,\"source\":{\"url\":\"https://us.trip.com/guide/transport/narita-express.html\",\"title\":\"Narita Express Guide: Tickets, Stops, Train Schedule & More | Trip.com\",\"evidence_url\":\"/evidence/20261010/search-https-us-trip-com-guide-transport-narita-express-html-9384329.txt\",\"fetched_at\":\"2026-10-10T16:56:24.329214\"},\"included\":true},{\"id\":\"l_af4b2507\",\"kind\":\"intercity\",\"from_place\":\"Tokyo\",\"to_place\":\"Kyoto\",\"mode\":\"Shinkansen Nozomi (reserved seat)\",\"duration_minutes\":130,\"price_usd\":88.07,\"per_person\":true,\"notes\":\"Tokyo to Kyoto on 2027-01-21; ~2h10m, no transfers.\",\"booking_url\":null,\"source\":{\"url\":\"https://us.trip.com/trains/japan/route/tokyo-to-kyoto\",\"title\":\"Shinkansen from Tokyo to Kyoto - Check train times and prices\",\"evidence_url\":\"/evidence/20261010/search-https-us-trip-com-trains-japan-route-tokyo-to-kyoto-9396115.txt\",\"fetched_at\":\"2026-10-10T16:56:36.115707\"},\"included\":true},{\"id\":\"l_179db768\",\"kind\":\"intercity\",\"from_place\":\"Kyoto\",\"to_place\":\"Tokyo\",\"mode\":\"Shinkansen Nozomi (reserved seat)\",\"duration_minutes\":130,\"price_usd\":88.07,\"per_person\":true,\"notes\":\"Kyoto to Tokyo on 2027-01-24; same route/fare in reverse.\",\"booking_url\":null,\"source\":{\"url\":\"https://us.trip.com/trains/japan/route/tokyo-to-kyoto\",\"title\":\"Shinkansen from Tokyo to Kyoto - Check train times and prices\",\"evidence_url\":\"/evidence/20261010/search-https-us-trip-com-trains-japan-route-tokyo-to-kyoto-9396115.txt\",\"fetched_at\":\"2026-10-10T16:56:36.115707\"},\"included\":true},{\"id\":\"l_c01d6a3e\",\"kind\":\"airport_transfer\",\"from_place\":\"Tokyo\",\"to_place\":\"Narita Airport\",\"mode\":\"Narita Express (N'EX)\",\"duration_minutes\":60,\"price_usd\":25.53,\"per_person\":true,\"notes\":\"Return transfer for the 2027-01-25 flight home; one-way ordinary car fare.\",\"booking_url\":null,\"source\":{\"url\":\"https://us.trip.com/guide/transport/narita-express.html\",\"title\":\"Narita Express Guide: Tickets, Stops, Train Schedule & More | Trip.com\",\"evidence_url\":\"/evidence/20261010/search-https-us-trip-com-guide-transport-narita-express-html-9384329.txt\",\"fetched_at\":\"2026-10-10T16:56:24.329214\"},\"included\":true},{\"id\":\"l_68933656\",\"kind\":\"local_pass\",\"from_place\":\"\",\"to_place\":\"\",\"mode\":\"Suica/Pasmo IC card (prepaid)\",\"duration_minutes\":0,\"price_usd\":45.0,\"per_person\":true,\"notes\":\"Covers 7 days of daily metro/subway/bus in Tokyo and Kyoto; a full day of transit runs ~¥2,000-3,000, so ~¥30,000 (~$200) total for the trip, ~$45 per person at a balanced pace.\",\"booking_url\":null,\"source\":{\"url\":\"https://chasingthechungs.com/japan-ic-card-guide-suica-pasmo-icoca\",\"title\":\"Japan IC Card Guide: Suica vs PASMO vs ICOCA (2026)\",\"evidence_url\":\"/evidence/20261010/search-https-chasingthechungs-com-japan-ic-card-guide-suica--9396113.txt\",\"fetched_at\":\"2026-10-10T16:56:36.115217\"},\"included\":true}]}"
+  "value": "{\"common_choice\":{\"choice\":\"trains and metro (Shinkansen between cities, IC-card metro/subway within cities)\",\"because\":\"Japan's rail network is fast, reliable and city-centre to city-centre, so it beats driving or flying for a Tokyo–Kyoto–Tokyo itinerary, and IC cards make local metro/subway rides tap-and-go.\",\"alternative\":\"rental car (only practical in rural areas like Hokkaido; not worth it for Tokyo/Kyoto)\",\"details\":[],\"sources\":[{\"url\":\"https://www.lonelyplanet.com/articles/getting-around-japan\",\"title\":\"How to get around in Japan - Lonely Planet\",\"evidence_url\":\"/evidence/20261010/search-https-www-lonelyplanet-com-articles-getting-around-ja-9876194.txt\",\"fetched_at\":\"2026-10-10T17:04:36.195762\"},{\"url\":\"https://tokyocheapo.com/travel/tokyo-to-kyoto-fastest-cheapest-ways\",\"title\":\"https://tokyocheapo.com/travel/tokyo-to-kyoto-fastest-cheapest-ways\",\"evidence_url\":\"/evidence/20261010/page-https-tokyocheapo-com-travel-tokyo-to-kyoto-fastest-che-9893539.txt\",\"fetched_at\":\"2026-10-10T17:04:53.539330\"},{\"url\":\"https://www.jreast.co.jp/en/multi/nex/tickets\",\"title\":\"N'EX (Narita Express) Tickets | Train & Routes | JR-EAST\",\"evidence_url\":\"/evidence/20261010/search-https-www-jreast-co-jp-en-multi-nex-tickets-2738585.txt\",\"fetched_at\":\"2026-10-10T15:05:38.585658\"},{\"url\":\"https://www.japan-guide.com/e/e2359_003.html\",\"title\":\"Prepaid IC Cards in Japan: Suica, Pasmo, Icoca\",\"evidence_url\":\"/evidence/20261010/search-https-www-japan-guide-com-e-e2359-003-html-9875286.txt\",\"fetched_at\":\"2026-10-10T17:04:35.286452\"},{\"url\":\"https://www.kyotostation.com/taking-a-bus-in-kyoto\",\"title\":\"Taking a Bus in Kyoto – Kyoto Station\",\"evidence_url\":\"/evidence/20261010/search-https-www-kyotostation-com-taking-a-bus-in-kyoto-9894669.txt\",\"fetched_at\":\"2026-10-10T17:04:54.669604\"},{\"url\":\"https://www.sakuramobile.jp/blog/japan-travel-guide/is-there-uber-in-japan-guide-to-using-uber-in-japan\",\"title\":\"Is There Uber in Japan? | Guide to Using Uber in Japan 2026 | Sakura Mobile\",\"evidence_url\":\"/evidence/20261010/search-https-www-sakuramobile-jp-blog-japan-travel-guide-is--9894546.txt\",\"fetched_at\":\"2026-10-10T17:04:54.547123\"},{\"url\":\"https://www.exchangerates.org.uk/USD-JPY-spot-exchange-rates-history-2026.html\",\"title\":\"US Dollar to Japanese Yen History: 2026\",\"evidence_url\":\"/evidence/20261010/search-https-www-exchangerates-org-uk-usd-jpy-spot-exchange--9901800.txt\",\"fetched_at\":\"2026-10-10T17:05:01.800990\"}]},\"rideshare_note\":\"Rideshare is not common in Japan — Uber only operates as a premium taxi-hailing service (Uber Black) and most visitors rely on trains, buses and regular taxis.\",\"legs\":[{\"id\":\"l_35896126\",\"kind\":\"airport_transfer\",\"from_place\":\"Narita Airport (NRT)\",\"to_place\":\"Tokyo\",\"mode\":\"Narita Express (N'EX)\",\"duration_minutes\":60,\"price_usd\":20.2,\"per_person\":true,\"notes\":\"One-way ordinary car to Tokyo Station ¥3,140 (~$20.20 at ¥155/USD); ~53-60 min. A tourist round-trip N'EX ticket (¥5,200) covers both the arrival and departure legs.\",\"booking_url\":null,\"source\":{\"url\":\"https://www.jreast.co.jp/en/multi/nex/tickets\",\"title\":\"N'EX (Narita Express) Tickets | Train & Routes | JR-EAST\",\"evidence_url\":\"/evidence/20261010/search-https-www-jreast-co-jp-en-multi-nex-tickets-2738585.txt\",\"fetched_at\":\"2026-10-10T15:05:38.585658\"},\"included\":true},{\"id\":\"l_5db7be65\",\"kind\":\"intercity\",\"from_place\":\"Tokyo\",\"to_place\":\"Kyoto\",\"mode\":\"Shinkansen Nozomi (reserved seat)\",\"duration_minutes\":135,\"price_usd\":91.4,\"per_person\":true,\"notes\":\"Tokyo→Kyoto 2027-01-21; ¥14,170 reserved (~$91.40). Hikari non-reserved ¥13,320 (~$85.90) is ~25 min slower and cheaper.\",\"booking_url\":null,\"source\":{\"url\":\"https://tokyocheapo.com/travel/tokyo-to-kyoto-fastest-cheapest-ways\",\"title\":\"https://tokyocheapo.com/travel/tokyo-to-kyoto-fastest-cheapest-ways\",\"evidence_url\":\"/evidence/20261010/page-https-tokyocheapo-com-travel-tokyo-to-kyoto-fastest-che-9893539.txt\",\"fetched_at\":\"2026-10-10T17:04:53.539330\"},\"included\":true},{\"id\":\"l_65f4cf53\",\"kind\":\"intercity\",\"from_place\":\"Kyoto\",\"to_place\":\"Tokyo\",\"mode\":\"Shinkansen Nozomi (reserved seat)\",\"duration_minutes\":135,\"price_usd\":91.4,\"per_person\":true,\"notes\":\"Kyoto→Tokyo 2027-01-24; ¥14,170 reserved (~$91.40). Same fare as the outbound leg.\",\"booking_url\":null,\"source\":{\"url\":\"https://tokyocheapo.com/travel/tokyo-to-kyoto-fastest-cheapest-ways\",\"title\":\"https://tokyocheapo.com/travel/tokyo-to-kyoto-fastest-cheapest-ways\",\"evidence_url\":\"/evidence/20261010/page-https-tokyocheapo-com-travel-tokyo-to-kyoto-fastest-che-9893539.txt\",\"fetched_at\":\"2026-10-10T17:04:53.539330\"},\"included\":true},{\"id\":\"l_597ef332\",\"kind\":\"airport_transfer\",\"from_place\":\"Tokyo\",\"to_place\":\"Narita Airport (NRT)\",\"mode\":\"Narita Express (N'EX)\",\"duration_minutes\":60,\"price_usd\":20.2,\"per_person\":true,\"notes\":\"Return to airport for the 2027-01-25 flight home; ¥3,140 one-way (~$20.20). Cheaper to buy the ¥5,200 tourist round-trip ticket covering both N'EX legs.\",\"booking_url\":null,\"source\":{\"url\":\"https://www.jreast.co.jp/en/multi/nex/tickets\",\"title\":\"N'EX (Narita Express) Tickets | Train & Routes | JR-EAST\",\"evidence_url\":\"/evidence/20261010/search-https-www-jreast-co-jp-en-multi-nex-tickets-2738585.txt\",\"fetched_at\":\"2026-10-10T15:05:38.585658\"},\"included\":true},{\"id\":\"l_fc4c6ed8\",\"kind\":\"local_pass\",\"from_place\":\"\",\"to_place\":\"\",\"mode\":\"Suica/Pasmo IC card (Tokyo) + Kyoto Subway & Bus 1-day pass\",\"duration_minutes\":0,\"price_usd\":40.0,\"per_person\":true,\"notes\":\"Estimate for 7 days of daily metro/subway/bus: Tokyo ~¥1,000/day and Kyoto ~¥1,100/day (Subway & Bus 1-day pass) plus a few extra rides, ≈¥6,000 (~$40). Suica/Pasmo is tap-and-go and works across Tokyo and Kyoto transit.\",\"booking_url\":null,\"source\":{\"url\":\"https://www.kyotostation.com/taking-a-bus-in-kyoto\",\"title\":\"Taking a Bus in Kyoto – Kyoto Station\",\"evidence_url\":\"/evidence/20261010/search-https-www-kyotostation-com-taking-a-bus-in-kyoto-9894669.txt\",\"fetched_at\":\"2026-10-10T17:04:54.669604\"},\"included\":true}]}"
  },
  "climate:tokyo:2026-12-02:2026-12-04": {
   "years": [
@@ -9927,7 +9927,7 @@
  ],
  "result:lodging:any:japan:7": {
   "start": "2027-01-18",
-  "value": "{\"common_choice\":{\"choice\":\"hotel\",\"because\":\"budget-conscious first-time visitors to Japan overwhelmingly choose compact business hotels over Airbnb for the value, central transit access, and convenience (e.g. parcel pickup, no strict quiet rules), staying in metro-adjacent, budget-friendly neighborhoods like Asakusa in Tokyo and Downtown/Kawaramachi in Kyoto.\",\"alternative\":\"airbnb\",\"details\":[\"Asakusa (Tokyo)\",\"Downtown Kawaramachi (Kyoto)\"],\"sources\":[{\"url\":\"https://nerdnomads.com/where-to-stay-in-tokyo\",\"title\":\"Where To Stay in Tokyo: 9 Best Areas for First-Timers (2026)\",\"evidence_url\":\"/evidence/20261010/search-https-nerdnomads-com-where-to-stay-in-tokyo-9374869.txt\",\"fetched_at\":\"2026-10-10T16:56:14.876904\"},{\"url\":\"https://www.bontraveler.com/where-to-stay-in-tokyo-japan\",\"title\":\"Where to Stay in Tokyo: 4 Best Areas and Hotels for First-Timers - Bon Traveler\",\"evidence_url\":\"/evidence/20261010/search-https-www-bontraveler-com-where-to-stay-in-tokyo-japa-9374878.txt\",\"fetched_at\":\"2026-10-10T16:56:14.878587\"},{\"url\":\"https://thewayfaringsoul.com/best-area-stay-tokyo-first-time-japan\",\"title\":\"6 Best Areas TOKYO HOTELS Your First Epic Japan Visit (2026)\",\"evidence_url\":\"/evidence/20261010/search-https-thewayfaringsoul-com-best-area-stay-tokyo-first-9374878.txt\",\"fetched_at\":\"2026-10-10T16:56:14.878975\"},{\"url\":\"https://travellemming.com/where-to-stay-in-kyoto\",\"title\":\"Where to Stay in Kyoto, Japan\",\"evidence_url\":\"/evidence/20261010/search-https-travellemming-com-where-to-stay-in-kyoto-9375014.txt\",\"fetched_at\":\"2026-10-10T16:56:15.014555\"},{\"url\":\"https://wherearethosemorgans.com/where-to-stay-in-kyoto\",\"title\":\"Exactly Where To Stay In Kyoto (For First Timers)\",\"evidence_url\":\"/evidence/20261010/search-https-wherearethosemorgans-com-where-to-stay-in-kyoto-9375014.txt\",\"fetched_at\":\"2026-10-10T16:56:15.014738\"},{\"url\":\"https://www.bontraveler.com/where-to-stay-in-kyoto-japan\",\"title\":\"Where to Stay in Kyoto: 6 Best Areas for First-Timers - Bon Traveler\",\"evidence_url\":\"/evidence/20261010/search-https-www-bontraveler-com-where-to-stay-in-kyoto-japa-9375014.txt\",\"fetched_at\":\"2026-10-10T16:56:15.014925\"},{\"url\":\"https://www.japan-guide.com/forum/quereadisplay.html?0+178375=\",\"title\":\"Tokyo/Kyoto/Osaka - Host/AirBnB or Hotel? - japan-guide.com forum\",\"evidence_url\":\"/evidence/20261010/search-https-www-japan-guide-com-forum-quereadisplay-html-0--2742697.txt\",\"fetched_at\":\"2026-10-10T15:05:42.699317\"},{\"url\":\"https://www.reddit.com/r/JapanTravelTips/comments/15becbc/airbnb_vs_hotels\",\"title\":\"Airbnb vs hotels : r/JapanTravelTips\",\"evidence_url\":\"/evidence/20261010/search-https-www-reddit-com-r-japantraveltips-comments-15bec-2742699.txt\",\"fetched_at\":\"2026-10-10T15:05:42.700443\"}]},\"stays\":[{\"city\":\"Tokyo\",\"check_in\":\"2027-01-18\",\"check_out\":\"2027-01-21\",\"selected_id\":\"h-asakusatokyo-0118-3\",\"options\":[{\"id\":\"h-asakusatokyo-0118-3\",\"city\":\"Tokyo\",\"name\":\"THE KANZASHI TOKYO ASAKUSA\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-18\",\"check_out\":\"2027-01-21\",\"price_total_usd\":189.0,\"rating\":4.3,\"location_note\":\"864 reviews, $63/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2018%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwiV9ufbuLCXAxWzD9QBHcDLHc0QyvcEegUIAxCmAQ&qs=MihDaG9JaXIyOHFLV1I2czd2QVJvTkwyY3ZNVEZ0T1Y4MVpuRmlaQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBISBwjrDxABGBUYAzICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-18%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-18-9426994.png\",\"fetched_at\":\"2026-10-10T16:57:07.021390\"}},{\"id\":\"h-asakusatokyo-0118-6\",\"city\":\"Tokyo\",\"name\":\"Agora Place Tokyo Asakusa\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-18\",\"check_out\":\"2027-01-21\",\"price_total_usd\":138.0,\"rating\":4.0,\"location_note\":\"1,540 reviews, $46/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2018%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwiV9ufbuLCXAxWzD9QBHcDLHc0QyvcEegUIAxDkAg&qs=MidDaGtJOTZfNWxvR0RtTHl1QVJvTUwyY3ZNVEpzY21ab2QzSjVFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBISBwjrDxABGBUYAzICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-18%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-18-9426994.png\",\"fetched_at\":\"2026-10-10T16:57:07.021390\"}},{\"id\":\"h-asakusatokyo-0118-4\",\"city\":\"Tokyo\",\"name\":\"Tosei Hotel Cocone Asakusa\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-18\",\"check_out\":\"2027-01-21\",\"price_total_usd\":162.0,\"rating\":4.2,\"location_note\":\"331 reviews, $54/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2018%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwiV9ufbuLCXAxWzD9QBHcDLHc0QyvcEegUIAxCUAg&qs=MidDaGtJbHJPWGx1dlRzcThvR2cwdlp5OHhNWEpuT1hJeWFETTRFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBISBwjrDxABGBUYAzICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-18%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-18-9426994.png\",\"fetched_at\":\"2026-10-10T16:57:07.021390\"}},{\"id\":\"h-asakusatokyo-0118-2\",\"city\":\"Tokyo\",\"name\":\"Richmond Hotel Premier Asakusa\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-18\",\"check_out\":\"2027-01-21\",\"price_total_usd\":246.0,\"rating\":4.4,\"location_note\":\"2,522 reviews, $82/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2018%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwiV9ufbuLCXAxWzD9QBHcDLHc0QyvcEegUIAxCvAg&qs=MihDaG9Jbl9qNHZiZWJ6cExMQVJvTkwyY3ZNVEZpZW5rMU56WXphQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBISBwjrDxABGBUYAzICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-18%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-18-9426994.png\",\"fetched_at\":\"2026-10-10T16:57:07.021390\"}},{\"id\":\"h-asakusatokyo-0118-5\",\"city\":\"Tokyo\",\"name\":\"VESSEL INN ASAKUSA TSUKUBA EXPRESS\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-18\",\"check_out\":\"2027-01-21\",\"price_total_usd\":165.0,\"rating\":4.1,\"location_note\":\"553 reviews, $55/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2018%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwiV9ufbuLCXAxWzD9QBHcDLHc0QyvcEegUIAxC1Aw&qs=MidDaGtJcW9tdjE0bWhxZDU0R2cwdlp5OHhNV3MwYzJ4dFkzQTFFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBISBwjrDxABGBUYAzICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-18%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-18-9426994.png\",\"fetched_at\":\"2026-10-10T16:57:07.021390\"}}],\"reasoning\":\"THE KANZASHI TOKYO ASAKUSA at $63/night ($189 total) is the best value in Asakusa, a budget-friendly, metro-connected base that's easy to reach Tokyo Disneyland via the Keiyo line. Alternatives: Tosei Cocone ($54), Agora Place ($46), and Richmond Premier ($82) if more comfort is wanted.\"},{\"city\":\"Kyoto\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"selected_id\":\"h-downtownkawaramachikyoto-0121-2\",\"options\":[{\"id\":\"h-downtownkawaramachikyoto-0121-2\",\"city\":\"Kyoto\",\"name\":\"Hotel Traveltine Kyoto Kiyamachi\",\"kind\":\"hotel\",\"neighborhood\":\"Downtown Kawaramachi\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":150.0,\"rating\":4.7,\"location_note\":\"495 reviews, $50/night\",\"lat\":null,\"lon\":null,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Downtown%20Kawaramachi%20Kyoto%20from%202027%2001%2021%20to%202027%2001%2024%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjFgNPduLCXAxWwGNQBHW7mNH0QyvcEegUIAxC2Ag&qs=MihDaG9JcFBpN3Q5NjcxZVhVQVJvTkwyY3ZNVEZtTlhabWFtYzRjQkFCOA0&ts=CAEaRAomEiQKCS9tLzA4OWQzODoXS2F3YXJhbWFjaGktRG9yaSBTdHJlZXQSGhIUCgcI6w8QARgVEgcI6w8QARgYGAMyAggBKgcKBToDVVNE\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Downtown%20Kawaramachi%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-downtown-kawaramachi-kyoto-2027-01-21-9429936.png\",\"fetched_at\":\"2026-10-10T16:57:09.941520\"}},{\"id\":\"h-downtownkawaramachikyoto-0121-6\",\"city\":\"Kyoto\",\"name\":\"OMO5 Kyoto Sanjo by Hoshino Resorts\",\"kind\":\"hotel\",\"neighborhood\":\"Downtown Kawaramachi\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":168.0,\"rating\":4.3,\"location_note\":\"620 reviews, $56/night\",\"lat\":null,\"lon\":null,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Downtown%20Kawaramachi%20Kyoto%20from%202027%2001%2021%20to%202027%2001%2024%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjFgNPduLCXAxWwGNQBHW7mNH0QyvcEegUIAxCZAg&qs=MidDaGtJdnM3U3hLLVlqTmRQR2cwdlp5OHhNWEl5Y1hocWJqZDRFQUU4DQ&ts=CAEaRAomEiQKCS9tLzA4OWQzODoXS2F3YXJhbWFjaGktRG9yaSBTdHJlZXQSGhIUCgcI6w8QARgVEgcI6w8QARgYGAMyAggBKgcKBToDVVNE\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Downtown%20Kawaramachi%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-downtown-kawaramachi-kyoto-2027-01-21-9429936.png\",\"fetched_at\":\"2026-10-10T16:57:09.941520\"}},{\"id\":\"h-downtownkawaramachikyoto-0121-5\",\"city\":\"Kyoto\",\"name\":\"Hotel Resol Kyoto Kawaramachi Sanjo\",\"kind\":\"hotel\",\"neighborhood\":\"Downtown Kawaramachi\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":201.0,\"rating\":4.4,\"location_note\":\"1,239 reviews, $67/night\",\"lat\":null,\"lon\":null,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Downtown%20Kawaramachi%20Kyoto%20from%202027%2001%2021%20to%202027%2001%2024%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjFgNPduLCXAxWwGNQBHW7mNH0QyvcEegUIAxCCAQ&qs=MihDaG9JdnZLczE1ejBySWU0QVJvTkwyY3ZNVEZuTURGMmRIbHdiaEFCOA0&ts=CAEaRAomEiQKCS9tLzA4OWQzODoXS2F3YXJhbWFjaGktRG9yaSBTdHJlZXQSGhIUCgcI6w8QARgVEgcI6w8QARgYGAMyAggBKgcKBToDVVNE\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Downtown%20Kawaramachi%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-downtown-kawaramachi-kyoto-2027-01-21-9429936.png\",\"fetched_at\":\"2026-10-10T16:57:09.941520\"}},{\"id\":\"h-downtownkawaramachikyoto-0121-1\",\"city\":\"Kyoto\",\"name\":\"Cross Hotel Kyoto\",\"kind\":\"hotel\",\"neighborhood\":\"Downtown Kawaramachi\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":285.0,\"rating\":4.7,\"location_note\":\"2,421 reviews, $95/night\",\"lat\":null,\"lon\":null,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Downtown%20Kawaramachi%20Kyoto%20from%202027%2001%2021%20to%202027%2001%2024%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjFgNPduLCXAxWwGNQBHW7mNH0QyvcEegQIAxBh&qs=MihDaG9JNnVHUl83cWFyLUQ2QVJvTkwyY3ZNVEZtTnpFMWVqZDBiQkFCOA0&ts=CAEaRAomEiQKCS9tLzA4OWQzODoXS2F3YXJhbWFjaGktRG9yaSBTdHJlZXQSGhIUCgcI6w8QARgVEgcI6w8QARgYGAMyAggBKgcKBToDVVNE\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Downtown%20Kawaramachi%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-downtown-kawaramachi-kyoto-2027-01-21-9429936.png\",\"fetched_at\":\"2026-10-10T16:57:09.941520\"}},{\"id\":\"h-downtownkawaramachikyoto-0121-3\",\"city\":\"Kyoto\",\"name\":\"Mitsui Garden Hotel Kyoto Kawaramachi Jokyoji\",\"kind\":\"hotel\",\"neighborhood\":\"Downtown Kawaramachi\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":237.0,\"rating\":4.5,\"location_note\":\"1,025 reviews, $79/night\",\"lat\":null,\"lon\":null,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Downtown%20Kawaramachi%20Kyoto%20from%202027%2001%2021%20to%202027%2001%2024%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjFgNPduLCXAxWwGNQBHW7mNH0QyvcEegQIAxAo&qs=MidDaGtJcU8yeHFyXzVzdWxxR2cwdlp5OHhNV3BrZEhSc01GODRFQUU4DQ&ts=CAEaRAomEiQKCS9tLzA4OWQzODoXS2F3YXJhbWFjaGktRG9yaSBTdHJlZXQSGhIUCgcI6w8QARgVEgcI6w8QARgYGAMyAggBKgcKBToDVVNE\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Downtown%20Kawaramachi%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-downtown-kawaramachi-kyoto-2027-01-21-9429936.png\",\"fetched_at\":\"2026-10-10T16:57:09.941520\"}}],\"reasoning\":\"Hotel Traveltine Kyoto Kiyamachi at $50/night ($150 total) is a top-rated (4.7) budget pick in Downtown Kawaramachi, the best-connected base for Fushimi Inari, Arashiyama, and Nishiki Market. Alternatives: OMO5 Sanjo ($56), Hotel Resol Sanjo ($67), and Cross Hotel ($95).\"},{\"city\":\"Tokyo\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"selected_id\":\"h-asakusatokyo-0124-4\",\"options\":[{\"id\":\"h-asakusatokyo-0124-4\",\"city\":\"Tokyo\",\"name\":\"THE KANZASHI TOKYO ASAKUSA\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":59.0,\"rating\":4.3,\"location_note\":\"864 reviews, $59/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2024%20to%202027%2001%2025%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwj2hNbduLCXAxWEcX8AHYacADQQyvcEegUIAxDjAQ&qs=MihDaG9JaXIyOHFLV1I2czd2QVJvTkwyY3ZNVEZ0T1Y4MVpuRmlaQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBgSBwjrDxABGBkYATICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-24-9429684.png\",\"fetched_at\":\"2026-10-10T16:57:09.690313\"}},{\"id\":\"h-asakusatokyo-0124-8\",\"city\":\"Tokyo\",\"name\":\"Agora Place Tokyo Asakusa\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":41.0,\"rating\":4.0,\"location_note\":\"1,540 reviews, $41/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2024%20to%202027%2001%2025%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwj2hNbduLCXAxWEcX8AHYacADQQyvcEegUIAxCZAw&qs=MidDaGtJOTZfNWxvR0RtTHl1QVJvTUwyY3ZNVEpzY21ab2QzSjVFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBgSBwjrDxABGBkYATICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-24-9429684.png\",\"fetched_at\":\"2026-10-10T16:57:09.690313\"}},{\"id\":\"h-asakusatokyo-0124-5\",\"city\":\"Tokyo\",\"name\":\"Tosei Hotel Cocone Asakusa\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":48.0,\"rating\":4.2,\"location_note\":\"331 reviews, $48/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2024%20to%202027%2001%2025%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwj2hNbduLCXAxWEcX8AHYacADQQyvcEegUIAxD6AQ&qs=MidDaGtJbHJPWGx1dlRzcThvR2cwdlp5OHhNWEpuT1hJeWFETTRFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBgSBwjrDxABGBkYATICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-24-9429684.png\",\"fetched_at\":\"2026-10-10T16:57:09.690313\"}},{\"id\":\"h-asakusatokyo-0124-2\",\"city\":\"Tokyo\",\"name\":\"ASAKUSA KOKONO CLUB HOTEL\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":83.0,\"rating\":4.6,\"location_note\":\"457 reviews, $83/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2024%20to%202027%2001%2025%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwj2hNbduLCXAxWEcX8AHYacADQQyvcEegQIAxBb&qs=MidDaGtJbU5iaGtwblB5LUVGR2cwdlp5OHhNV056Y1daeWRERjJFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBgSBwjrDxABGBkYATICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-24-9429684.png\",\"fetched_at\":\"2026-10-10T16:57:09.690313\"}},{\"id\":\"h-asakusatokyo-0124-6\",\"city\":\"Tokyo\",\"name\":\"VESSEL INN ASAKUSA TSUKUBA EXPRESS\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":58.0,\"rating\":4.1,\"location_note\":\"553 reviews, $58/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2024%20to%202027%2001%2025%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwj2hNbduLCXAxWEcX8AHYacADQQyvcEegUIAxCyAg&qs=MidDaGtJcW9tdjE0bWhxZDU0R2cwdlp5OHhNV3MwYzJ4dFkzQTFFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBgSBwjrDxABGBkYATICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-24-9429684.png\",\"fetched_at\":\"2026-10-10T16:57:09.690313\"}}],\"reasoning\":\"THE KANZASHI TOKYO ASAKUSA at $59 for the single night keeps the final Tokyo stay cheap and consistent with the first base, near transit for the airport. Alternatives: Tosei Cocone ($48), Agora Place ($41), and Kokono Club Hotel ($83).\"}]}"
+  "value": "{\"common_choice\":{\"choice\":\"hotel\",\"because\":\"...hotels are easier to manage, more predictable, and almost always sit within a few minutes of a major train station with an English-speaking front desk to help first-timers, which suits a short, transit-heavy Japan itinerary far better than an Airbnb.\",\"alternative\":\"airbnb\",\"details\":[\"Tokyo: Asakusa (historic, budget-friendly, easy airport access) and Shinjuku (central transit hub)\",\"Kyoto: Kyoto Station (best rail access, budget deals, easy to Fushimi Inari and Arashiyama)\"],\"sources\":[{\"url\":\"https://www.japantravelpros.com/blog/japan-airbnb-vs-hotel-which-is-right-for-you\",\"title\":\"Hotel vs. Airbnb in Japan: Which is Right for You? | Japan Travel Pros\",\"evidence_url\":\"/evidence/20261010/search-https-www-japantravelpros-com-blog-japan-airbnb-vs-ho-9873482.txt\",\"fetched_at\":\"2026-10-10T17:04:33.528300\"},{\"url\":\"https://www.japansophy.com/post/japan-airbnb-vs-hotel\",\"title\":\"Airbnb vs hotel in Japan: which should you book?\",\"evidence_url\":\"/evidence/20261010/search-https-www-japansophy-com-post-japan-airbnb-vs-hotel-9873528.txt\",\"fetched_at\":\"2026-10-10T17:04:33.529265\"},{\"url\":\"https://bucketlistbri.com/best-place-to-stay-in-tokyo-first-time\",\"title\":\"The Best Places to Stay in Tokyo for First-Time Visitors\",\"evidence_url\":\"/evidence/20261010/search-https-bucketlistbri-com-best-place-to-stay-in-tokyo-f-9874235.txt\",\"fetched_at\":\"2026-10-10T17:04:34.236973\"},{\"url\":\"https://nerdnomads.com/where-to-stay-in-tokyo\",\"title\":\"Where To Stay in Tokyo: 9 Best Areas for First-Timers (2026)\",\"evidence_url\":\"/evidence/20261010/search-https-nerdnomads-com-where-to-stay-in-tokyo-9874238.txt\",\"fetched_at\":\"2026-10-10T17:04:34.238987\"},{\"url\":\"https://travellemming.com/where-to-stay-in-kyoto\",\"title\":\"Where to Stay in Kyoto, Japan\",\"evidence_url\":\"/evidence/20261010/search-https-travellemming-com-where-to-stay-in-kyoto-9874738.txt\",\"fetched_at\":\"2026-10-10T17:04:34.740166\"},{\"url\":\"https://www.bontraveler.com/where-to-stay-in-kyoto-japan\",\"title\":\"Where to Stay in Kyoto: 6 Best Areas for First-Timers - Bon Traveler\",\"evidence_url\":\"/evidence/20261010/search-https-www-bontraveler-com-where-to-stay-in-kyoto-japa-9874740.txt\",\"fetched_at\":\"2026-10-10T17:04:34.740806\"}]},\"stays\":[{\"city\":\"Tokyo\",\"check_in\":\"2027-01-19\",\"check_out\":\"2027-01-21\",\"selected_id\":\"h-asakusatokyo-0119-8\",\"options\":[{\"id\":\"h-asakusatokyo-0119-8\",\"city\":\"Tokyo\",\"name\":\"THE KANZASHI TOKYO ASAKUSA\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-19\",\"check_out\":\"2027-01-21\",\"price_total_usd\":122.0,\"rating\":4.3,\"location_note\":\"864 reviews, $61/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegQIAxB5&qs=MihDaG9JaXIyOHFLV1I2czd2QVJvTkwyY3ZNVEZ0T1Y4MVpuRmlaQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-19%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-19-9949695.png\",\"fetched_at\":\"2026-10-10T17:05:49.700889\"}},{\"id\":\"h-asakusatokyo-0119-6\",\"city\":\"Tokyo\",\"name\":\"Far East Village Hotel Tokyo, Asakusa\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-19\",\"check_out\":\"2027-01-21\",\"price_total_usd\":144.0,\"rating\":4.4,\"location_note\":\"352 reviews, $72/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxC0Ag&qs=MidDaGtJd2FENDUtZXpsYzlIR2cwdlp5OHhNV3M1Wkhsck1Ua3hFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-19%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-19-9949695.png\",\"fetched_at\":\"2026-10-10T17:05:49.700889\"}},{\"id\":\"h-asakusatokyo-0119-7\",\"city\":\"Tokyo\",\"name\":\"Richmond Hotel Premier Asakusa\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-19\",\"check_out\":\"2027-01-21\",\"price_total_usd\":168.0,\"rating\":4.4,\"location_note\":\"2,522 reviews, $84/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxDRAg&qs=MihDaG9Jbl9qNHZiZWJ6cExMQVJvTkwyY3ZNVEZpZW5rMU56WXphQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-19%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-19-9949695.png\",\"fetched_at\":\"2026-10-10T17:05:49.700889\"}},{\"id\":\"h-asakusatokyo-0119-1\",\"city\":\"Tokyo\",\"name\":\"Asakusa Kaminarimon Takenoyado\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-19\",\"check_out\":\"2027-01-21\",\"price_total_usd\":190.0,\"rating\":4.7,\"location_note\":\"125 reviews, $95/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxCKAw&qs=MihDaG9Jc1BpWXBhV0lnN3p0QVJvTkwyY3ZNVEZtYkc0elkySXpZaEFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-19%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-19-9949695.png\",\"fetched_at\":\"2026-10-10T17:05:49.700889\"}},{\"id\":\"h-asakusatokyo-0119-3\",\"city\":\"Tokyo\",\"name\":\"横綱 Hotel - Stay SAKURA Tokyo Asakusa\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-19\",\"check_out\":\"2027-01-21\",\"price_total_usd\":196.0,\"rating\":4.5,\"location_note\":\"110 reviews, $98/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxC8Aw&qs=MidDaGtJMmJxQTE0cjJzWmdZR2cwdlp5OHhNV1p4ZUdJd05XUTBFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-19%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-19-9949695.png\",\"fetched_at\":\"2026-10-10T17:05:49.700889\"}},{\"id\":\"h-asakusatokyo-0119-2\",\"city\":\"Tokyo\",\"name\":\"Asakusa Tobu Hotel\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-19\",\"check_out\":\"2027-01-21\",\"price_total_usd\":242.0,\"rating\":4.5,\"location_note\":\"1,377 reviews, $121/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxCjAw&qs=MihDaG9JckxuNXhzV09zb0tsQVJvTkwyY3ZNVEZtY21JelgydzJjQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-19%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-19-9949695.png\",\"fetched_at\":\"2026-10-10T17:05:49.700889\"}},{\"id\":\"h-asakusatokyo-0119-4\",\"city\":\"Tokyo\",\"name\":\"THE GATE HOTEL Kaminarimon by HULIC\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-19\",\"check_out\":\"2027-01-21\",\"price_total_usd\":256.0,\"rating\":4.4,\"location_note\":\"1,925 reviews, $128/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegQIAxBC&qs=MiZDaGdJbExhMF84TEw4WnQzR2d3dlp5OHhNVE5xWkRCbk5td1FBUTgN&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-19%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-19-9949695.png\",\"fetched_at\":\"2026-10-10T17:05:49.700889\"}},{\"id\":\"h-asakusatokyo-0119-5\",\"city\":\"Tokyo\",\"name\":\"Asakusa View Hotel Annex Rokku\",\"kind\":\"hotel\",\"neighborhood\":\"Asakusa\",\"check_in\":\"2027-01-19\",\"check_out\":\"2027-01-21\",\"price_total_usd\":262.0,\"rating\":4.4,\"location_note\":\"566 reviews, $131/night\",\"lat\":35.7175966,\"lon\":139.7975626,\"booking_url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxCUAQ&qs=MihDaG9JNy0za19xRDV2OV9oQVJvTkwyY3ZNVEZuZVROb2EzaHFlQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-19%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-asakusa-tokyo-2027-01-19-9949695.png\",\"fetched_at\":\"2026-10-10T17:05:49.700889\"}}],\"reasoning\":\"THE KANZASHI TOKYO ASAKUSA at $61/night fits all three budgets (Alex $117, Sam $140, Jo $103) and sits in Asakusa, a budget-friendly, historic base with easy airport access. Alternatives: Far East Village ($72), Richmond Premier Asakusa ($84), and Asakusa Kaminarimon Takenoyado ($95, top-rated 4.7).\"},{\"city\":\"Kyoto\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"selected_id\":\"h-kyotostationkyoto-0121-6\",\"options\":[{\"id\":\"h-kyotostationkyoto-0121-6\",\"city\":\"Kyoto\",\"name\":\"Ala Hotel Kyoto\",\"kind\":\"hotel\",\"neighborhood\":\"Kyoto Station\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":177.0,\"rating\":4.5,\"location_note\":\"805 reviews, $59/night\",\"lat\":34.9866933,\"lon\":135.7583589,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChoIqNPYk6DKmemoARoNL2cvMTF0NWN6XzN3OBAB?q=hotels+in+Kyoto+Station+Kyoto+from+2027-01-21+to+2027-01-24+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKapqbLJip_bMPht2q0A4&sa=X&ved=2ahUKEwiaj47ZuLCXAxWYVH8AHYauCuoQyvcEegUIAxCQAw\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Kyoto%20Station%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-kyoto-station-kyoto-2027-01-21-9422024.png\",\"fetched_at\":\"2026-10-10T16:57:02.029148\"}},{\"id\":\"h-kyotostationkyoto-0121-4\",\"city\":\"Kyoto\",\"name\":\"Mitsui Garden Hotel Kyoto Station\",\"kind\":\"hotel\",\"neighborhood\":\"Kyoto Station\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":183.0,\"rating\":4.5,\"location_note\":\"895 reviews, $61/night\",\"lat\":34.9866933,\"lon\":135.7583589,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChoI8fjs7oKt0Lz9ARoNL2cvMTFoMXE1eDBocRAB?q=hotels+in+Kyoto+Station+Kyoto+from+2027-01-21+to+2027-01-24+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKapqbLJip_bMPht2q0A4&sa=X&ved=2ahUKEwiaj47ZuLCXAxWYVH8AHYauCuoQyvcEegUIAxDuAQ\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Kyoto%20Station%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-kyoto-station-kyoto-2027-01-21-9422024.png\",\"fetched_at\":\"2026-10-10T16:57:02.029148\"}},{\"id\":\"h-kyotostationkyoto-0121-7\",\"city\":\"Kyoto\",\"name\":\"Mercure Kyoto Station\",\"kind\":\"hotel\",\"neighborhood\":\"Kyoto Station\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":225.0,\"rating\":4.4,\"location_note\":\"1,921 reviews, $75/night\",\"lat\":34.9866933,\"lon\":135.7583589,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChkItfX1iu-57787Gg0vZy8xMWttbXZtajZmEAE?q=hotels+in+Kyoto+Station+Kyoto+from+2027-01-21+to+2027-01-24+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKapqbLJip_bMPht2q0A4&sa=X&ved=2ahUKEwiaj47ZuLCXAxWYVH8AHYauCuoQyvcEegUIAxDPAQ\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Kyoto%20Station%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-kyoto-station-kyoto-2027-01-21-9422024.png\",\"fetched_at\":\"2026-10-10T16:57:02.029148\"}},{\"id\":\"h-kyotostationkyoto-0121-3\",\"city\":\"Kyoto\",\"name\":\"HOTEL VISCHIO KYOTO by GRANVIA\",\"kind\":\"hotel\",\"neighborhood\":\"Kyoto Station\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":258.0,\"rating\":4.5,\"location_note\":\"1,539 reviews, $86/night\",\"lat\":34.9866933,\"lon\":135.7583589,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChoIv4qJ2PrwtoD9ARoNL2cvMTFndnQ0d3o4bBAB?q=hotels+in+Kyoto+Station+Kyoto+from+2027-01-21+to+2027-01-24+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKapqbLJip_bMPht2q0A4&sa=X&ved=2ahUKEwiaj47ZuLCXAxWYVH8AHYauCuoQyvcEegUIAxCzAQ\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Kyoto%20Station%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-kyoto-station-kyoto-2027-01-21-9422024.png\",\"fetched_at\":\"2026-10-10T16:57:02.029148\"}},{\"id\":\"h-kyotostationkyoto-0121-1\",\"city\":\"Kyoto\",\"name\":\"Richmond Hotel Premier Kyōto Ekimae\",\"kind\":\"hotel\",\"neighborhood\":\"Kyoto Station\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":243.0,\"rating\":4.6,\"location_note\":\"1,569 reviews, $81/night\",\"lat\":34.9866933,\"lon\":135.7583589,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChoIn5zDhKravsutARoNL2cvMTFnY3l4MnNmYhAB?q=hotels+in+Kyoto+Station+Kyoto+from+2027-01-21+to+2027-01-24+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKapqbLJip_bMPht2q0A4&sa=X&ved=2ahUKEwiaj47ZuLCXAxWYVH8AHYauCuoQyvcEegUIAxDBAg\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Kyoto%20Station%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-kyoto-station-kyoto-2027-01-21-9422024.png\",\"fetched_at\":\"2026-10-10T16:57:02.029148\"}},{\"id\":\"h-kyotostationkyoto-0121-5\",\"city\":\"Kyoto\",\"name\":\"Royal Twin Hotel Kyoto Hachijoguchi\",\"kind\":\"hotel\",\"neighborhood\":\"Kyoto Station\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":267.0,\"rating\":4.5,\"location_note\":\"922 reviews, $89/night\",\"lat\":34.9866933,\"lon\":135.7583589,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChoIgN2FzKWitNX8ARoNL2cvMTFoN3pmbjRkaxAB?q=hotels+in+Kyoto+Station+Kyoto+from+2027-01-21+to+2027-01-24+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKapqbLJip_bMPht2q0A4&sa=X&ved=2ahUKEwiaj47ZuLCXAxWYVH8AHYauCuoQyvcEegUIAxDcAg\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Kyoto%20Station%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-kyoto-station-kyoto-2027-01-21-9422024.png\",\"fetched_at\":\"2026-10-10T16:57:02.029148\"}},{\"id\":\"h-kyotostationkyoto-0121-2\",\"city\":\"Kyoto\",\"name\":\"Onyado Nono Kyotoshichijo\",\"kind\":\"hotel\",\"neighborhood\":\"Kyoto Station\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":270.0,\"rating\":4.5,\"location_note\":\"2,688 reviews, $90/night\",\"lat\":34.9866933,\"lon\":135.7583589,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChkIh_zS0cn3gLc_Gg0vZy8xMWg5a3Bfc3dtEAE?q=hotels+in+Kyoto+Station+Kyoto+from+2027-01-21+to+2027-01-24+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKapqbLJip_bMPht2q0A4&sa=X&ved=2ahUKEwiaj47ZuLCXAxWYVH8AHYauCuoQyvcEegQIAxA_\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Kyoto%20Station%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-kyoto-station-kyoto-2027-01-21-9422024.png\",\"fetched_at\":\"2026-10-10T16:57:02.029148\"}},{\"id\":\"h-kyotostationkyoto-0121-8\",\"city\":\"Kyoto\",\"name\":\"Hotel Granvia Kyoto\",\"kind\":\"hotel\",\"neighborhood\":\"Kyoto Station\",\"check_in\":\"2027-01-21\",\"check_out\":\"2027-01-24\",\"price_total_usd\":321.0,\"rating\":4.3,\"location_note\":\"4,901 reviews, $107/night\",\"lat\":34.9866933,\"lon\":135.7583589,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChgI4vfH6fLZ9c6zARoLL2cvMTIxcDZzN3QQAQ?q=hotels+in+Kyoto+Station+Kyoto+from+2027-01-21+to+2027-01-24+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKapqbLJip_bMPht2q0A4&sa=X&ved=2ahUKEwiaj47ZuLCXAxWYVH8AHYauCuoQyvcEegQIAxAl\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Kyoto%20Station%20Kyoto%20from%202027-01-21%20to%202027-01-24%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-kyoto-station-kyoto-2027-01-21-9422024.png\",\"fetched_at\":\"2026-10-10T16:57:02.029148\"}}],\"reasoning\":\"Ala Hotel Kyoto at $59/night is the cheapest, fits all three budgets, and is right by Kyoto Station for easy access to Fushimi Inari and Arashiyama. Alternatives: Mitsui Garden Kyoto Station ($61), Mercure Kyoto Station ($75), and HOTEL VISCHIO by GRANVIA ($86).\"},{\"city\":\"Tokyo\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"selected_id\":\"h-shinjukutokyo-0124-5\",\"options\":[{\"id\":\"h-shinjukutokyo-0124-5\",\"city\":\"Tokyo\",\"name\":\"Stay SAKURA Tokyo 新宿 百蔵\",\"kind\":\"hotel\",\"neighborhood\":\"Shinjuku\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":61.0,\"rating\":4.3,\"location_note\":\"89 reviews, $61/night\",\"lat\":35.6937632,\"lon\":139.7036319,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChoI_uXOyvrG_oHRARoNL2cvMTFqNDRqZm13cBAB?q=hotels+in+Shinjuku+Tokyo+from+2027-01-24+to+2027-01-25+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKatHdNq6x0L4PsYyKoAE&sa=X&ved=2ahUKEwjR0ZjZuLCXAxWuGNQBHTGGAhQQyvcEegUIAxCZAg\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Shinjuku%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-shinjuku-tokyo-2027-01-24-9421418.png\",\"fetched_at\":\"2026-10-10T16:57:01.424115\"}},{\"id\":\"h-shinjukutokyo-0124-7\",\"city\":\"Tokyo\",\"name\":\"The Knot Tokyo Shinjuku\",\"kind\":\"hotel\",\"neighborhood\":\"Shinjuku\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":84.0,\"rating\":4.2,\"location_note\":\"2,637 reviews, $84/night\",\"lat\":35.6937632,\"lon\":139.7036319,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChkIpbeM08LBkcgxGg0vZy8xMWY1YnI3NGJ4EAE?q=hotels+in+Shinjuku+Tokyo+from+2027-01-24+to+2027-01-25+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKatHdNq6x0L4PsYyKoAE&sa=X&ved=2ahUKEwjR0ZjZuLCXAxWuGNQBHTGGAhQQyvcEegUIAxDhAQ\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Shinjuku%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-shinjuku-tokyo-2027-01-24-9421418.png\",\"fetched_at\":\"2026-10-10T16:57:01.424115\"}},{\"id\":\"h-shinjukutokyo-0124-2\",\"city\":\"Tokyo\",\"name\":\"Nippon Seinenkan Hotel\",\"kind\":\"hotel\",\"neighborhood\":\"Shinjuku\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":90.0,\"rating\":4.4,\"location_note\":\"1,716 reviews, $90/night\",\"lat\":35.6937632,\"lon\":139.7036319,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChcIiI-u55uxkpnHARoKL20vMGxsNTRudhAB?q=hotels+in+Shinjuku+Tokyo+from+2027-01-24+to+2027-01-25+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKatHdNq6x0L4PsYyKoAE&sa=X&ved=2ahUKEwjR0ZjZuLCXAxWuGNQBHTGGAhQQyvcEegUIAxCMAw\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Shinjuku%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-shinjuku-tokyo-2027-01-24-9421418.png\",\"fetched_at\":\"2026-10-10T16:57:01.424115\"}},{\"id\":\"h-shinjukutokyo-0124-8\",\"city\":\"Tokyo\",\"name\":\"Shinjuku Prince Hotel\",\"kind\":\"hotel\",\"neighborhood\":\"Shinjuku\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":111.0,\"rating\":4.1,\"location_note\":\"3,401 reviews, $111/night\",\"lat\":35.6937632,\"lon\":139.7036319,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChgI3YmQ_d6Om6e0ARoLL2cvMXRmYzFfeWsQAQ?q=hotels+in+Shinjuku+Tokyo+from+2027-01-24+to+2027-01-25+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKatHdNq6x0L4PsYyKoAE&sa=X&ved=2ahUKEwjR0ZjZuLCXAxWuGNQBHTGGAhQQyvcEegUIAxD8AQ\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Shinjuku%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-shinjuku-tokyo-2027-01-24-9421418.png\",\"fetched_at\":\"2026-10-10T16:57:01.424115\"}},{\"id\":\"h-shinjukutokyo-0124-4\",\"city\":\"Tokyo\",\"name\":\"Hotel Gracery Shinjuku\",\"kind\":\"hotel\",\"neighborhood\":\"Shinjuku\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":123.0,\"rating\":4.3,\"location_note\":\"6,343 reviews, $123/night\",\"lat\":35.6937632,\"lon\":139.7036319,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChoI6djuxaLx-tqdARoNL2cvMTFiNnZienN0ahAB?q=hotels+in+Shinjuku+Tokyo+from+2027-01-24+to+2027-01-25+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKatHdNq6x0L4PsYyKoAE&sa=X&ved=2ahUKEwjR0ZjZuLCXAxWuGNQBHTGGAhQQyvcEegUIAxCtAQ\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Shinjuku%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-shinjuku-tokyo-2027-01-24-9421418.png\",\"fetched_at\":\"2026-10-10T16:57:01.424115\"}},{\"id\":\"h-shinjukutokyo-0124-1\",\"city\":\"Tokyo\",\"name\":\"Daiwa Roynet Hotel Nishi-Shinjuku Premier\",\"kind\":\"hotel\",\"neighborhood\":\"Shinjuku\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":128.0,\"rating\":4.4,\"location_note\":\"1,396 reviews, $128/night\",\"lat\":35.6937632,\"lon\":139.7036319,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChoIhI6Phvj6jP3uARoNL2cvMTFneTM2bDR3MRAB?q=hotels+in+Shinjuku+Tokyo+from+2027-01-24+to+2027-01-25+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKatHdNq6x0L4PsYyKoAE&sa=X&ved=2ahUKEwjR0ZjZuLCXAxWuGNQBHTGGAhQQyvcEegUIAxC0Ag\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Shinjuku%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-shinjuku-tokyo-2027-01-24-9421418.png\",\"fetched_at\":\"2026-10-10T16:57:01.424115\"}},{\"id\":\"h-shinjukutokyo-0124-3\",\"city\":\"Tokyo\",\"name\":\"Mitsui Garden Hotel Jingugaien Tokyo PREMIER\",\"kind\":\"hotel\",\"neighborhood\":\"Shinjuku\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":134.0,\"rating\":4.3,\"location_note\":\"1,814 reviews, $134/night\",\"lat\":35.6937632,\"lon\":139.7036319,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChkIp_C6kLrYt_BUGg0vZy8xMWgxMTNmMTc3EAE?q=hotels+in+Shinjuku+Tokyo+from+2027-01-24+to+2027-01-25+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKatHdNq6x0L4PsYyKoAE&sa=X&ved=2ahUKEwjR0ZjZuLCXAxWuGNQBHTGGAhQQyvcEegQIAxBy\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Shinjuku%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-shinjuku-tokyo-2027-01-24-9421418.png\",\"fetched_at\":\"2026-10-10T16:57:01.424115\"}},{\"id\":\"h-shinjukutokyo-0124-6\",\"city\":\"Tokyo\",\"name\":\"ONSEN RYOKAN YUEN SHINJUKU\",\"kind\":\"hotel\",\"neighborhood\":\"Shinjuku\",\"check_in\":\"2027-01-24\",\"check_out\":\"2027-01-25\",\"price_total_usd\":138.0,\"rating\":4.2,\"location_note\":\"1,643 reviews, $138/night\",\"lat\":35.6937632,\"lon\":139.7036319,\"booking_url\":\"https://www.google.com/travel/hotels/entity/ChoIp9LlhfLB4rPRARoNL2cvMTFnbnBxNHBxZBAB?q=hotels+in+Shinjuku+Tokyo+from+2027-01-24+to+2027-01-25+for+1+adults&hl=en&gl=us&curr=USD&ei=qLTKatHdNq6x0L4PsYyKoAE&sa=X&ved=2ahUKEwjR0ZjZuLCXAxWuGNQBHTGGAhQQyvcEegUIAxDGAQ\",\"source\":{\"url\":\"https://www.google.com/travel/search?q=hotels%20in%20Shinjuku%20Tokyo%20from%202027-01-24%20to%202027-01-25%20for%201%20adults&hl=en&gl=us&curr=USD\",\"title\":\"Google Hotels\",\"evidence_url\":\"/evidence/20261010/hotels-shinjuku-tokyo-2027-01-24-9421418.png\",\"fetched_at\":\"2026-10-10T16:57:01.424115\"}}],\"reasoning\":\"Stay SAKURA Tokyo Shinjuku at $61/night fits all three budgets and is in central Shinjuku, ideal for a final night before the airport. Alternatives: The Knot Tokyo Shinjuku ($84), Nippon Seinenkan Hotel ($90), and Shinjuku Prince Hotel ($111).\"}]}"
  },
  "climate:tokyo:2027-01-18:2027-01-20": {
   "years": [
@@ -10649,7 +10649,7 @@
   {
    "title": "teamLab Planets TOKYO DMM - Tokyo Attractions - Japan Travel",
    "url": "https://en.japantravel.com/places/tokyo/teamlab-planets/446",
-   "excerpt": "8:30 - 22:00\n Wednesday\n\n  8:30 - 22:00\n Thursday\n\n  8:30 - 22:00\n Friday\n\n  8:30 - 22:00\n Saturday\n\n  8:30 - 22:00\n Sunday\n\n  8:30 - 22:00\n Holidays\n\n  8:30 - 22:00\n\n### Price\n\n¥3800~\n\nAll teamLab Planets TOKYO DMM prices\n\n### Website\n\nplanets.teamlab.art\n\nCTA Get tickets to teamLab Planets\t\n\nVia our partner Get tickets to teamLab Planets\t\n\nGet tickets to teamLab Planets\n\nGet to experience this exciting, immersive art adventure during your trip to Tokyo\n\nBook now\n\n## Highlights [...] ## Notice\n\nSummer 2026 Closures: Thursday, June 11; Thursday, July 9; Wednesday, August 5\n\n## Overview\n\nStatic map of (35.6491171, 139.7902417)/139.7902417,35.6491171,8/360x120?access_token=REDACTED",
+   "excerpt": "8:30 - 22:00\n Wednesday\n\n  8:30 - 22:00\n Thursday\n\n  8:30 - 22:00\n Friday\n\n  8:30 - 22:00\n Saturday\n\n  8:30 - 22:00\n Sunday\n\n  8:30 - 22:00\n Holidays\n\n  8:30 - 22:00\n\n### Price\n\n¥3800~\n\nAll teamLab Planets TOKYO DMM prices\n\n### Website\n\nplanets.teamlab.art\n\nCTA Get tickets to teamLab Planets\t\n\nVia our partner Get tickets to teamLab Planets\t\n\nGet tickets to teamLab Planets\n\nGet to experience this exciting, immersive art adventure during your trip to Tokyo\n\nBook now\n\n## Highlights [...] ## Notice\n\nSummer 2026 Closures: Thursday, June 11; Thursday, July 9; Wednesday, August 5\n\n## Overview\n\nStatic map of (35.6491171, 139.7902417)/139.7902417,35.6491171,8/360x120?access_token=pk.eyJ1IjoiamFwYW50c",
    "evidence_url": "/evidence/20261010/search-https-en-japantravel-com-places-tokyo-teamlab-planets-9383617.txt",
    "fetched_at": "2026-10-10T16:56:23.618757"
   },
@@ -11463,7 +11463,7 @@
   {
    "title": "Sensoji Temple - Tokyo Attractions - Japan Travel",
    "url": "https://en.japantravel.com/places/tokyo/sensoji-temple/5",
-   "excerpt": "Opening Hours\n\n Monday\n\n  6:00 - 17:00\n Tuesday\n\n  6:00 - 17:00\n Wednesday\n\n  6:00 - 17:00\n Thursday\n\n  6:00 - 17:00\n Friday\n\n  6:00 - 17:00\n Saturday\n\n  6:00 - 17:00\n Sunday\n\n  6:00 - 17:00\n Holidays\n\n  6:00 - 17:00\n\n### Price\n\nFree\n\n### Phone\n\n03-3842-0181\n\n### Website\n\nsenso-ji.jp\n\nHighlights\n\n### Nakamise Street [...] ## Overview\n\nStatic map of (35.714669176588, 139.7967528454)/139.7967528454,35.714669176588,8/360x120?access_token=REDACTED)\n\n### Address\n\n2-chōme-3-1 Asakusa, Taito City, Tōkyō-to 111-0032\n\n(Map) ( Directions )\n\n### Hours\n\n6:00 - 17:00 Closed now\n\nOpening Hours\n\n Monday\n\n  6:00 - 17",
+   "excerpt": "Opening Hours\n\n Monday\n\n  6:00 - 17:00\n Tuesday\n\n  6:00 - 17:00\n Wednesday\n\n  6:00 - 17:00\n Thursday\n\n  6:00 - 17:00\n Friday\n\n  6:00 - 17:00\n Saturday\n\n  6:00 - 17:00\n Sunday\n\n  6:00 - 17:00\n Holidays\n\n  6:00 - 17:00\n\n### Price\n\nFree\n\n### Phone\n\n03-3842-0181\n\n### Website\n\nsenso-ji.jp\n\nHighlights\n\n### Nakamise Street [...] ## Overview\n\nStatic map of (35.714669176588, 139.7967528454)/139.7967528454,35.714669176588,8/360x120?access_token=[token removed])\n\n### Address\n\n2-chōme-3-1 Asakusa, Taito City, Tōkyō-to 111-0032\n\n(Map) ( Directions )\n\n### Hours\n\n6:00 - 17:00 Closed now\n\nOpening Hours\n\n Monday\n\n  6:00 - 17",
    "evidence_url": "/evidence/20261010/search-https-en-japantravel-com-places-tokyo-sensoji-temple--9417870.txt",
    "fetched_at": "2026-10-10T16:56:57.871030"
   },
@@ -13188,5 +13188,892 @@
  "geocode:shibuya, tokyo": [
   35.6637109,
   139.6976941
+ ],
+ "climate:tokyo:2027-01-19:2027-01-20": {
+  "years": [
+   {
+    "time": [
+     "2026-01-19",
+     "2026-01-20"
+    ],
+    "temperature_2m_max": [
+     12.3,
+     8.9
+    ],
+    "temperature_2m_min": [
+     5.1,
+     2.7
+    ],
+    "precipitation_sum": [
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "time": [
+     "2025-01-19",
+     "2025-01-20"
+    ],
+    "temperature_2m_max": [
+     8.4,
+     13.0
+    ],
+    "temperature_2m_min": [
+     0.2,
+     4.9
+    ],
+    "precipitation_sum": [
+     1.9,
+     1.5
+    ]
+   },
+   {
+    "time": [
+     "2024-01-19",
+     "2024-01-20"
+    ],
+    "temperature_2m_max": [
+     14.7,
+     7.4
+    ],
+    "temperature_2m_min": [
+     6.8,
+     5.0
+    ],
+    "precipitation_sum": [
+     0.0,
+     5.5
+    ]
+   }
+  ],
+  "evidence_url": "/evidence/20261010/climate-tokyo-2027-01-19-9856675.txt",
+  "url": "https://open-meteo.com/en/docs/historical-weather-api?latitude=35.6768601&longitude=139.7638947"
+ },
+ "search:hotel vs airbnb japan travelers which is better for short trip": [
+  {
+   "title": "Hotel vs. Airbnb in Japan: Which is Right for You? | Japan Travel Pros",
+   "url": "https://www.japantravelpros.com/blog/japan-airbnb-vs-hotel-which-is-right-for-you",
+   "excerpt": "Skip to Content \n\nJapan Travel Pros\n\nJapan Travel Pros\n\nJapan Travel Pros\n\nJapan Travel Pros\n\n# Hotel vs. Airbnb in Japan: Which is Right for You?\n\nWritten By Jiro 中村次郎\n\nHotels are the better choice for most trips to Japan.\n\nThey are easier to manage, more predictable, and usually better located near major train stations.\n\nAirbnb can work well for families or longer stays when space matters more than convenience. [...] ## Japan’s Hotels vs Airbnb: Which One Should You Choose?\n\nIf you prioritize reliability, convenience, and service, a hotel is the best option. Hotels in Japan are clean, efficient, and often located near train stations, making sightseeing and day trips much easier.\n\nIf you’re",
+   "evidence_url": "/evidence/20261010/search-https-www-japantravelpros-com-blog-japan-airbnb-vs-ho-9873482.txt",
+   "fetched_at": "2026-10-10T17:04:33.528300"
+  },
+  {
+   "title": "Airbnb vs hotel in Japan: which should you book?",
+   "url": "https://www.japansophy.com/post/japan-airbnb-vs-hotel",
+   "excerpt": "We always recommend first-timers in particular to book a hotel rather than an airbnb for their Japan trip, for a couple of reasons. First of all, a hotel is going to offer you all kinds of support that an airbnb host won't.  Front desk staff at most tourist-area hotels speak enough English to help you, and someone is always there to help immediately if there's a medical emergency, if you lose your wallet or something and need to contact the police or the lost property office, if you want to [...] Secondly, Japanese hotels have a reputation for being impeccably clean, are almost always within five minutes of a major train station (especially business hotels), and typically include a breakfast",
+   "evidence_url": "/evidence/20261010/search-https-www-japansophy-com-post-japan-airbnb-vs-hotel-9873528.txt",
+   "fetched_at": "2026-10-10T17:04:33.529265"
+  },
+  {
+   "title": "Tokyo/Kyoto/Osaka - Host/AirBnB or Hotel? - japan-guide.com forum",
+   "url": "https://www.japan-guide.com/forum/quereadisplay.html?0+178375=",
+   "excerpt": "| |  |  | Greetings all! 1st trip to Japan in mid August and venturing out solo! Excited and anxious at the same time.  Question. Would it be better to stay in a Host/AirBnB or Hotel? They seem to be similar in pricing for cost effectiveness. I could imagine that there would be a sense of how the culture really lives in a host home, may be even get advice as to where to go. However, I could also see staying in a Hotel would be beneficial as you literally don't have to worry about anyone else, [...] |  |  |  |\n --- \n| |  |  |  --- | | Re: Tokyo/Kyoto/Osaka - Host/AirBnB or Hotel? | 2024/8/13 20:14 | |\n| |  |  | I understand the dilemma of choosing a host, Airbnb, or hotel in Japan. I lean tow",
+   "evidence_url": "/evidence/20261010/search-https-www-japan-guide-com-forum-quereadisplay-html-0--9873529.txt",
+   "fetched_at": "2026-10-10T17:04:33.529496"
+  },
+  {
+   "title": "What's better? AIRBNB or HOTELS in Japan + video tour and why I much prefer one over the other",
+   "url": "https://www.youtube.com/watch?v=uoqBY0vGLt4",
+   "excerpt": "### Transcript\n[0:00] if you clicked on this video you're probably planning for your Japan trip and debating between Airbnb or hotel as\n[0:08] someone who has stayed in both let me tell you why I personally prefer one over the other I'll also give you an\n[0:15] Airbnb tour and a hotel overview to sort of give you an idea of how spacious or lack of space each one [...] [7:06] experience again if you want to get a taste of what living like the locals feel like a hotel may not be for\n[7:15] you overall I much prefer hotels over Airbnb if you're claustrophobic or are used to a spacious room I implore you to\n[7:23] do your research and look at pictures and videos of the hotel or airbnb's don't ju",
+   "evidence_url": "/evidence/20261010/search-https-www-youtube-com-watch-v-uoqby0vglt4-9873529.txt",
+   "fetched_at": "2026-10-10T17:04:33.529905"
+  },
+  {
+   "title": "BEFORE STAYING WITH AIRBNB IN JAPAN... – The Tokyo Chapter",
+   "url": "https://www.thetokyochapter.com/before-staying-with-airbnb-in-japan",
+   "excerpt": "-cleaning fees + accommodation costs doesn’t always mean it is cheaper to stay in an airbnb vs a hotel (and, with kids, there is some added pressure that kids may damage a part of the Airbnb facilities/property.)  \n-almost all airbnb properties in Japan have very strict rules about no noise, no hanging around outside the property at all (that includes talking in hallways or alleyways nearby) [...] Please be aware that: because of the language barrier in Japan. By choosing Airbnb in Japan over a hotel you are relinquishing the option of assistance with restaurant bookings, someone to call you an ambulance,  someone to hold your luggage before or after check out.In a country with earthquakes a",
+   "evidence_url": "/evidence/20261010/search-https-www-thetokyochapter-com-before-staying-with-air-9873529.txt",
+   "fetched_at": "2026-10-10T17:04:33.530097"
+  }
+ ],
+ "search:best neighborhoods to stay in tokyo for first-time visitors near transit budget-friendly": [
+  {
+   "title": "The Best Places to Stay in Tokyo for First-Time Visitors",
+   "url": "https://bucketlistbri.com/best-place-to-stay-in-tokyo-first-time",
+   "excerpt": "You’ll be near a major subway line, making it super easy to get to/from Narita and Haneda airports. Plus, you’ll be in one of Tokyo’s most cultural and historic wards with plenty to do.\n\nTourists pose for a photo with sumo wrestlers at the Asakusa Sumo Club in Tokyo, Japan.\n\nTeehee!\n\nEast Tokyo simply has so much to see and do. It is a great base from which to explore the rest of Tokyo. And it is typically more budget-friendly than the neighborhoods closer to Shibuya. [...] In short, Shibuya isn’t a bad place to stay for first-timers; it’s just heavily focused on nightlife. I stayed at the BookTeaBed hostel for three nights to be near the station!\n\nFor travelers who want a more authentic exp",
+   "evidence_url": "/evidence/20261010/search-https-bucketlistbri-com-best-place-to-stay-in-tokyo-f-9874235.txt",
+   "fetched_at": "2026-10-10T17:04:34.236973"
+  },
+  {
+   "title": "Where to stay in Tokyo for first time visitors (The 5 BEST Areas!) - Adventures of A+K",
+   "url": "https://adventuresofaplusk.com/where-to-stay-in-tokyo-for-first-time-visitors",
+   "excerpt": "Akasaka is considered to be one of the underrated places to stay in Tokyo for first time visitors. It may not be home to as many of Tokyo’s top attractions, but with easy access to multiple train stations, it is very convenient to explore multiple areas of the city. Plus you can find more budget friendly options! In fact, all of the hotels listed below often have nightly rates under $150 USD. [...] Since most first time visitors to Tokyo will visit here, it is often a top contender for places to stay. Not only because of what you can see just in Shibuya, but also because it’s really convenient to visit other areas of Tokyo, with Shibuya Station offering many train routes. However, we have fo",
+   "evidence_url": "/evidence/20261010/search-https-adventuresofaplusk-com-where-to-stay-in-tokyo-f-9874236.txt",
+   "fetched_at": "2026-10-10T17:04:34.237494"
+  },
+  {
+   "title": "Where to Stay in Tokyo: 4 Best Areas and Hotels for First-Timers - Bon Traveler",
+   "url": "https://www.bontraveler.com/where-to-stay-in-tokyo-japan",
+   "excerpt": "I recommend staying in Ginza proper (the area around Ginza Station and Chuo-dori). It’s the most central and is where most of the luxury shops are. Otherwise, Higashi-Ginza is a good option for more budget-friendly hotel stays, better subway access, and proximity to the Tsukiji Outer Market.\n\n#### Things to Do in Tokyo Station and Ginza\n\n Interior of GLITCH Coffee specialty cafe in Ginza, Tokyo\n\nGLITCH Coffee in Ginza [...] | Area | Best For | Vibe | Transit | Price Tier |\n ---  --- \n| Shibuya | First-timers, main sights, walkability | Energetic, with quiet pockets nearby | Yamanote line, walkable in most directions | $$–$$$, priciest |\n| Asakusa | Culture, temples, ryokan stays | Historic a",
+   "evidence_url": "/evidence/20261010/search-https-www-bontraveler-com-where-to-stay-in-tokyo-japa-9874237.txt",
+   "fetched_at": "2026-10-10T17:04:34.237791"
+  },
+  {
+   "title": "Honest Advice for Where to Stay in Tokyo for First-Time Travellers",
+   "url": "https://www.theinvisibletourist.com/where-to-stay-in-tokyo",
+   "excerpt": "It’s in a great overlooked location between Harajuku and Shibuya, meaning you can skip the big crowds of Shibuya Station and switch it for Harajuku if you wish. If you’re looking for where to stay in Tokyo on a budget, this is a great option.\n\nHaving discovered another hotel I now prefer further down the page, this isn’t my go-to anymore. But it’s convenient location makes and budget price it one of the best places for where to stay in Tokyo for first time travellers! [...] Nearest Station/s: Under 10mins walk to either Shibuya Station, JR Harajuku Station and Meiji Jingumae Metro Station.\n Points of interest: 10mins walk to Shibuya Crossing, Shibuya Sky (read my Shibuya Sky tips to not make",
+   "evidence_url": "/evidence/20261010/search-https-www-theinvisibletourist-com-where-to-stay-in-to-9874237.txt",
+   "fetched_at": "2026-10-10T17:04:34.238431"
+  },
+  {
+   "title": "Where To Stay in Tokyo: 9 Best Areas for First-Timers (2026)",
+   "url": "https://nerdnomads.com/where-to-stay-in-tokyo",
+   "excerpt": "Areas\n\nShinjukuShibuyaHarajuku\n\nBest forFirst-timers, nightlife, shopping\n\nTradeoff\n\nCrowds, noise, higher prices\n\nEast Tokyo – temples, old streets & local atmosphere\n\nAreas\n\nAsakusaUenoYanakaKuramae\n\nBest forCulture, budget, slower pace\n\nTradeoff\n\nLess nightlife\n\nCentral Tokyo – polished & convenient\n\nAreas\n\nGinzaTokyo StationNihonbashi\n\nBest forLuxury, food, transport, day trips & quieter design hotels\n\nTradeoff\n\nLess neighbourhood atmosphere\n\nBay Tokyo – spacious & family-friendly\n\nAreas [...] Shinjuku →\n\nGreat transport, neon Tokyo, food, nightlife, and easy connections everywhere.\n\nClassic base  Shopping & nightlife\n\nShibuya →\n\nYounger, trendier, great for shopping, food, nightlife, an",
+   "evidence_url": "/evidence/20261010/search-https-nerdnomads-com-where-to-stay-in-tokyo-9874238.txt",
+   "fetched_at": "2026-10-10T17:04:34.238987"
+  }
+ ],
+ "search:best area to stay in kyoto for tourists near fushimi inari arashiyama budget": [
+  {
+   "title": "Where to Stay in Kyoto, Japan",
+   "url": "https://travellemming.com/where-to-stay-in-kyoto",
+   "excerpt": "Fushimi and Nakagyo are the best parts of Kyoto to stay on a budget. These districts have a bunch of nice accommodations for prices of $50 per night or lower depending on the season. Nakagyo and Fushimi also offer a ton of budget-friendly restaurants, bars, and even attractions like the famed Fushimi Inari Shrine and Nijō Castle.\n\n\\\\\\\n\nI hope this helped you plan your perfect stay for Kyoto! [...] 👉 Best Area For Budget Travelers | ✨ Best Fushimi Hotels: Zen Kyoto Apartment Hotel• Inari Ohan• Hotel and Spa Lotus Modern • Stay Inn KOTO | 🔑 Browse Airbnbs in Fushimi\n\nThe Kyoto neighborhood of Fushimi is home to one of the most iconic attractions in Japan – the Fushimi Inari Shrine. Most people",
+   "evidence_url": "/evidence/20261010/search-https-travellemming-com-where-to-stay-in-kyoto-9874738.txt",
+   "fetched_at": "2026-10-10T17:04:34.740166"
+  },
+  {
+   "title": "Where to Stay in Kyoto: 6 Best Areas for First-Timers - Bon Traveler",
+   "url": "https://www.bontraveler.com/where-to-stay-in-kyoto-japan",
+   "excerpt": "| Northern Higashiyama | Repeat visitors, zen temples | Serene and overlooked | Bus, bicycle, or short taxi | $–$$$ |\n| Kyoto Station | Budget stays, day trips | Busy transit hub, south of the city | Best rail access in Kyoto | $$, best deals |\n| Arashiyama | Nature retreats, split stays | Village feel, a world away | 30 min by car from Downtown | Mostly $$$ | [...] #### Where to Stay in Arashiyama\n\n##### Best Hotels in Arashiyama\n\n1. HOSHINOYA Kyoto ($$$$), for the best luxury zen ryokan stay\n2. Rangetsu Ryokan ($$$), for the best luxury riverfront ryokan stay\n3. Suiran, a Luxury Collection Hotel, Kyoto ($$$), for the best luxury riverfront hotel\n4. Hanaikada Ryokan ($$), for the best onsen",
+   "evidence_url": "/evidence/20261010/search-https-www-bontraveler-com-where-to-stay-in-kyoto-japa-9874740.txt",
+   "fetched_at": "2026-10-10T17:04:34.740806"
+  },
+  {
+   "title": "Exactly Where To Stay In Kyoto (For First Timers)",
+   "url": "https://wherearethosemorgans.com/where-to-stay-in-kyoto",
+   "excerpt": "Our verdict: Other than staying near Kyoto Station, Downtown is the best connected neighborhood. If we had 3+ days and planned to spend most of our trip exploring attractions like Inari Fushimi, Arashiyama Bamboo Forest, Kinkaku-ji and the Imperial Palace, Downtown would work much better as a base for getting around than the likes of Higashiyama or Arashiyama, and it has more “life” than Kyoto Station.\n\nPros\n\n✅ Dining variety  \n✅ Nightlife  \n✅ Transit links  \n✅ Walkability\n\nCons [...] Arashiyama Bamboo Forest was so busy that we preferred our fun perspective photos looking up at the canopy\n\n \n\n💰 Cheap: To be honest, we personally wouldn’t stay in a cheaper hotel in Arashiyama because the poi",
+   "evidence_url": "/evidence/20261010/search-https-wherearethosemorgans-com-where-to-stay-in-kyoto-9874740.txt",
+   "fetched_at": "2026-10-10T17:04:34.741065"
+  },
+  {
+   "title": "Where to Stay in Kyoto for First Timers: Central & Charming",
+   "url": "https://yourfriendthenomad.com/where-to-stay-in-kyoto",
+   "excerpt": "Downtown Kyoto is another convenient base with its own train station (Kyoto-Kawaramachi Station) that connects you to Arashiyama and beyond, plus a train station a short walk across the river in Gion, which will take you to Fushimi Inari.\n\nDowntown Kyoto is not as charming as the next areas I’ll mention, but it is home to the lantern-lit Pontocho Alley, and is the best area for shopping.\n\n \n\nPhotos via Good Nature Kyoto\n\n#### 1. Good Nature Kyoto [...] 1-4 Days in Kyoto: Stay in a central area, nearby Kyoto Station or in downtown Kyoto, my favorites include:\n  + ✨ $175+/night: Modern art in a 500-year-old temple\n  + 🚿 $116+/night: Hotel with onsen (bathhouse)\n  + 🥐 $80+/night: Boutique budge",
+   "evidence_url": "/evidence/20261010/search-https-yourfriendthenomad-com-where-to-stay-in-kyoto-9874741.txt",
+   "fetched_at": "2026-10-10T17:04:34.741309"
+  },
+  {
+   "title": "The BEST Areas & Hotels to stay in KYOTO Japan in 2026 (review from our trip in March!)",
+   "url": "https://www.youtube.com/watch?v=E0FIUIOXqc8",
+   "excerpt": "We feature top-rated accommodations across three budget categories: Luxury, Mid-Range, and Budget Hotels. So no matter what your travel budget is, this guide will definitely help you find the perfect hotel for your trip to Kyoto, Japan.\n\nTiemestamps:\n\n00:00 - Intro\n00:40 - Area 1: Gion\n01:28 - Area 2: Higashiyama\n02:46 - Area 3: Arashiyama\n04:55 - Area 4: Kyoto Station\n05:35 - Best Luxury Hotels in Kyoto\n08:00 - Best Mid-Range Hotels in Kyoto\n10:25 - Best Budget Hotels in Kyoto [...] ### Chapters\n[0:00] Intro\n[0:40] Area 1: Gion\n[1:28] Area 2: Higashiyama\n[2:46] Area 3: Arashiyama\n[4:55] Area 4: Kyoto Station\n[5:35] Best Luxury Hotels in Kyoto\n[8:00] Best Mid-Range Hotels in Kyoto\n[10:25] Be",
+   "evidence_url": "/evidence/20261010/search-https-www-youtube-com-watch-v-e0fiuioxqc8-9874741.txt",
+   "fetched_at": "2026-10-10T17:04:34.741526"
+  }
+ ],
+ "search:suica pasmo ic card tokyo local transit daily cost tourist": [
+  {
+   "title": "Suica / Pasmo vs day passes - Tokyo Forum",
+   "url": "https://www.tripadvisor.com/ShowTopic-g298184-i861-k8728999-Suica_Pasmo_vs_day_passes-Tokyo_Tokyo_Prefecture_Kanto.html",
+   "excerpt": "The combined Metro/ Toi subway pass costs only 1,000 JPY per day, so my question is, how many journeys would it take (on average of course) to spend as much as that using Suica/ Pasmo cards (there are various types of day passes of course not just this one).\n\nSo, how does a Suica/Pasmo card compare to a day pass? [...] , 200 yen (6-11 km), 240 yen (12-19 km), 280 yen (20-27 km), or 310 yen (28-40 km) and usually we take 170 -240 yen rides. But, the 3 days Tokyo Subway Pass of 1,500 yen is also cheap, and if you take 3 - 4 rides a day, it pays, so it depends on you. But, the difference is not big. At the same time, I think you should buy Suica or Pasmo at first for your convenience, because y",
+   "evidence_url": "/evidence/20261010/search-https-www-tripadvisor-com-showtopic-g298184-i861-k872-9875285.txt",
+   "fetched_at": "2026-10-10T17:04:35.285856"
+  },
+  {
+   "title": "Cheap Tickets & IC Cards | The Official Tokyo Travel Guide, GO TOKYO",
+   "url": "https://www.gotokyo.org/en/plan/getting-around/ic-card/index.html",
+   "excerpt": "### Suica\n\nSuica cards are sold for the following prices: 1,000 yen, 2,000 yen, 3,000 yen, 4,000 yen, 5,000 yen and 10,000 yen. The price includes the card, a 500-yen deposit and usable credit. Suica can be used on trains and buses, and also in some shops, in areas of Japan served by the following IC card operators: SAPICA, Kitaca, PASMO, TOICA, manaca, ICOCA, PiTaPa, SUGOCA, nimoca, HAYAKAKEN, odeca, icsca and RYUTO. To check Suica service areas, click here.\n\n### PASMO [...] Welcome Suica and Tourist Pasmo are IC cards for short-term foreign visitors to Japan. Unlike regular IC cards, they do not require a deposit, but can only be used for 28 days. These differences aside, they can be used ",
+   "evidence_url": "/evidence/20261010/search-https-www-gotokyo-org-en-plan-getting-around-ic-card--9875285.txt",
+   "fetched_at": "2026-10-10T17:04:35.286141"
+  },
+  {
+   "title": "Prepaid IC Cards in Japan: Suica, Pasmo, Icoca",
+   "url": "https://www.japan-guide.com/e/e2359_003.html",
+   "excerpt": "#### Where to get an IC card?\n\nIC cards can be purchased at ticket machines and ticket counters of the issuing railway companies. The initial cost consists of a refundable deposit of 500 yen plus an initial amount (typically 1500 yen) to be charged onto the card. For a surcharge, Suica and Pasmo cards can also be purchased and sent to you before the start of your trip through Japan Experience. Last but not least, Iphone users can add Suica, Pasmo and Icoca cards to Apple Pay. [...] IC cards generally do not provide any discounts over regular tickets. But in Greater Tokyo, Niigata and Sendai, train fares can differ by a few yen depending on whether an IC card or a paper ticket is used. This i",
+   "evidence_url": "/evidence/20261010/search-https-www-japan-guide-com-e-e2359-003-html-9875286.txt",
+   "fetched_at": "2026-10-10T17:04:35.286452"
+  },
+  {
+   "title": "Suica & Pasmo Guide 2026: How to Use Japan's Transportation IC Cards | Japan Travel by NAVITIME - Japan Travel Guides, Transit Search and Itinerary Planner",
+   "url": "https://japantravel.navitime.com/en/area/jp/guide/NTJhowto0063-en",
+   "excerpt": "the balance is 220 yen or less. [...] Refund locations: You must return the card to the issuing company. Suica cards can only be refunded at JR East stations. Pasmo cards can be refunded at stations other than JR, such as Tokyo Metro and Keikyu stations. Refund amount calculation: The refund amount is the 500 yen deposit plus the remaining balance minus a 220 yen handling fee. If the remaining balance is less than 220 yen, only the 500 yen deposit will be refunded. To avoid paying the handling fee, use the card until the balance is [...] Welcome Suica:   \n ・Who can buy it: Short-term tourists.   \n ・Validity period: 28 days. Extensions are not possible.   \n ・Deposit: No 500 yen deposit is req",
+   "evidence_url": "/evidence/20261010/search-https-japantravel-navitime-com-en-area-jp-guide-ntjho-9875286.txt",
+   "fetched_at": "2026-10-10T17:04:35.286698"
+  },
+  {
+   "title": "Suica | JR-EAST",
+   "url": "https://www.jreast.co.jp/en/multi/pass/suica.html",
+   "excerpt": "| Suica Pricing | | | | | | |\n ---  ---  --- \n| Adult | 1,000 yen | 2,000 yen | 3,000 yen | 4,000 yen | 5,000 yen | 10,000 yen |\n| Child | 1,000 yen | 2,000 yen | 3,000 yen | 4,000 yen | 5,000 yen | 10,000 yen |\n\n## How to Use Suica\n\n### You can top up!\n\nWhen your card balance is low, you can top up using cash at regular and multifunctional ticket machines as well as well fare adjustment machines that have the nationwide mutual use symbol. [...] ### Shopping\n\nOnce you top up your Suica card, it can be used at convenience stores, shopping malls, restaurants, etc., in addition to riding trains. It can also be used at shops located inside some private railway and subway stations.\n\nThe Suica car",
+   "evidence_url": "/evidence/20261010/search-https-www-jreast-co-jp-en-multi-pass-suica-html-9875286.txt",
+   "fetched_at": "2026-10-10T17:04:35.286985"
+  }
+ ],
+ "search:how do tourists get around japan trains shinkansen vs rental car rideshare common": [
+  {
+   "title": "How to get around in Japan - Lonely Planet",
+   "url": "https://www.lonelyplanet.com/articles/getting-around-japan",
+   "excerpt": "Summarized by AI\n\n Tokyo-based writer Rebecca Milner breaks down the best ways to get around Japan.\n The shinkansen (bullet train) connects Japan's major cities quickly and reliably.\n Buses are significantly cheaper than the shinkansen and cover rural areas trains miss.\n Rent a car for Hokkaidō, Shikoku and the Japan Alps, where rail thins out.\n\nLonely Planet may earn a commission from affiliate links on our site. All recommendations and reviews reflect our own independent opinions. [...] Advertisement\n\nAdd us on\n\n# How to Get Around in Japan\n\nApr 28, 2026\n\n9 MIN READ\n\nRebecca Milner\n\nRebecca Milner \n\nWriter\n\nAdd us on\n\nHighlights\n\nSummarized by AI\n\n Tokyo-based writer Rebecca Milner breaks ",
+   "evidence_url": "/evidence/20261010/search-https-www-lonelyplanet-com-articles-getting-around-ja-9876194.txt",
+   "fetched_at": "2026-10-10T17:04:36.195762"
+  },
+  {
+   "title": "Japan Travel: JR Pass vs Car Rental | Japan Experience",
+   "url": "https://www.japan-experience.com/plan-your-trip/travel-by-train/train-in-japan/jrpass-vs-rentcar",
+   "excerpt": "Fukuoka Metro\n\nOsaka Metro \n\nFukuoka Metro\n\nOsaka Metro \n\nThe trip from Tokyo Station to Shin-Osaka Station is very common by JR Pass holders, and on that same pass, surrounding ventures to other parts of Kansai is a popular option due to the ease of navigation provided by the pass. These destinations all have very up-to-date and efficient rail systems that are easily accessible, and them being more compact Japanese cities makes driving an option that is often foregone even by residents. [...] Determining whether using a Japan Rail Pass to travel via the intricate railway system of Japan versus renting a car is largely going to depend on where you plan to travel. Of course, Japan’s railway s",
+   "evidence_url": "/evidence/20261010/search-https-www-japan-experience-com-plan-your-trip-travel--9876195.txt",
+   "fetched_at": "2026-10-10T17:04:36.196186"
+  },
+  {
+   "title": "Japan Transportation Guide: How to Get Around in Japan",
+   "url": "https://www.firebirdtours.com/blog/how-to-get-around-in-japan",
+   "excerpt": "RailNinja Tip: Planning to ride during busy seasons or holidays? Reserve your seats early. RailNinja not only helps you compare Shinkansen train types and fares, but also gives you access to Green Car reservations (Japan’s version of first class) and specific seat selections—perfect for making the most of your scenic rail journeys. [...] Trains are the heart of Japanese transportation. Efficient, reliable, clean, and punctual to the second—this is often the best way to travel in Japan, especially for first-time visitors. Rail.Ninja is your ultimate tool for reserving seats on Japan’s high-speed and regional trains. Whether you're riding the iconic Shinkansen or a scenic limited express, you ",
+   "evidence_url": "/evidence/20261010/search-https-www-firebirdtours-com-blog-how-to-get-around-in-9876196.txt",
+   "fetched_at": "2026-10-10T17:04:36.197181"
+  },
+  {
+   "title": "Is train pass or car rental cheaper in Japan?",
+   "url": "https://www.facebook.com/groups/japanwithkids/posts/1917787885495951",
+   "excerpt": "Is it easier to buy passes for the trains or rent a car for a month of traveling around Japan? This is our first time going and we have 3 kids(16,13,10).",
+   "evidence_url": "/evidence/20261010/search-https-www-facebook-com-groups-japanwithkids-posts-191-9876197.txt",
+   "fetched_at": "2026-10-10T17:04:36.197484"
+  },
+  {
+   "title": "Japan Travel: JR Pass vs Car Rental? : r/JapanTravelTips",
+   "url": "https://www.reddit.com/r/JapanTravelTips/comments/1csgojw/japan_travel_jr_pass_vs_car_rental",
+   "excerpt": "Jr pass is apparently alot more expensive now than when I was in japan last time.\n\n4 people, 17 nights we like to move allot, max 2-3 nights per town.",
+   "evidence_url": "/evidence/20261010/search-https-www-reddit-com-r-japantraveltips-comments-1csgo-9876197.txt",
+   "fetched_at": "2026-10-10T17:04:36.197750"
+  }
+ ],
+ "flights:mdw:tokyo:2027-01-18:2027-01-25": {
+  "url": "https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20MDW%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD",
+  "evidence_url": "/evidence/20261010/flights-mdw-tokyo-2027-01-18-9879092.png",
+  "fetched_at": "2026-10-10T17:04:39.103204",
+  "options": [
+   {
+    "airline": "Delta",
+    "origin": "Chicago Midway International Airport",
+    "destination": "Haneda Airport",
+    "depart_at": "2027-01-18T06:00:00",
+    "arrive_at": "2027-01-19T14:05:00",
+    "duration_minutes": 1025,
+    "stops": 1,
+    "layovers": [
+     "Hartsfield-Jackson Atlanta International Airport (40 min)"
+    ],
+    "price_usd": 1251.0,
+    "id": "f1",
+    "return_depart_at": "2027-01-25T17:20:00",
+    "return_arrive_at": "2027-01-25T16:50:00"
+   },
+   {
+    "airline": "Delta. Operated by Endeavor Air DBA Delta Connection",
+    "origin": "Chicago Midway International Airport",
+    "destination": "Haneda Airport",
+    "depart_at": "2027-01-18T09:30:00",
+    "arrive_at": "2027-01-19T17:45:00",
+    "duration_minutes": 1035,
+    "stops": 1,
+    "layovers": [
+     "Detroit Metropolitan Wayne County Airport (2 hr 29 min)"
+    ],
+    "price_usd": 1251.0,
+    "id": "f2",
+    "return_depart_at": "2027-01-25T17:20:00",
+    "return_arrive_at": "2027-01-25T16:50:00"
+   },
+   {
+    "airline": "Delta and Korean Air. Operated by Endeavor Air DBA Delta Connection",
+    "origin": "Chicago Midway International Airport",
+    "destination": "Narita International Airport",
+    "depart_at": "2027-01-18T17:35:00",
+    "arrive_at": "2027-01-20T19:30:00",
+    "duration_minutes": 2095,
+    "stops": 2,
+    "layovers": [
+     "Minneapolis-Saint Paul International Airport (15 hr 20 min)",
+     "Incheon International Airport (1 hr 5 min)"
+    ],
+    "price_usd": 1351.0,
+    "id": "f3",
+    "return_depart_at": "2027-01-25T17:20:00",
+    "return_arrive_at": "2027-01-25T16:50:00"
+   },
+   {
+    "airline": "Delta and Korean Air. Operated by Endeavor Air DBA Delta Connection",
+    "origin": "Chicago Midway International Airport",
+    "destination": "Narita International Airport",
+    "depart_at": "2027-01-18T17:59:00",
+    "arrive_at": "2027-01-20T21:25:00",
+    "duration_minutes": 2186,
+    "stops": 2,
+    "layovers": [
+     "Detroit Metropolitan Wayne County Airport (15 hr 11 min)",
+     "Incheon International Airport (2 hr 5 min)"
+    ],
+    "price_usd": 1351.0,
+    "id": "f4",
+    "return_depart_at": "2027-01-25T17:20:00",
+    "return_arrive_at": "2027-01-25T16:50:00"
+   },
+   {
+    "airline": "Delta and Asiana Airlines. Operated by Endeavor Air DBA Delta Connection",
+    "origin": "Chicago Midway International Airport",
+    "destination": "Narita International Airport",
+    "depart_at": "2027-01-18T17:35:00",
+    "arrive_at": "2027-01-20T20:20:00",
+    "duration_minutes": 2145,
+    "stops": 2,
+    "layovers": [
+     "Minneapolis-Saint Paul International Airport (15 hr 20 min)",
+     "Incheon International Airport (2 hr 10 min)"
+    ],
+    "price_usd": 2102.0,
+    "id": "f5",
+    "return_depart_at": "2027-01-25T17:20:00",
+    "return_arrive_at": "2027-01-25T16:50:00"
+   },
+   {
+    "airline": "Delta. Operated by Endeavor Air DBA Delta Connection",
+    "origin": "Chicago Midway International Airport",
+    "destination": "Haneda Airport",
+    "depart_at": "2027-01-18T17:59:00",
+    "arrive_at": "2027-01-20T14:05:00",
+    "duration_minutes": 1746,
+    "stops": 2,
+    "layovers": [
+     "Detroit Metropolitan Wayne County Airport (10 hr 16 min)",
+     "Hartsfield-Jackson Atlanta International Airport (52 min)"
+    ],
+    "price_usd": 2288.0,
+    "id": "f6",
+    "return_depart_at": "2027-01-25T17:20:00",
+    "return_arrive_at": "2027-01-25T16:50:00"
+   },
+   {
+    "airline": "Delta",
+    "origin": "Chicago Midway International Airport",
+    "destination": "Haneda Airport",
+    "depart_at": "2027-01-18T17:25:00",
+    "arrive_at": "2027-01-20T14:05:00",
+    "duration_minutes": 1780,
+    "stops": 1,
+    "layovers": [
+     "Hartsfield-Jackson Atlanta International Airport (13 hr 14 min)"
+    ],
+    "price_usd": 2289.0,
+    "id": "f7",
+    "return_depart_at": "2027-01-25T17:20:00",
+    "return_arrive_at": "2027-01-25T16:50:00"
+   },
+   {
+    "airline": "Delta. Operated by Endeavor Air DBA Delta Connection",
+    "origin": "Chicago Midway International Airport",
+    "destination": "Haneda Airport",
+    "depart_at": "2027-01-18T17:59:00",
+    "arrive_at": "2027-01-20T17:45:00",
+    "duration_minutes": 1966,
+    "stops": 1,
+    "layovers": [
+     "Detroit Metropolitan Wayne County Airport (17 hr 56 min)"
+    ],
+    "price_usd": 2289.0,
+    "id": "f8",
+    "return_depart_at": "2027-01-25T17:20:00",
+    "return_arrive_at": "2027-01-25T16:50:00"
+   },
+   {
+    "airline": "Delta. Operated by Endeavor Air DBA Delta Connection",
+    "origin": "Chicago Midway International Airport",
+    "destination": "Haneda Airport",
+    "depart_at": "2027-01-18T17:35:00",
+    "arrive_at": "2027-01-20T14:35:00",
+    "duration_minutes": 1800,
+    "stops": 1,
+    "layovers": [
+     "Minneapolis-Saint Paul International Airport (15 hr 30 min)"
+    ],
+    "price_usd": 2291.0,
+    "id": "f9",
+    "return_depart_at": "2027-01-25T17:20:00",
+    "return_arrive_at": "2027-01-25T16:50:00"
+   }
+  ],
+  "return_evidence_url": "/evidence/20261010/flights-return-tokyo-mdw-2027-01-25-9879007.png"
+ },
+ "search:shibuya crossing tokyo free viewing hours": [
+  {
+   "title": "Where to get the best views of Shibuya Crossing",
+   "url": "https://www.timeout.com/tokyo/things-to-do/where-to-get-the-best-views-of-shibuya-crossing",
+   "excerpt": "Station’s B5 exit for free by taking the elevators directly to the 11th floor (open from 7am to 12midnight). [...] The best things in life are free: the bridge connecting Shibuya Mark City shopping centre with Shibuya Station's Toyoko Store is a great spot to see the iconic crossing without opening your wallet. While the concourse is usually busy with commuters moving briskly to catch their next train, you’ll be able to take a long moment to press against the glass during off-peak hours and watch up to 3,000 people cross the Scramble every 90-second interval.\n\nRead more\n\nAdvertising\n\n### Cé La Vi [...] One of Tokyo's most popular party venues, Cé La Vi regularly hosts late-night club events ",
+   "evidence_url": "/evidence/20261010/search-https-www-timeout-com-tokyo-things-to-do-where-to-get-9892887.txt",
+   "fetched_at": "2026-10-10T17:04:52.888807"
+  },
+  {
+   "title": "Shibuya Crossing (2026 Guide): Tickets, Tours, Viewpoints & Itineraries - Shibuya Crossing",
+   "url": "https://shibuyacrossing.org",
+   "excerpt": "No, crossing the street is completely free; you only need tickets or reservations for tours, rooftops, and paid experiences.\n\n### How long should I plan to spend at Shibuya Crossing on a first visit?\n\nPlan about 1 hour for a quick look and photos, 2–3 hours if you add one paid highlight, and longer if you turn it into a half-day or evening with a tour.\n\n### What is the best time of day and year to experience Shibuya Crossing? [...] You don’t pay to cross, but tours and viewpoints are worth booking in advance for popular times.\n Most people need about 1–3 hours in Shibuya if they add one “hero” experience (tour, viewpoint, or food).\n The best time to go depends on whether you want calmer stre",
+   "evidence_url": "/evidence/20261010/search-https-shibuyacrossing-org-9892888.txt",
+   "fetched_at": "2026-10-10T17:04:52.889526"
+  },
+  {
+   "title": "SHIBUYA SKY Night View Guide: Access & Hours",
+   "url": "https://nightscape.tokyo/en/shibuya/shibuya-sky",
+   "excerpt": "| Address | 2-24-12 Shibuya, Shibuya-ku, Tokyo, Japan（Shibuya Night View Spots） |\n| Opening Hours | 10:00–22:30 (last admission 21:20) |\n| Closed | Closed January 1 (the rooftop deck closes in bad weather, etc.) \\May close temporarily for equipment inspections and similar | [...] | Admission Fee | Adults (\\ages 12 and up)  Entry until 14:59 → Online ¥2,700 (approx. $18) / Counter ¥3,000 (approx. $20)   Entry from 15:00 → Online ¥3,400 (approx. $23) / Counter ¥3,700 (approx. $25)  Children (\\includes 12-year-olds in elementary school)  Same-day counter sales only ¥1,200 (approx. $8) \\Preschoolers aged 6 are free |\n| Observation Deck Height | Approx. 230m (755 ft) |\n| Links | SHIBUYA SKY Obser",
+   "evidence_url": "/evidence/20261010/search-https-nightscape-tokyo-en-shibuya-shibuya-sky-9892889.txt",
+   "fetched_at": "2026-10-10T17:04:52.890041"
+  },
+  {
+   "title": "Shibuya Scramble Crossing: Top 7 Viewing Spots - Japan Travel Guide MATCHA",
+   "url": "https://matcha-jp.com/en/1141",
+   "excerpt": "Another location with excellent views of the Shibuya Crossing is MAG's PARK, on top of the Magnet by Shibuya 109 shopping mall. Go up to the rooftop for a stunning view of the Scramble Crossing at day or night.\n\nAdmission is 300 yen, and the roof is open from 11:00 to 23:00, making it a great spot to go any time of the day. You can enjoy a snack or drink on the rooftop; events are held regularly. For more information, see the official website.\n\nMAGNET by SHIBUYA 109\n\nMAGNET by SHIBUYA 109 [...] For those who want to enjoy the view in style, the observation deck’s rooftop bar lounge THE ROOF offers beer, wine, cocktails, and even champagne.\n\nSHIBUYA SKY is open from 10:00 until 22:30 (final a",
+   "evidence_url": "/evidence/20261010/search-https-matcha-jp-com-en-1141-9892890.txt",
+   "fetched_at": "2026-10-10T17:04:52.890303"
+  },
+  {
+   "title": "Everything You Need To Know About Visiting Shibuya Crossing",
+   "url": "https://www.getyourguide.com/explorer/tokyo-ttd193/visit-shibuya-crossing",
+   "excerpt": "As a public intersection, Shibuya Crossing is free for anyone to use. There are also several free viewing points to offer panoramic views of the crossing, such as the glass-enclosed Shibuya Mark City walkway, the 11th-floor Sky Lobby in Hikarie, and the elevated passage in Shibuya Station.\n\n## Discover the top activities near Shibuya Crossing\n\n image [...] Shibuya Crossing is wheelchair accessible, with smooth, level pavement and curb cuts that allow easy movement across the intersection. Shibuya Station, the easiest way to reach the crossing, is also equipped with elevators, ramps, and accessible restrooms. However, the area is notoriously crowded, especially during peak hours, so visiting ",
+   "evidence_url": "/evidence/20261010/search-https-www-getyourguide-com-explorer-tokyo-ttd193-visi-9892890.txt",
+   "fetched_at": "2026-10-10T17:04:52.890568"
+  }
+ ],
+ "read:https://tokyocheapo.com/travel/tokyo-to-kyoto-fastest-cheapest-ways": {
+  "url": "https://tokyocheapo.com/travel/tokyo-to-kyoto-fastest-cheapest-ways",
+  "text": "[All Cities](#) \n\n* [Japan](https://japancheapo.com/)\n* [Hong Kong](https://hongkongcheapo.com/)\n* [London](https://londoncheapo.com/)\n* [Singapore](https://singaporecheapo.com/)\n* [JR Tickets](https://japanrailtickets.com/)\n\n[EN](#) \n\n* [English](/travel/tokyo-to-kyoto-fastest-cheapest-ways/)\n* [中文(香港)](/zh-hk/)\n* [中文(台灣)](/zh-tw/)\n\n[Log in](#)\n\n[![Tokyo Cheapo logo](https://cdn.cheapoguides.com/wp-content/themes/cheapo_theme/assets/img/logos/tokyocheapo/logo.svg.gzip \"Tokyo Cheapo\")](/ \"Tokyo Cheapo Homepage\")  The Ultimate Guide To Tokyo\n\n![Tokyo to Kyoto: The Fastest and Cheapest Ways to Travel in 2026](https://cdn.cheapoguides.com/wp-content/uploads/sites/2/2021/06/iStock-1150053291-1024x600.jpg)\n\nPic: iStock.com/Blue Planet Studio\n\n# Tokyo to Kyoto: The Fastest and Cheapest Ways to Travel in 2026\n\nJuly 10th, 2026 | Carey Finn\n\n![](https://cdn.cheapoguides.com/wp-content/uploads/sites/2/2025/09/IMG_1869-copy-162x162.jpg) Written by [Carey Finn](https://tokyocheapo.com/author/francesmaeda/)\n\n![](https://cdn.cheapoguides.com/wp-content/uploads/sites/2/2025/02/Jane-Pipkin-150x150.jpg) Researched by [Jane Pipkin](https://tokyocheapo.com/author/janepipkin/)\n\nIn a hurry? Tokyo to Kyoto in 2026:\n\n* **Fastest:** Nozomi Shinkansen — ¥14,170 reserved, about 2 hr 15 min ([book a one-way ticket on Klook](https://affiliate.klook.com/redirect?aid=513&aff_adid=774887&k_site=https%3A%2F%2Fwww.klook.com%2Fen-AU%2Frails-32%2F1012-japan%2Fsearch%2F%3Fdate_range_count%3D90%26origin_position_name%3DTokyo%26origin_position%3Dfbf76020-13a1-41b8-a33a-ce13ccdbabd9%26destination_position_name%3DKyoto%26destination_position%3D7fc793b8-f3a5-4f25-8ee9-cd76e89520e5%26departure_date%3D2023-11-17%26passengers%3D%5B%5D%26spm%3DMobility_Aggregate.SearchBtn%26clickId%3D62f6f68e0c))\n* **Cheapest:** Overnight highway bus — from ¥2,800, and you save a night’s accommodation\n* **Best value:** Hikari non-reserved — ¥13,320, about 25 min slower than the Nozomi but ¥850 cheaper\n\nThere are plenty of ways to get from Tokyo to Kyoto in 2026, and the right one depends on whether you care most about speed or price. The bullet train (Shinkansen) is our pick — it runs city centre to city centre in about 2 hr 15 min. If you would rather save the cash, an overnight highway bus is the cheapest way to make the trip, with budget flights sitting somewhere in between. Below are all the options, with current fares and how to book each one.\n\n## How to get from Tokyo to Kyoto\n\nKyoto is about 370 kilometers (225 miles) west of Tokyo. It’s part of the Kansai region, and thus actually much closer to [Osaka](https://japancheapo.com/locations/osaka/): the two cities are about 30 minutes apart on the train. Coming from Tokyo, you’ll reach [Kyoto](https://japancheapo.com/locations/kyoto/) before Osaka.\n\nSuggested Activity\n\nNINJA WiFi Up to 80% OFF!\n\nSave money with Ninja WiFi, one of Japan's top pocket WiFi brands. As a Tokyo Cheapo reader, you can enjoy an exclusive discount! Not just WiFi - we also offer SIM/eSIM for your convenience. Stay connected effortlessly, wherever you go!\n\n[Click here for details](https://ninjawifi.com/en?pr_vmaf=8u6L7ng3bd&utm_campaign=article&utm_medium=referral&utm_source=tokyocheapo.com&utm_content=tokyokyoto)\n\n### Comparing Tokyo to Kyoto travel options\n\nHere’s a quick overview of all the different types of transport.\n\n| Mode of travel | Comfort | Price | Time | Emissions | Booking links |\n| --- | --- | --- | --- | --- | --- |\n| Bullet train | ★ ★ ★ ★ ★ | From ¥13,320 | 2 hrs 15 mins (on the fastest service) | 4.1kg CO2 | Book a one-way ticket or JR Pass [Klook](https://affiliate.klook.com/redirect?aid=513&aff_adid=774887&k_site=https%3A%2F%2Fwww.klook.com%2Fen-AU%2Frails-32%2F1012-japan%2Fsearch%2F%3Fdate_range_count%3D90%26origin_position_name%3DTokyo%26origin_position%3Dfbf76020-13a1-41b8-a33a-ce13ccdbabd9%26destination_position_name%3DKyoto%26destination_position%3D7fc793b8-f3a5-4f25-8ee9-cd76e89520e5%26departure_date%3D2023-11-17%26passengers%3D%5B%5D%26spm%3DMobility_Aggregate.SearchBtn%26clickId%3D62f6f68e0c) |\n| Flights | ★ ★ ★ ☆ ☆ | From ¥5,000 | 90 minutes (flight time) + travel time to/from the airport | 59.2kg CO2 | [Search flights](https://skyscanner.pxf.io/Orq5Xn) |\n| Highway buses | ★ ☆ ☆ ☆ ☆ | From ¥2,800 | 7–9 hrs | 13.4kg CO2 | Book tickets on [12GO](https://12goasiapteltd.sjv.io/WyK1AP) |\n| Regular trains | ★ ☆ ☆ ☆ ☆ | ¥8,360 | 8 hrs (minimum + transfer time) | 8.5kg CO2 | N/A |\n| Driving | ★ ★ ★ ☆ ☆ | ¥15,000 + | Around 5 hrs 30 mins (more with traffic) | 16kg CO2 | N/A |\n\n### Top choice: Shinkansen\n\nThe **fastest, easiest, and most convenient option**is the Shinkansen, especially if you have a [Japan Rail Pass](https://affiliate.klook.com/redirect?aid=513&aff_adid=617672&k_site=https%3A%2F%2Fwww.klook.com%2Factivity%2F1420-7-day-whole-japan-rail-pass-jr-pass%2F). **The cheapest option** is usually a highway bus, followed by flights — but these are both a bit time-consuming.\n\n**The cheapest way to get from Tokyo to K",
+  "fetched_at": "2026-10-10T17:04:53.539330",
+  "evidence_url": "/evidence/20261010/page-https-tokyocheapo-com-travel-tokyo-to-kyoto-fastest-che-9893539.txt"
+ },
+ "search:uber rideshare japan tokyo common availability 2026": [
+  {
+   "title": "Uber Technologies, Inc.  - Uber Partners with Hinomaru Kotsu for Robotaxi Pilot Deployment in Tokyo",
+   "url": "https://investor.uber.com/news-events/news/press-release-details/2026/Uber-Partners-with-Hinomaru-Kotsu-for-Robotaxi-Pilot-Deployment-in-Tokyo/default.aspx",
+   "excerpt": "Uber Technologies, Inc. (NYSE: UBER) today announced that Uber Japan has signed an operational partnership agreement with one of its taxi operators, Hinomaru Kotsu Co., Ltd., to manage day-to-day fleet operations for its autonomous vehicle pilot deployment in Tokyo, scheduled to launch in late 2026. Hinomaru Kotsu will oversee depot operations, vehicle cleaning, maintenance, inspections, charging, and vehicle uptime, with Uber making these rides available to customers through its leading global [...] This initiative is based on the Memorandum of Understanding (MOU) for a robotaxi partnership in Japan signed on March 12, 2026, by Uber Technologies (Headquarters: California, USA; CEO: Dara Kho",
+   "evidence_url": "/evidence/20261010/search-https-investor-uber-com-news-events-news-press-releas-9894545.txt",
+   "fetched_at": "2026-10-10T17:04:54.546498"
+  },
+  {
+   "title": "Is There Uber in Japan? | Guide to Using Uber in Japan 2026 | Sakura Mobile",
+   "url": "https://www.sakuramobile.jp/blog/japan-travel-guide/is-there-uber-in-japan-guide-to-using-uber-in-japan",
+   "excerpt": "Uber is now available in all of Japan's 47 prefecutres.  \nFor a full list of cities, click here: Uber Japan Cities to see if Uber is available in the city you're visiting!  \n  \nUber is also available around major airports like:\n\n Aomori Airport\n Fukushima Airport\n Osaka International Airport\n Kansai International Airport\n Narita International Airport\n New Chitose Airport\n Tokyo Haneda International Airport [...] ### Vehicles in Japan\n\nDue to strict taxi regulations in Japan, Uber didn't enter the market until 2018 and only expanded into Tokyo in 2020 through agreements with established taxi companies.  \n  \nThis slow entry was met with opposition from local taxi drivers, who cited concerns ov",
+   "evidence_url": "/evidence/20261010/search-https-www-sakuramobile-jp-blog-japan-travel-guide-is--9894546.txt",
+   "fetched_at": "2026-10-10T17:04:54.547123"
+  },
+  {
+   "title": "Instagram",
+   "url": "https://www.instagram.com/reel/Db-tQH4TObz",
+   "excerpt": "hearourcity\n\nUber announce new partnership on Thursday, August 13, 2026 with Hinomaru Kotsu for Robotaxi Pilot Deployment in Tokyo.  \n  \nKotsu Co operates taxi and hired car services in Japan.  \n  \nUber Japan  \n  \n#uberjapan #uber #axi\n\n## No comments yet.\n\nStart the conversation.\n\nLog in to like or comment.\n\nMore posts from hearourcity\n\nVideo by Hear Media LLC on July 29, 2025.\n\nPhoto by Hear Media LLC on October 07, 2026. May be an image of poster and text.",
+   "evidence_url": "/evidence/20261010/search-https-www-instagram-com-reel-db-tqh4tobz-9894547.txt",
+   "fetched_at": "2026-10-10T17:04:54.547568"
+  },
+  {
+   "title": "Japan's Best Taxi Apps in English: GO, Grab, Uber, and More - Japan Travel Guide MATCHA",
+   "url": "https://matcha-jp.com/en/9586",
+   "excerpt": "### Dragon Quest 40th Anniversary Exhibition: Osaka 2027\n Final Fantasy X 25th Anniversary: Tokyo Museum and Japan Cafés\n\n  ### Final Fantasy X 25th Anniversary: Tokyo Museum and Japan Cafés\n\n  2026.09.16\n\n## Top Articles\n\nMore.\n\n Effective November 2026! What You Need to Know About Japan’s New Refund Method\n\n  ### Effective November 2026! What You Need to Know About Japan’s New Refund Method\n\n  Basic Information\n Japan Public Holiday Calendar 2026-2027: Events, Travel Tips [...] More.\n\n ZEN NIGHT TOKYO 2026: Autumn Illuminations in Ueno\n\n  ### ZEN NIGHT TOKYO 2026: Autumn Illuminations in Ueno\n Final Fantasy 40th Anniversary Exhibition Tokyo 2027\n\n  ### Final Fantasy 40th Anniversary Exhibi",
+   "evidence_url": "/evidence/20261010/search-https-matcha-jp-com-en-9586-9894547.txt",
+   "fetched_at": "2026-10-10T17:04:54.547976"
+  },
+  {
+   "title": "Is Uber a Thing in Japan? The state of Ride-sharing [Apr 2025]",
+   "url": "https://japan-dev.com/blog/is-there-uber-in-japan",
+   "excerpt": "Sign Up\n\nOR\n\nJoin 52k readers + get our Developer Salary Guide free ☝️\n\nlogo\n\n© 2026 Japan Dev. All rights reserved.\n\nProudly built in Tokyo.\n\ntwitterlinkedinfacebookyoutube\n\n### For Talent\n\nJapan Developer JobsTop CompaniesSearch JobsSign Up NowDesigner ExperiencesRemote companies\n\n### For Employers\n\nEmployer LoginPost Jobs人事向けブログEmail Us\n\n### Japan Dev\n\nAbout UsBlogCareersResources\n\n### Contact\n\nFeedbackEmail Us [...] This is why Uber in Japan has been more like a luxury car service with its Uber Black and Uber Black Van options.\n\nWhat’s more, the company wasn’t even able to operate in the capital, Tokyo City, until 2020. It was only through an agreement between well-established taxi compa",
+   "evidence_url": "/evidence/20261010/search-https-japan-dev-com-blog-is-there-uber-in-japan-9894547.txt",
+   "fetched_at": "2026-10-10T17:04:54.548439"
+  }
+ ],
+ "search:kyoto city bus day pass price 2026 yen tourist": [
+  {
+   "title": "Transportation Tickets and Passes for Kyoto | Kyoto Travel",
+   "url": "https://kyoto.travel/en/getting-around/in-kyoto",
+   "excerpt": "•Ticket Overview  \n Hieizan Bus and Hieizan Shuttle Bus operated by Kojak Transportation, Keihan Bus and Kyoto Bus – unlimited rides within their area for 1 day.\n\n•Price  \n 1,200 yen per adult, 600 yen per child\n\n•Sales Period  \n March 20, 2026 – December 6, 2026\n\n•Usage Period  \n 1 day of use\n\n•Purchase locations  \n Enryakuji Bus Center kiosk, Cable Sakamoto Station, Eizan Railway Demachiyanagi Station, Kojak Bus shuttle buses [...] •Price  \n 3,500 yen per adult, 1,800 yen per child\n\n•Sales Period  \n March 20, 2026 – December 6, 2026\n\n•Usage Period  \n Any day of your choice from the day of the purchase to the last day of the following month, up to December 6, 2026. [...] •Ticket Overview  \n",
+   "evidence_url": "/evidence/20261010/search-https-kyoto-travel-en-getting-around-in-kyoto-9894668.txt",
+   "fetched_at": "2026-10-10T17:04:54.668787"
+  },
+  {
+   "title": "Kyoto Bus Pass in 2026: Worth ¥1,100? (Honest Math)",
+   "url": "https://www.youtube.com/watch?v=c2eP7fJOXf4&xstg=CAMSBhUDze3xHw%3D%3D",
+   "excerpt": "# Kyoto Bus Pass in 2026: Worth ¥1,100? (Honest Math)\n## Channel: Trip Moito\n2.74K subscribers\n3 likes\n\n### Description\n350 views\nPosted: 2026-06-09\nThe ¥1,100 Subway and Bus Pass pays off in exactly three scenarios. For most Kyoto days, you're handing over ¥730 you didn't need to spend. [...] ### Transcript\n[0:13] King Kakuji, Fushimi Inari, Kiomiz Dera, Arashyama.\n[0:19] If that's your Kyoto list, you might think the 100 yen subway and bus pass is a no-brainer. Three of those don't need\n[0:26] a bus. Skip the pass. Here's when to buy it.\n[0:36] The product is the Kyoto Subway and Bus 1-day pass. 1,00 yen for adults, 550 yen\n[0:43] for kids. There's also a 2-day version for 2,000 yen. It co",
+   "evidence_url": "/evidence/20261010/search-https-www-youtube-com-watch-v-c2ep7fjoxf4-xstg-camsbh-9894668.txt",
+   "fetched_at": "2026-10-10T17:04:54.669080"
+  },
+  {
+   "title": "Kyoto Plans Two-Tier Bus Pricing Amid Overtourism - Unseen Japan",
+   "url": "https://unseen-japan.com/kyoto-buses-two-tier-pricing",
+   "excerpt": "Kyoto Mayor Matsui Koji announced on February 25 that the city will introduce a “citizen priority pricing” system for its municipal bus network. Under the plan, Kyoto residents would pay just 200 yen ($1.30) per ride, a 30 yen drop from the current flat fare of 230 yen.\n\nThe new pricing is expected to roll out across the entire city by fiscal year 2027. It’ll cover both the flat-fare zone and adjusted-fare zones where prices vary by distance. [...] Visitors and non-residents would face a fare of 350 to 400 yen under the new system, a steep jump from the current 230 yen. That means tourists could end up paying nearly twice as much as locals for the same ride.",
+   "evidence_url": "/evidence/20261010/search-https-unseen-japan-com-kyoto-buses-two-tier-pricing-9894669.txt",
+   "fetched_at": "2026-10-10T17:04:54.669329"
+  },
+  {
+   "title": "Taking a Bus in Kyoto – Kyoto Station",
+   "url": "https://www.kyotostation.com/taking-a-bus-in-kyoto",
+   "excerpt": "The Subway & Bus 1-Day Pass is 1,100 yen for adults and 550 yen for children. It covers all Kyoto Municipal Subway lines, all Kyoto City Bus routes, and Kyoto Bus, Keihan Bus and West Japan JR Bus routes within the designated areas. It can also be used on the Sightseeing Limited Express Bus. This is the main Kyoto City pass to consider if you plan to combine buses and subway rides in one day. [...] Within the city there is a flat fare zone, where adults only have to pay 230 yen and children under 12 years old pay 120 yen. Sightseeing Limited Express Bus EX100 and EX101 have a separate fare of 500 yen for adults and 250 yen for children, unless you are using a valid Subway & Bus 1-Day Pass.\n ",
+   "evidence_url": "/evidence/20261010/search-https-www-kyotostation-com-taking-a-bus-in-kyoto-9894669.txt",
+   "fetched_at": "2026-10-10T17:04:54.669604"
+  },
+  {
+   "title": "Kyoto City Bus - VisitKansai",
+   "url": "https://www.visitkansai.com/sightseeing/kyoto-city-bus",
+   "excerpt": "VisitKansai\n\nExplore Kyoto, Osaka, Nara with locals.\n\nガイド募集\n\nVisitKansai\n\nExplore Kyoto, Osaka, Nara with locals.\n\nガイド募集\n\n Kyoto\n\n# Kyoto City Bus\n\nThe City bus is the most commonly used transportation in Kyoto. It’s convenient for the locals to commute and for tourist to visit almost all major temples and shrines in the city. With the One-day Pass which is only 500 yen, you can take buses as many times as you need in a day. Without the Pass, you pay 230 yen each time. [...] ## Major lines map\n\nBalloons show the popular tourist sites. Blue zone is out of the flat fare area which requires additional 150 to 250 yen to the All Day Pass validity.\n\n## Alternatives [...] People tend not to think a",
+   "evidence_url": "/evidence/20261010/search-https-www-visitkansai-com-sightseeing-kyoto-city-bus-9894669.txt",
+   "fetched_at": "2026-10-10T17:04:54.669824"
+  }
+ ],
+ "result:flight:dallas:japan:7": {
+  "start": "2027-01-18",
+  "value": "{\"origin_airports\":[\"DFW\"],\"options\":[{\"id\":\"f1\",\"airline\":\"Delta\",\"origin\":\"Dallas Love Field\",\"destination\":\"Haneda Airport\",\"depart_at\":\"2027-01-18T06:00:00\",\"arrive_at\":\"2027-01-19T14:05:00\",\"return_depart_at\":\"2027-01-25T23:30:00\",\"return_arrive_at\":\"2027-01-26T22:32:00\",\"duration_minutes\":1025,\"stops\":1,\"layovers\":[\"Hartsfield-Jackson Atlanta International Airport (40 min)\"],\"price_usd\":897.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20DFW%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20DFW%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-dfw-tokyo-2027-01-18-9378693.png\",\"fetched_at\":\"2026-10-10T16:56:18.700887\"},\"tradeoff\":\"Cheapest at $897 with a 17h05 duration and one short 40-min stop in Atlanta, landing Haneda 01-19 14:05 — the earliest arrival of the budget options.\"},{\"id\":\"f2\",\"airline\":\"Delta\",\"origin\":\"Dallas Fort Worth International Airport\",\"destination\":\"Haneda Airport\",\"depart_at\":\"2027-01-18T07:00:00\",\"arrive_at\":\"2027-01-19T14:35:00\",\"return_depart_at\":\"2027-01-25T23:30:00\",\"return_arrive_at\":\"2027-01-26T22:32:00\",\"duration_minutes\":995,\"stops\":1,\"layovers\":[\"Minneapolis-Saint Paul International Airport (1 hr 15 min)\"],\"price_usd\":897.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20DFW%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20DFW%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-dfw-tokyo-2027-01-18-9378693.png\",\"fetched_at\":\"2026-10-10T16:56:18.700887\"},\"tradeoff\":\"Same $897 price and lands 01-19 14:35, slightly shorter at 16h35 but with a longer 1h15m stop in Minneapolis.\"},{\"id\":\"f7\",\"airline\":\"Air Canada\",\"origin\":\"Dallas Fort Worth International Airport\",\"destination\":\"Narita International Airport\",\"depart_at\":\"2027-01-18T07:00:00\",\"arrive_at\":\"2027-01-19T16:30:00\",\"return_depart_at\":\"2027-01-25T18:50:00\",\"return_arrive_at\":\"2027-01-25T22:20:00\",\"duration_minutes\":1110,\"stops\":1,\"layovers\":[\"Toronto Pearson International Airport (1 hr 30 min)\"],\"price_usd\":1001.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20DFW%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20DFW%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-dfw-tokyo-2027-01-18-9378693.png\",\"fetched_at\":\"2026-10-10T16:56:18.700887\"},\"tradeoff\":\"Costs $104 more at $1,001 and lands later at 16:30 (Narita) with a 1h30m Toronto stop, but still under budget and offers an earlier 18:50 return departure.\"}],\"selected_id\":\"f1\"}"
+ },
+ "search:usd to jpy exchange rate january 2026": [
+  {
+   "title": "US Dollar to Japanese Yen History: 2026",
+   "url": "https://www.exchangerates.org.uk/USD-JPY-spot-exchange-rates-history-2026.html",
+   "excerpt": "| Friday 30 January 2026 | $1 USD = ¥154.7451 | USD/JPY rate for 30/01/2026 |\n| Saturday 31 January 2026 | $1 USD = ¥154.7449 | USD/JPY rate for 31/01/2026 |\n| Worst USD to JPY exchange rate in January 2026: 152.4639  Best USD to JPY exchange rate in January 2026: 159.1709  Average USD to JPY exchange rate in January 2026: 156.7344 | | | | | [...] Worst USD to JPY exchange rate in January 2026: 152.4639\n\nBest USD to JPY exchange rate in January 2026: 159.1709\n\nAverage USD to JPY exchange rate in January 2026: 156.7344\n\n### February 2026 [...] | Saturday 24 January 2026 | $1 USD = ¥155.695 | USD/JPY rate for 24/01/2026 |\n| Sunday 25 January 2026 | $1 USD = ¥155.1634 | USD/JPY rate for 25/01/2",
+   "evidence_url": "/evidence/20261010/search-https-www-exchangerates-org-uk-usd-jpy-spot-exchange--9901800.txt",
+   "fetched_at": "2026-10-10T17:05:01.800990"
+  },
+  {
+   "title": "US dollar to Japanese yen Exchange Rate History | Currency Converter | Wise",
+   "url": "https://wise.com/us/currency-converter/usd-to-jpy-rate/history",
+   "excerpt": "Skip to main content\n\n about the rate\n\n### What was the highest US dollar to Japanese yen exchange rate in the last 6 months?\n\nThe highest US dollar to Japanese yen rate was on July 29, 2026 when 1 US dollar was worth 163.8700 Japanese yen.\n\n### What was the lowest US dollar to Japanese yen exchange rates in the last 6 months?\n\nThe lowest US dollar to Japanese yen rate was on February 23, 2026 when 1 US dollar was worth 154.3650 Japanese yen. [...] ### What is the average US dollar to Japanese yen exchange rate for the last 6 months?\n\nThe average US dollar to Japanese yen exchange rate for the last six months was 1 US dollar = 159.5351 Japanese yen.",
+   "evidence_url": "/evidence/20261010/search-https-wise-com-us-currency-converter-usd-to-jpy-rate--9901801.txt",
+   "fetched_at": "2026-10-10T17:05:01.801371"
+  },
+  {
+   "title": "1 JPY to USD Exchange Rate Today - Japanese Yen/US Dollar - Japanese Yen/US Dollar",
+   "url": "http://currencylive.com/exchange-rate/1-jpy-to-usd-exchange-rate-today",
+   "excerpt": "Loading...\n\nLast 7 days Last 30 days 2026 2025 2024 2023\n\nCurrent period\n\n## 1 Japanese Yen to US Dollar stats | JPY to USD\n\n| Stat | Last 7 days | Last 30 days | Last 90 days | Last year | Selected period on chart |\n ---  ---  --- |\n| High | 0.0063 | 0.0065 | 0.0065 | 0.0067 | 0.0065 |\n| Low | 0.0063 | 0.0063 | 0.0061 | 0.0061 | 0.0063 |\n| Average | 0.0063 | 0.0064 | 0.0063 | 0.0063 | 0.0064 |\n| Volatility | 0% | 3.17% | 6.56% | 9.84% | 3.17% | [...] © 2017 - 2026 Currency Live by Wise [...] | 1 JPY | 0.00630 USD |\n| 100 JPY | 0.63000 USD |\n| 500 JPY | 3.15000 USD |\n| 1,000 JPY | 6.30000 USD |\n| 2,000 JPY | 12.60000 USD |\n| 5,000 JPY | 31.50000 USD |\n| 10,000 JPY | 63.00000 USD |\n| 20,000 J",
+   "evidence_url": "/evidence/20261010/search-http-currencylive-com-exchange-rate-1-jpy-to-usd-exch-9901801.txt",
+   "fetched_at": "2026-10-10T17:05:01.801748"
+  },
+  {
+   "title": "USD to JPY historical exchange rate - OFX (US)",
+   "url": "https://www.ofx.com/en-us/forex-news/historical-exchange-rates/usd/jpy",
+   "excerpt": "| Date | 1 USD= |\n| Average | 159.075451 |\n| May 31, 2026 | 158.23315 |\n| June 30, 2026 | 160.861603 |\n| July 31, 2026 | 162.35179 |\n| August 31, 2026 | 158.831345 |\n| September 30, 2026 | 156.189817 |\n| October 7, 2026 | 157.985 |\n\nTrustpilot\n\n## Subscribe to currency updates and tips from our OFXperts\n\nWe monitor global events and FX markets day and night, so you don’t have to.\n\n\"\\\" indicates required fields\n\nReady to make a transfer? Sign up in less than 5 minutes.\n\nGet started\n\nContact us",
+   "evidence_url": "/evidence/20261010/search-https-www-ofx-com-en-us-forex-news-historical-exchang-9901801.txt",
+   "fetched_at": "2026-10-10T17:05:01.802390"
+  },
+  {
+   "title": "Dollar Yen Exchange Rate - USD JPY (1971-2026)",
+   "url": "https://www.macrotrends.net/2550/dollar-yen-exchange-rate-historical-chart",
+   "excerpt": "✖\n\nImage 1: Macrotrends Logo\n\n## Dollar Yen Exchange Rate - USD JPY (1971-2026)\n\nMarketsMetalsEnergyCommoditiesInterest RatesExchange RatesEconomy\n\nEURUSDDOLLAR INDEXGBPUSDUSDJPYUSDCHFAUDUSDEURCHFEURGBPEURJPYGBPJPYUSDCNY\n\nInteractive historical chart showing the daily U.S. Dollar - Japanese Yen (USDJPY) exchange rate back to 1971. The full historical dataset is available for download here: Dollar Yen Exchange Rate - USD JPY | Data | 1971-2026.\n\nView More\n\n## Historical Chart",
+   "evidence_url": "/evidence/20261010/search-https-www-macrotrends-net-2550-dollar-yen-exchange-ra-9901802.txt",
+   "fetched_at": "2026-10-10T17:05:01.802691"
+  }
+ ],
+ "search:fushimi inari taisha kyoto opening hours free": [
+  {
+   "title": "Guide to Fushimi Inari - Lonely Planet",
+   "url": "https://www.lonelyplanet.com/articles/guide-to-fushimi-inari",
+   "excerpt": "## Do I need to book a ticket?\n\nFushimi Inari is free to enter and open to the public 24 hours a day, every day of the year, so there’s no need to book a ticket. In fact, it’s not even possible.\n\nAdvertisement\n\n  Orange arches line one against one another around a cement path. \n\nRed gates at Fushimi Inari Taisha, Shintō Shrine in Kyoto, Japan. Rintaro Kanemoto for Lonely Planet\n\n \n\n## How do I get there? [...] Although Fushimi Inari is open 24 hours a day, seven days a week, there are some things worth bearing in mind. Peak times at the shrine are 9am–6pm, so getting there before or after these times usually means smaller crowds, with the beautiful light of sunrise and sunset adding extra at",
+   "evidence_url": "/evidence/20261010/search-https-www-lonelyplanet-com-articles-guide-to-fushimi--9911736.txt",
+   "fetched_at": "2026-10-10T17:05:11.737188"
+  },
+  {
+   "title": "Instagram",
+   "url": "https://www.instagram.com/reel/DKamX28Su6e?hl=en",
+   "excerpt": "What you can expect when visiting Fushimi Inari in Kyoto...  \n  \nEntrance is Free & Fushimi Inari is open 24/7  \n  \nWhen to Go?  \n⛩ Early Morning (before 6-8 AM) or Late Evening/Night: This is hands-down the best way to avoid the massive crowds. We went at 6:30am and had a fabulous experience. You can go before sunrise or after sunset for a more quiet experience. The gates are illuminated at night.  \n  \nHow Long Does it Take?",
+   "evidence_url": "/evidence/20261010/search-https-www-instagram-com-reel-dkamx28su6e-hl-en-9911737.txt",
+   "fetched_at": "2026-10-10T17:05:11.737481"
+  },
+  {
+   "title": "How To Visit Fushimi Inari Like A Pro | The Navigatio",
+   "url": "https://thenavigatio.com/fushimi-inari-kyoto-japan",
+   "excerpt": "Fushimi Inari Taisha is open 24 hours a day. The shrine is also open every day of the year. Please keep in mind that the shops are only staffed between 9 AM and 5 PM. You might also find some guards in the evening, but don’t worry, it’s perfectly okay to visit at night.\n\n## How long does it take to hike Mount Inari? [...] ## Fushimi Inari Entrance Fee\n\nFushimi Inari is completely free to visit. There are some shops you will find during your hike, selling souvenirs, drinks and snacks. It is, however, recommended to bring some of your own snacks and drinks as these shops definitely are on the more expensive side. The higher you go, the more expensive they seemed to get. I’d also recommend taki",
+   "evidence_url": "/evidence/20261010/search-https-thenavigatio-com-fushimi-inari-kyoto-japan-9911737.txt",
+   "fetched_at": "2026-10-10T17:05:11.737720"
+  },
+  {
+   "title": "Fushimi Inari-taisha Shrine, Kyoto",
+   "url": "https://www.tripadvisor.com/Attraction_Review-g298564-d321456-Reviews-Fushimi_Inari_taisha_Shrine-Kyoto_Kyoto_Prefecture_Kinki.html",
+   "excerpt": "Suggest edits to improve what we show.\n\nImprove this listing\n\n## Hours\n\nOpen now\n\nThursday\n\n12:00 AM - 11:59 PM\n\n## Plan your visit\n\nSee all [...] Image 9 Kyoto: Fushimi Inari Taisha Small Group Guided Walking Tour (11) Duration: 3h Free cancellationfrom $30   Reserve   \n   Image 10 Kyoto Fushimi-Inari Night Walking Tour (340) Duration: 90–120 minutes Free cancellationfrom $43   Reserve   \n   Image 11 Kyoto Early Morning Tour with English Speaking Guide (1,414) Duration: 5–6 hours Free cancellationReserve [...] Fushimi Inari-taisha Shrine is a must-visit iconic landmark in Kyoto, lauded for its spiritual ambiance and stunning red torii gates. Easily accessible via nearby train stations, this",
+   "evidence_url": "/evidence/20261010/search-https-www-tripadvisor-com-attraction-review-g298564-d-9911737.txt",
+   "fetched_at": "2026-10-10T17:05:11.737997"
+  },
+  {
+   "title": "Fushimi Inari Shrine (Fushimi Inari Taisha) - Kyoto Travel",
+   "url": "https://www.japan-guide.com/e/e3915.html",
+   "excerpt": "Fushimi Inari Shrine is located just outside JR Inari Station, the second station from Kyoto Station along the JR Nara Line (5 minutes, 150 yen one way from Kyoto Station). The shrine can also be reached in a short walk from Fushimi Inari Station along the Keihan Main Line.\n\nHow to get to and around Kyoto\n\n## Hours and Fees\n\n#### Hours\n\nAlways open\n\n#### Closed\n\nNo closing days\n\n#### Admission\n\nFree\n\nQuestions? Ask in our forum.\n\n## Links and Resources\n\n### English\n\n #### Fushimi Inari Taisha [...] The hike to the summit of the mountain and back takes about 2-3 hours, however, visitors are free to walk just as far as they wish before turning back. Along the way, there are multiple smaller sh",
+   "evidence_url": "/evidence/20261010/search-https-www-japan-guide-com-e-e3915-html-9911738.txt",
+   "fetched_at": "2026-10-10T17:05:11.738284"
+  }
+ ],
+ "result:flight:chicago:japan:7": {
+  "start": "2027-01-18",
+  "value": "{\"origin_airports\":[\"ORD\",\"MDW\"],\"options\":[{\"id\":\"f1\",\"airline\":\"JAL\",\"origin\":\"Chicago O'Hare International Airport\",\"destination\":\"Narita International Airport\",\"depart_at\":\"2027-01-18T10:25:00\",\"arrive_at\":\"2027-01-19T14:50:00\",\"return_depart_at\":\"2027-01-25T10:40:00\",\"return_arrive_at\":\"2027-01-25T07:30:00\",\"duration_minutes\":805,\"stops\":0,\"layovers\":[],\"price_usd\":1236.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20ORD%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20ORD%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-ord-tokyo-2027-01-18-9375833.png\",\"fetched_at\":\"2026-10-10T16:56:15.853348\"},\"tradeoff\":\"Cheapest nonstop at $1,236 with the shortest 13h25 flight, landing Narita 01-19 14:50, but the return departs early at 10:40.\"},{\"id\":\"f2\",\"airline\":\"ANA\",\"origin\":\"Chicago O'Hare International Airport\",\"destination\":\"Narita International Airport\",\"depart_at\":\"2027-01-18T10:30:00\",\"arrive_at\":\"2027-01-19T15:00:00\",\"return_depart_at\":\"2027-01-25T17:05:00\",\"return_arrive_at\":\"2027-01-25T13:50:00\",\"duration_minutes\":810,\"stops\":0,\"layovers\":[],\"price_usd\":1236.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20ORD%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20ORD%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-ord-tokyo-2027-01-18-9375833.png\",\"fetched_at\":\"2026-10-10T16:56:15.853348\"},\"tradeoff\":\"Same $1,236 nonstop price and 13h30 duration, landing Narita 01-19 15:00, with a later 17:05 return for a more relaxed last day.\"},{\"id\":\"f10\",\"airline\":\"United\",\"origin\":\"Chicago O'Hare International Airport\",\"destination\":\"Haneda Airport\",\"depart_at\":\"2027-01-18T13:05:00\",\"arrive_at\":\"2027-01-19T17:45:00\",\"return_depart_at\":\"2027-01-25T18:00:00\",\"return_arrive_at\":\"2027-01-25T14:50:00\",\"duration_minutes\":820,\"stops\":0,\"layovers\":[],\"price_usd\":1236.0,\"booking_url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20ORD%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"source\":{\"url\":\"https://www.google.com/travel/flights?q=Flights%20to%20Tokyo%20from%20ORD%20on%202027-01-18%20through%202027-01-25&hl=en&gl=us&curr=USD\",\"title\":\"Google Flights\",\"evidence_url\":\"/evidence/20261010/flights-ord-tokyo-2027-01-18-9375833.png\",\"fetched_at\":\"2026-10-10T16:56:15.853348\"},\"tradeoff\":\"Same $1,236 nonstop price and 13h40 duration, but lands at Haneda 01-19 17:40 (closer to central Tokyo) with an 18:00 return.\"}],\"selected_id\":\"f1\"}"
+ },
+ "hotels:asakusa tokyo:2027-01-19:2027-01-21:1": {
+  "url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027-01-19%20to%202027-01-21%20for%201%20adults&hl=en&gl=us&curr=USD",
+  "evidence_url": "/evidence/20261010/hotels-asakusa-tokyo-2027-01-19-9949695.png",
+  "fetched_at": "2026-10-10T17:05:49.700889",
+  "options": [
+   {
+    "name": "Prostyle Ryokan Asakusa",
+    "kind": "hotel",
+    "rating": 4.2,
+    "reviews": 219,
+    "price_per_night_usd": 115.0,
+    "price_total_usd": 230.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegQIAxAl&qs=MihDaG9JMnRhWDBLV0MtT19JQVJvTkwyY3ZNVEZxT0RadWQzSjZiUkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "THE GATE HOTEL Kaminarimon by HULIC",
+    "kind": "hotel",
+    "rating": 4.4,
+    "reviews": 1925,
+    "price_per_night_usd": 128.0,
+    "price_total_usd": 256.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegQIAxBC&qs=MiZDaGdJbExhMF84TEw4WnQzR2d3dlp5OHhNVE5xWkRCbk5td1FBUTgN&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Asakusa View Hotel",
+    "kind": "hotel",
+    "rating": 4.2,
+    "reviews": 7942,
+    "price_per_night_usd": 116.0,
+    "price_total_usd": 232.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegQIAxBf&qs=MiZDaGdJb0t1TF84TGo4WXpNQVJvTEwyY3ZNVEl4TkcxbmNEY1FBUTgN&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "THE KANZASHI TOKYO ASAKUSA",
+    "kind": "hotel",
+    "rating": 4.3,
+    "reviews": 864,
+    "price_per_night_usd": 61.0,
+    "price_total_usd": 122.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegQIAxB5&qs=MihDaG9JaXIyOHFLV1I2czd2QVJvTkwyY3ZNVEZ0T1Y4MVpuRmlaQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Asakusa View Hotel Annex Rokku",
+    "kind": "hotel",
+    "rating": 4.4,
+    "reviews": 566,
+    "price_per_night_usd": 131.0,
+    "price_total_usd": 262.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxCUAQ&qs=MihDaG9JNy0za19xRDV2OV9oQVJvTkwyY3ZNVEZuZVROb2EzaHFlQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Onyado Nono Asakusa",
+    "kind": "hotel",
+    "rating": 4.4,
+    "reviews": 1487,
+    "price_per_night_usd": 142.0,
+    "price_total_usd": 284.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxCxAQ&qs=MidDaGtJX3FUYTZQaV94WjB3R2cwdlp5OHhNV1pzY1RoZlh6VnJFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Kaminarimon Ryokan",
+    "kind": "hotel",
+    "rating": 4.8,
+    "reviews": 225,
+    "price_per_night_usd": 204.0,
+    "price_total_usd": 408.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxDIAQ&qs=MiZDaGdJNFl6WHk5bTRwNGJxQVJvTEwyY3ZNWFJuY1RadU5tTVFBUTgN&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Tosei Hotel Cocone Asakusa",
+    "kind": "hotel",
+    "rating": 4.2,
+    "reviews": 331,
+    "price_per_night_usd": 56.0,
+    "price_total_usd": 112.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxDlAQ&qs=MidDaGtJbHJPWGx1dlRzcThvR2cwdlp5OHhNWEpuT1hJeWFETTRFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "OMO3 Asakusa by Hoshino Resorts",
+    "kind": "hotel",
+    "rating": 4.2,
+    "reviews": 550,
+    "price_per_night_usd": 110.0,
+    "price_total_usd": 220.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxCAAg&qs=MihDaG9JOHJTSno3Ynlfb0xrQVJvTkwyY3ZNVEYwZVRGME5YcDRPUkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Onyado Nono Asakusa Bettei",
+    "kind": "hotel",
+    "rating": 4.6,
+    "reviews": 371,
+    "price_per_night_usd": 176.0,
+    "price_total_usd": 352.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxCdAg&qs=MihDaG9JLTZHQzQ5WF8zWkc0QVJvTkwyY3ZNVEYyYkRWcmVYSnVlaEFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Far East Village Hotel Tokyo, Asakusa",
+    "kind": "hotel",
+    "rating": 4.4,
+    "reviews": 352,
+    "price_per_night_usd": 72.0,
+    "price_total_usd": 144.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxC0Ag&qs=MidDaGtJd2FENDUtZXpsYzlIR2cwdlp5OHhNV3M1Wkhsck1Ua3hFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Richmond Hotel Premier Asakusa",
+    "kind": "hotel",
+    "rating": 4.4,
+    "reviews": 2522,
+    "price_per_night_usd": 84.0,
+    "price_total_usd": 168.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxDRAg&qs=MihDaG9Jbl9qNHZiZWJ6cExMQVJvTkwyY3ZNVEZpZW5rMU56WXphQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Agora Place Tokyo Asakusa",
+    "kind": "hotel",
+    "rating": 4.0,
+    "reviews": 1540,
+    "price_per_night_usd": 51.0,
+    "price_total_usd": 102.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxDtAg&qs=MidDaGtJOTZfNWxvR0RtTHl1QVJvTUwyY3ZNVEpzY21ab2QzSjVFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Asakusa Kaminarimon Takenoyado",
+    "kind": "hotel",
+    "rating": 4.7,
+    "reviews": 125,
+    "price_per_night_usd": 95.0,
+    "price_total_usd": 190.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxCKAw&qs=MihDaG9Jc1BpWXBhV0lnN3p0QVJvTkwyY3ZNVEZtYkc0elkySXpZaEFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Asakusa Tobu Hotel",
+    "kind": "hotel",
+    "rating": 4.5,
+    "reviews": 1377,
+    "price_per_night_usd": 121.0,
+    "price_total_usd": 242.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxCjAw&qs=MihDaG9JckxuNXhzV09zb0tsQVJvTkwyY3ZNVEZtY21JelgydzJjQkFCOA0&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "横綱 Hotel - Stay SAKURA Tokyo Asakusa",
+    "kind": "hotel",
+    "rating": 4.5,
+    "reviews": 110,
+    "price_per_night_usd": 98.0,
+    "price_total_usd": 196.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxC8Aw&qs=MidDaGtJMmJxQTE0cjJzWmdZR2cwdlp5OHhNV1p4ZUdJd05XUTBFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   },
+   {
+    "name": "Hotel Ann Asakusa",
+    "kind": "hotel",
+    "rating": 4.1,
+    "reviews": 382,
+    "price_per_night_usd": 68.0,
+    "price_total_usd": 136.0,
+    "booking_url": "https://www.google.com/travel/search?q=hotels%20in%20Asakusa%20Tokyo%20from%202027%2001%2019%20to%202027%2001%2021%20for%201%20adults&hl=en&gl=us&curr=USD&ved=2ahUKEwjaosHVurCXAxUaT38AHU-4A4cQyvcEegUIAxDuAw&qs=MidDaGtJMHYzcWtJbll0SWdSR2cwdlp5OHhNV1kxWjJReWNtNWtFQUU4DQ&ts=CAEaNAoWEhQKCS9tLzAxazRyXzoHQXNha3VzYRIaEhQKBwjrDxABGBMSBwjrDxABGBUYAjICCAEqBwoFOgNVU0Q"
+   }
+  ]
+ },
+ "geocode:teamlab planets, tokyo": [
+  35.64938,
+  139.789728
+ ],
+ "geocode:ghibli museum, mitaka, tokyo": [
+  35.6962518,
+  139.570451
+ ],
+ "geocode:senso-ji temple, asakusa, tokyo": [
+  35.7134032,
+  139.7955265
+ ],
+ "geocode:shibuya sky, tokyo": [
+  35.6582857,
+  139.7022617
+ ],
+ "search:teamlab planets tokyo ticket price usd opening hours closed days": [
+  {
+   "title": "Visit teamLab Planets Tokyo | Tickets, Hours & Travel Tips",
+   "url": "https://www.tickets-tokyo.com/teamlab-planets/visit",
+   "excerpt": "## Frequently asked questions about visiting teamLab Planets Tokyo\n\nYou can book tickets to TeamLab Planets online here.\n\nThe cost of a standard adult ticket is 3,800 yen. Please check here for updated prices.\n\nteamLab Planets is open from 9 am to 10 pm daily.\n\nThe best time to visit is on weekdays early in the morning when it's less crowded.\n\nIt takes approximately 2 hours to visit TeamLab Planets.\n\nNo, once you exit the premises, re-entry is not allowed. [...] ## What are the teamLab Planets opening hours?\n\nMonday to Sunday: 9am to 10pm\n\nLast Entry: The last entry is 1 hour before closing. The rooms will be cleared 30 minutes before closing.\n\nClosure: teamLab Planets remains open all year ",
+   "evidence_url": "/evidence/20261010/search-https-www-tickets-tokyo-com-teamlab-planets-visit-159211.txt",
+   "fetched_at": "2026-10-10T17:09:19.212146"
+  },
+  {
+   "title": "teamLab Planets TOKYO - All You SHOULD Know Before Going (2026 Reviews)",
+   "url": "https://www.tripadvisor.com/Attraction_Review-g14134359-d14951238-Reviews-TeamLab_Planets_TOKYO-Toyosu_Koto_Tokyo_Tokyo_Prefecture_Kanto.html",
+   "excerpt": "## Hours\n\nOpen now\n\nFriday\n\n8:00 AM - 10:00 PM\n\nDuration: 2-3 hours\n\nSuggest edits to improve what we show.Improve this listing\n\nAdmission tickets\n\nSunday, Oct 11\n\n2\n\nBook ahead • This is booked 9 days in advance on average.\n\nOfficial entry ticket\n\nBest Seller\n\nteamLab Planets Tokyo: Entry Ticket\n\nLose yourself in Tokyo's multi-sensory masterpiece\n\nRead more\n\nChoose start time:\n\n8:30 PM\n\n10 spots left\n\n  \n\nTotal \n\n$60.74\n\n2 Adult x \n\n$30.37\n\n(No additional taxes or booking fees) [...] Image 6 1 TeamLab Planets TOKYO Admission Entry Ticket (4) Duration: 2–3 hoursfrom $53   Reserve   \n   Image 7 2 Tokyo Top Highlights 3h Guided E-Bike Tour (814) Duration: 3–4 hours Free cancellationfrom $63   ",
+   "evidence_url": "/evidence/20261010/search-https-www-tripadvisor-com-attraction-review-g14134359-159212.txt",
+   "fetched_at": "2026-10-10T17:09:19.212495"
+  },
+  {
+   "title": "TeamLab Planets TOKYO Tickets [2026] - Promos, Prices, Reviews & Opening Hours | Trip.com",
+   "url": "https://us.trip.com/travel-guide/attraction/tokyo/teamlab-planets-tokyo-61909015",
+   "excerpt": "You can book TeamLab Planets TOKYO tickets on Trip.com, a trusted global travel platform offering secure booking, competitive prices, and dedicated support for international travelers.  \n  Today's ticket price: $29.08  \n  How to book:  \n  1. Visit the Trip.com TeamLab Planets TOKYO ticket page.   \n  2. Choose your visit date and ticket option.   \n  3. Provide the required traveler details and complete your booking. [...] △In this space, a world full of life is unfolding, with flowers blooming all year round, constantly changing and evolving over time.\n\nloading  \nLoading...\n\n## TeamLab Planets TOKYO FAQ\n\n ### What are the current prices for TeamLab Planets TOKYO?\n\n  According to the latest Tr",
+   "evidence_url": "/evidence/20261010/search-https-us-trip-com-travel-guide-attraction-tokyo-teaml-159212.txt",
+   "fetched_at": "2026-10-10T17:09:19.212713"
+  },
+  {
+   "title": "teamLab Planets: Tickets and What to Expect (2026) | Tokyo Cheapo",
+   "url": "https://tokyocheapo.com/entertainment/museums-and-exhibitions/everything-you-need-to-know-about-teamlab-planets",
+   "excerpt": ">\n> As each drink is poured, it comes to life with a gentle glow. You can take control of the lighting within the space, by simply lifting your glass.\n>\n> While we do our best to ensure it’s correct, information is subject to change. Post first published in January, 2020. Last update: January, 2025, by Jane Pipkin.\n>\n> Open with Maps\n>\n> teamLab Planets\n>\n> ¥4200\n>\n> 6-1-16 Toyosu, Koto Ward, Tokyo\n>\n> Odaiba  Toyosu\n>\n> Official Website\n>\n>  teamLab Planets Tokyo\n>\n> Written by: Lucy Dayman\n> [...] >\n> You can also enjoy other new installations, including “Autonomous Abstraction”, and “Existence in the Flow Creates Vortices”.\n>\n> ## Tickets for teamLab Planets\n>\n> | Ticket Type | Admission ",
+   "evidence_url": "/evidence/20261010/search-https-tokyocheapo-com-entertainment-museums-and-exhib-159212.txt",
+   "fetched_at": "2026-10-10T17:09:19.213144"
+  },
+  {
+   "title": "[Official] teamLab Planets TOKYO, Toyosu",
+   "url": "https://www.teamlab.art/e/planets",
+   "excerpt": "JPY 1,500\n\n3 years old and younger\n\nFree\n\nVisitors with disabilities\n\nA person who has a disability certificate  \nClick here for more information\n\nJPY 1,900\n\nPremium Pass\n\n\\ Admission time not specified. Priority entry.\n\nAdults / Children\n\n4 Years and above\n\nJPY 12,000\n\nTickets\n\nOfficial Ticket Store\n\nBuy Tickets\n\nNotes\n\n[Notes on purchasing tickets]\n\n・Price includes tax.\n\n・Tickets cannot be cancelled or refunded once purchased. [...] teamLab Planets TOKYO DMM  \n 8:00 - 22:00  \n \\ Last entry one hour before closing.  \n   \n Living Art Store ＆ Sketch Factory  \n 8:30 - 22:00  \n   \n Vegan Ramen UZU Tokyo  \n Glass House  \n Emptiness Table  \n 10:30 - 21:30  \n \\ 10:30-11:00: Only light meals and dr",
+   "evidence_url": "/evidence/20261010/search-https-www-teamlab-art-e-planets-159213.txt",
+   "fetched_at": "2026-10-10T17:09:19.213404"
+  }
+ ],
+ "search:arashiyama bamboo grove kyoto free opening hours": [
+  {
+   "title": "Arashiyama Bamboo Forest: Get There from Kyoto | JRailPass",
+   "url": "https://www.jrailpass.com/blog/arashiyama-bamboo-forest",
+   "excerpt": "Located at the foot of the “Storm Mountains” in the northwest of the city of Kyoto, this world-famous, seemingly endless forest of swaying bamboo boughs is perfect for a relaxing retreat to nature during a stay in Japan.\n\nThe Arashiyama bamboo grove is open 24/7 and admission is free. The surrounding Arashiyama district, known for unique fishing methods which involve using trained cormorant birds, is also well worth a visit. [...] The sound of the rustling bamboo within this forest has been named one of the “100 Soundscapes of Japan” by the Japanese Ministry of Environment. Together with Fushimi Inari and the Kinkaku-ji, it offers a Kyoto experience not to be missed.\n\nThe bamboo grove is ope",
+   "evidence_url": "/evidence/20261010/search-https-www-jrailpass-com-blog-arashiyama-bamboo-forest-183317.txt",
+   "fetched_at": "2026-10-10T17:09:43.318913"
+  },
+  {
+   "title": "Kyoto's Arashiyama Bamboo Grove: History, Fees, and Things to Do! | Japan Travel by NAVITIME - Japan Travel Guides, Transit Search and Itinerary Planner",
+   "url": "https://japantravel.navitime.com/en/area/jp/guide/NTJauto0044-en",
+   "excerpt": "Operating Hours:   \n・Garden (8:30 AM – 5:00 PM (Last entry 4:50 PM)  \n・Cloud Dragon Painting (9:00 AM – 4:30 PM (Last entry 4:20 PM) – open only on Saturdays, Sundays, and national holidays, with daily openings during spring and autumn special viewing periods).  \nEntrance Fees:   \n・Garden (High school students and above: ¥500, Elementary and junior high school students: ¥300, Preschoolers: Free)  \n・Cloud Dragon Painting (Additional ¥500 per person to the garden entrance fee). [...] Operating Hours:: 9:00 AM – 5:00 PM (Last entry 4:30 PM)  \nEntrance Fees: Free [...] At the end of the main bamboo path, you'll find the entrance to Okochi Sanso. This villa offers a magnificent, meticulously main",
+   "evidence_url": "/evidence/20261010/search-https-japantravel-navitime-com-en-area-jp-guide-ntjau-183318.txt",
+   "fetched_at": "2026-10-10T17:09:43.319540"
+  },
+  {
+   "title": "Arashiyama Bamboo Forest Hours: Open 24/7, Best at 7am",
+   "url": "https://arashiyamabambooforest.org/opening-hours",
+   "excerpt": "Quick answer\n\nThe Arashiyama Bamboo Forest has no opening hours and no entrance fee: the path is public and open around the clock. Go before 8:30 in the morning for a quiet path, or in the last hour of daylight once the coach groups leave. By 10:00 it is shoulder to shoulder, and it stays that way until late afternoon. Tuesday to Thursday are the quietest days of the week. The paid sights nearby open at 8:30 to 9:00 and close between 16:00 and 17:00.\n\nKey takeaways [...] The Arashiyama bamboo forest hours are the shortest answer on this site: the path is open 24 hours a day, every day of the year, and it is free. No gate closes, no last entry is called, nobody sweeps the grove at night. Our ",
+   "evidence_url": "/evidence/20261010/search-https-arashiyamabambooforest-org-opening-hours-183319.txt",
+   "fetched_at": "2026-10-10T17:09:43.320215"
+  },
+  {
+   "title": "Arashiyama Bamboo Grove",
+   "url": "https://www.insidekyoto.com/arashiyama-bamboo-grove",
+   "excerpt": "For more about the Arashiyama area, including other sights to see and recommended places to eat, see our page on Arashiyama.\n\n## Check Hotel Availability\n\nWalking Tour: Arashiyama Bamboo Grove features in our Guided Walking Tour of Arashiyama\n\nEnglish address: Arashiyama, Ukyo-ku\n\nJapanese address: 右京区嵐山\n\nOpening hours: 24hrs\n\nNon-smoking area: Yes\n\nNearest Transport:  \n 10 min walk from Saga Arashiyama Station, JR Sagano line  \n 15 min walk from Arashiyama Station, Henkyu railway",
+   "evidence_url": "/evidence/20261010/search-https-www-insidekyoto-com-arashiyama-bamboo-grove-183320.txt",
+   "fetched_at": "2026-10-10T17:09:43.320786"
+  },
+  {
+   "title": "Best Times to Visit the Arashiyama Bamboo Forest | Japan Manifest",
+   "url": "https://www.japanmanifest.com/best-times-to-visit-the-arashiyama-bamboo-forest",
+   "excerpt": "The Arashiyama Bamboo Forest in Kyoto, Japan, is a globally renowned natural and cultural landmark, captivating visitors with its towering stalks of bamboo that create an otherworldly atmosphere. Open 24 hours a day, seven days a week, this iconic grove offers easy access for anyone interested in visiting. However, to truly appreciate its beauty and capture its essence, strategic planning of your visit is crucial. [...] ### Avoid peak times\n\nThe Arashiyama Bamboo Forest is open 24 hours a day with no admission fee, which contributes to its popularity. To avoid the most significant crowds and have a better environment for enjoying the bamboo grove, aim to visit early in the morning (before 7:",
+   "evidence_url": "/evidence/20261010/search-https-www-japanmanifest-com-best-times-to-visit-the-a-183320.txt",
+   "fetched_at": "2026-10-10T17:09:43.321480"
+  }
+ ],
+ "search:kinkaku-ji golden pavilion kyoto ticket price opening hours closed days": [
+  {
+   "title": "Kinkakuji Kyoto: Golden Pavilion Hours, Fee & Access | JeePe - Japan Travel Guide",
+   "url": "https://www.jeepe.jp/en/articles/kinkakuji-3",
+   "excerpt": "Because roads can be congested during peak sightseeing seasons, visiting earlier in the day is recommended.\n\nYou can also access it on foot in about 20 minutes from Kitano-Hakubaichō Station on the Randen (Keifuku Electric Railroad) Kitano Line.\n\n### Kinkaku-ji Opening Hours and Entrance Fee\n\nKinkaku-ji is open to visitors, with hours from 9:00 a.m. to 5:00 p.m.\n\nAdmission is 500 yen for high school students and above, and 300 yen for elementary and junior high school students. [...] A. Opening hours are 9:00–17:00, and the admission donation is 500 yen for adults and 300 yen for elementary/junior high students. The area near the entrance tends to be busiest in the morning, so for photograph",
+   "evidence_url": "/evidence/20261010/search-https-www-jeepe-jp-en-articles-kinkakuji-3-183695.txt",
+   "fetched_at": "2026-10-10T17:09:43.695724"
+  },
+  {
+   "title": "Is Kinkakuji Worth Visiting? An Honest Review for 2026 (Tickets, Crowds & Tips) - One Day Away",
+   "url": "https://onedayawaytravel.com/kinkakuji-worth-it",
+   "excerpt": "| Category | Details |\n --- |\n| Official Name | Rokuon-ji, commonly known as Kinkakuji or the Golden Pavilion |\n| Location | Northern Kyoto, Kita Ward |\n| Admission | Adults: 500 JPY / elementary and junior high school students: 300 JPY / special openings may have different fees |\n| Opening Hours | Usually 9:00 AM – 5:00 PM, open year-round; no regular nighttime opening |\n| Typical Visit Duration | 30–45 minutes for most independent visitors | [...] No. Visitors cannot enter the Golden Pavilion itself. You view the building from across the pond and follow a designated route through the garden.\n\n### How much is Kinkakuji admission?\n\nRegular admission is 500 JPY for adults and 300 JPY for elem",
+   "evidence_url": "/evidence/20261010/search-https-onedayawaytravel-com-kinkakuji-worth-it-183695.txt",
+   "fetched_at": "2026-10-10T17:09:43.696013"
+  },
+  {
+   "title": "Kinkaku-ji Guide | Official Opening Hours Kyoto 2026 – KeepGoodTrip",
+   "url": "https://www.keepgoodtrip.com/blogs/japan-travel/kinkaku-ji-golden-pavilion-guide",
+   "excerpt": "Official Name: Rokuon-ji (Deer Park Temple)\n Opening Hours: 9:00 AM – 5:00 PM (open daily, no closing days)\n Admission Price: 500 yen (Adults), 300 yen (Elementary/Junior High Students)\n Best Time to Visit: Early morning (around 9:00 AM) or late afternoon for fewer crowds and better lighting\n Location: Northern Kyoto (Kita Ward), about 40 minutes from central Kyoto\n\n## The History Behind Kinkaku-ji [...] If you’d rather cut down travel time, a good alternative is to take the Karasuma Subway Line up to Kitaoji Station, then grab a short taxi ride (about 10 minutes) to the temple.\n\nKinkaku-ji, Kiyomizu-dera, and Byōdō-in from Kyoto/Osaka\n\nSee availability See availability\n\n## Kinkaku-ji, Kiyom",
+   "evidence_url": "/evidence/20261010/search-https-www-keepgoodtrip-com-blogs-japan-travel-kinkaku-183696.txt",
+   "fetched_at": "2026-10-10T17:09:43.696400"
+  },
+  {
+   "title": "Kinkakuji (Golden Pavilion) - Kyoto Travel",
+   "url": "https://www.japan-guide.com/e/e3908.html",
+   "excerpt": "#### Closed\n\nNo closing days\n\n#### Admission\n\n500 yen\n\n#### Typical Visit Duration\n\n15-45 minutes\n\nQuestions? Ask in our forum.\n\n## Links and Resources\n\n### English\n\n #### Kinkakuji\n\n  Official website.\n\n### Japanese\n\n #### Kinkakuji\n\n  Official website.\n\n## Hotels around Kyoto\n\nRead our Kyoto Hotel Guide\n\n + \n\n    Sponsored\n\n    arashiyama villa Serenitas kyoto [...] Tea Garden\n\n## Getting there and around\n\nKinkakuji can be accessed from Kyoto Station by direct Kyoto City Bus number 205 in about 40 minutes and for 230 yen. Alternatively, it can be faster and more reliable to take the Karasuma Subway Line to Kitaoji Station (15 minutes, 260 yen) and a taxi (10 minutes, about 1500 yen) or bus",
+   "evidence_url": "/evidence/20261010/search-https-www-japan-guide-com-e-e3908-html-183696.txt",
+   "fetched_at": "2026-10-10T17:09:43.696643"
+  },
+  {
+   "title": "Hours - Kinkaku-ji Temple",
+   "url": "https://kinkakujitemple.com/hours",
+   "excerpt": "Short answer: Kinkaku-ji Temple and the Golden Pavilion in Kyoto is open daily from 9 am to 5 pm, irrespective of the season.\n\n> Planning a trip to Kinkaku-ji Temple and the Golden Pavilion? Visit the Kinkaku-ji Temple website for the complete rundown on every single detail!\n\nAnd if you’re just starting to plan your visit to Japan, check out some of the top things to do in Japan, many of which you absolutely don’t want to miss!\n\nTop 10 Things to Do in Japan\n\nTop 10 Things to Do in Japan [...] Kinkaku-ji Temple and the Golden Pavilion is open from 09:00 am to 05:00 pm daily.\n\n## How long does a visit to Kinkaku-ji Temple take?\n\nYou will typically spend 45 minutes to an hour at this beautiful ",
+   "evidence_url": "/evidence/20261010/search-https-kinkakujitemple-com-hours-183696.txt",
+   "fetched_at": "2026-10-10T17:09:43.697012"
+  }
  ]
 }

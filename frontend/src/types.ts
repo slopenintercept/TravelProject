@@ -154,14 +154,16 @@ export interface LodgingPlan {
   stays: LodgingStay[]
 }
 
-/** One person on the trip. Flights are found for each traveler individually. */
+/** One person on the trip, with their own flight, rooms and transport, and their own marks on the ideas list. */
 export interface Traveler extends TravelerIn, Picks {
   id: string
   host: boolean
   picked: boolean // has saved their marks on the ideas list
   confirmed: boolean // has chosen their flight and rooms; the days are planned around them
   flights: FlightPlan | null
-  lodging: LodgingPlan | null // the rooms picked for this traveler, by their own budget
+  lodging: LodgingPlan | null // this traveler's room for each stay, chosen from the group's options
+  legs: TransportLeg[] // this traveler's own copy of the transport legs: what they keep, they pay for
+  rental_car: boolean
 }
 
 export interface Attraction {
@@ -200,6 +202,7 @@ export interface TransportLeg {
   booking_url: string | null
   source: Source
   included: boolean
+  alternatives: TransportLeg[] // other ways to make the same trip, for a traveler to swap to
 }
 
 export interface TransportPlan {
@@ -306,7 +309,7 @@ export interface TripState {
   ideas: Idea[] // the shared list everyone marks
   windows: DateWindow[]
   dates: TripDates | null
-  lodging: LodgingPlan | null // the options researched once for the group
+  lodging: LodgingPlan | null // what the lodging agent found: the options for each stay
   attractions: Attraction[]
   transport: TransportPlan | null
   weather: DayWeather[]
@@ -320,7 +323,6 @@ export interface TripState {
   approvals: Record<string, 'approved'> // keyed by card id
   agents: Record<string, AgentStatus> // keyed by agent name
   lodging_override: 'hotel' | 'airbnb' | null
-  transport_override: 'rental_car' | null
 }
 
 // --- cards.py --------------------------------------------------------------------
@@ -333,7 +335,7 @@ export interface Alternative {
 }
 
 export interface Card {
-  // "flight:<traveler>", "stay:<traveler>:<n>", "attraction:<id>", "leg:<id>", or the defaults "lodging" / "transport"
+  // "flight:<traveler>", "stay:<traveler>:<n>", "attraction:<id>", "leg:<traveler>:<id>", or the defaults "lodging" / "transport"
   id: string
   category: Category
   kind: 'item' | 'default' // "default" is the most-travelers-pick card
@@ -363,7 +365,7 @@ export interface Card {
 export interface BookingStep {
   id: string
   category: Category
-  traveler: string | null // whose booking this is (traveler id); null for shared tickets and transport
+  traveler: string | null // whose booking this is (traveler id); null for shared tickets
   who: string[] // names of the people this is for
   title: string
   when: string

@@ -188,6 +188,11 @@ export function Review({ view, you, busy, onDecision, onApplyBudget }: Props) {
                 <DefaultCard key={card.id} card={card} busy={busy} onDecision={onDecision} />
               ))}
               {items.map(item)}
+              {category === 'transport' && !you.legs.some((leg) => leg.kind === 'rental_car' && leg.included) && (
+                <button className="add" disabled={busy} onClick={() => onDecision('switch', `transport:${you.id}`)}>
+                  Add a rental car
+                </button>
+              )}
             </div>
           </section>
         )

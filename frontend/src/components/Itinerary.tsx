@@ -7,9 +7,10 @@ interface Props {
   busy: boolean
   onMove: (itemId: string, day: string) => void
   onSwap: (itemId: string, attractionId: string) => void
+  onRemove: (attractionId: string) => void
 }
 
-export function Itinerary({ state, busy, onMove, onSwap }: Props) {
+export function Itinerary({ state, busy, onMove, onSwap, onRemove }: Props) {
   const [dragId, setDragId] = useState<string | null>(null)
   const [overDay, setOverDay] = useState<string | null>(null)
   const [viewer, setViewer] = useState('') // a traveler id, or '' for everyone
@@ -28,6 +29,8 @@ export function Itinerary({ state, busy, onMove, onSwap }: Props) {
   // Attractions that are not on the calendar: removed in review, or the scheduler could not place them.
   const missed = new Set(state.unscheduled.map((u) => u.attraction_id))
   const spare = state.attractions.filter((a) => !a.included || missed.has(a.id))
+  // Same rule as the review cards: an attraction someone needs can't be removed.
+  const needed = new Set(state.attractions.filter((a) => a.must_have).map((a) => a.id))
 
   const problems = new Map<string, string[]>()
   for (const violation of state.violations) {
@@ -127,17 +130,28 @@ export function Itinerary({ state, busy, onMove, onSwap }: Props) {
                     {item.locked ? (
                       <span className="fixed">fixed</span>
                     ) : (
-                      spare.length > 0 && (
-                        <select
-                          aria-label={`Swap ${item.title} for another attraction`}
-                          value=""
-                          disabled={busy}
-                          onChange={(e) => onSwap(item.id, e.target.value)}
-                        >
-                          <option value="" disabled>swap…</option>
-                          {spare.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.city})</option>)}
-                        </select>
-                      )
+                      <>
+                        {spare.length > 0 && (
+                          <select
+                            aria-label={`Swap ${item.title} for another attraction`}
+                            value=""
+                            disabled={busy}
+                            onChange={(e) => onSwap(item.id, e.target.value)}
+                          >
+                            <option value="" disabled>swap…</option>
+                            {spare.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.city})</option>)}
+                          </select>
+                        )}
+                        {item.ref_id && !needed.has(item.ref_id) && (
+                          <button
+                            aria-label={`Remove ${item.title} from the itinerary`}
+                            disabled={busy}
+                            onClick={() => onRemove(item.ref_id!)}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </>
                     )}
                   </article>
                 ))}

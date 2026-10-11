@@ -1,13 +1,14 @@
 # Tripwright: 3-minute demo script
 
-Scenario: 7 days in Japan from Kansas City, $2,500 total. On the picks screen, mark Tokyo Disneyland and Fushimi Inari Taisha (Kyoto) **Must do** and teamLab Planets **Interested**.
+Scenario: 7 days in Japan. Alex hosts from Kansas City ($2,500) and invites Sam from Chicago ($3,000) and Jo from Dallas ($2,200). On the picks screen Alex marks Tokyo Disneyland and Fushimi Inari Taisha **Must do** and teamLab Planets **Interested**; Sam marks the Ghibli Museum **Must do**; Jo marks Fushimi Inari **Must do** and Shinjuku Golden Gai **Not for me**.
 
 ## Before you go on stage
 
 1. `.env` has `OPENAI_API_KEY` (team key) and `TAVILY_API_KEY`. Open `/api/health` and check `inference.key` is true.
-2. Plan the demo trip once beforehand. A cold run takes about 3 minutes (most of it Google Flights page loads for the date windows); with the cache warm, the tools answer instantly and only the model calls remain.
-3. Safety net: set `DEMO_MODE=true` and restart. Tools then replay recorded results and never browse, while the agents still reason live. If inference itself is down, every specialist falls back to its recorded result and the cards say so. The ideas list has no recorded result until someone plans the demo trip once with `RECORD_FIXTURES=true`; without one, the picks screen is empty and you add the three places by hand with **Add a place**.
-4. Keep the app open on the new-trip form, browser at about 1360 px wide.
+2. Plan the demo trip once beforehand. A cold group run takes about 4 to 5 minutes; with the cache warm the tools answer instantly, but the model calls still take about 2 minutes, so start the planning step before you begin talking about it.
+3. Safety net: set `DEMO_MODE=true` and restart. Tools then replay recorded results and never browse, while the agents still reason live. If inference itself is down, every specialist falls back to its recorded result and the cards say so. The ideas list has no recorded result until someone plans the demo trip once with `RECORD_FIXTURES=true`; without one, the picks screen is empty and you add the places by hand with **Add a place**.
+4. Have Sam's and Jo's browsers (or phones) ready: each joins from the invite link on their own device.
+5. Keep the app open on the new-trip form, browser at about 1360 px wide.
 
 ## Script
 
@@ -25,32 +26,40 @@ The ideas agent's list of places appears, grouped by category.
 
 Mark Tokyo Disneyland and Fushimi Inari **Must do**, teamLab Planets **Interested**, then **Save my picks**.
 
-**0:35 Timeframe (20 s)**
+**0:35 Timeframe (15 s)**
 
 Three date windows appear, each with typical weather, crowd level and the cheapest fare the agent actually found. The timeframe agent was working while you picked.
 
-> "I didn't give dates. The timeframe agent researched crowds and seasons, then checked real fares and three years of weather history for each window. The cheapest window is hundreds of dollars below the others. Behind every number is a source URL and a snapshot of the page, saved to Akamai Object Storage."
+> "I didn't give dates. The timeframe agent checked real fares and three years of weather history for each window. Behind every number is a source URL and a snapshot of the page, saved to Akamai Object Storage."
 
-Click **Choose these dates** on the first window, then **Everyone's in: plan the trip**.
+Click **Choose these dates** on the first window.
 
-**0:55 Agents in parallel (35 s)**
+**0:50 Who's coming? (20 s)**
 
-The route planner runs first, from your picks: point at its **attempt 2** if it appears (it usually proposes Tokyo then Kyoto, and the orchestrator sends it back to add a last night in Tokyo for the flight home).
+> "Now I invite my friends. Each of them opens this link on their own phone, adds where they fly from and their budget, and marks the same list. Every place shows how many of us want it."
 
-The agent panel shows flight, lodging, attractions, transport and weather working side by side.
+Show the invite link. Sam and Jo join and save their picks; their marks appear on the list. Click **Everyone's in: plan the trip**.
 
-> "This is one Strands Graph. Five specialists run at once, each with its own headless browser session on our Akamai VM. Watch the status pills: working, under review, accepted. The orchestrator checks every result before accepting it: do the dates match, does every price trace back to a page we actually loaded, is it within that category's share of the budget. When something fails, it is sent back with specific feedback, up to twice. The model never types a price: it picks option ids, and code joins them to the scraped data."
+**1:10 Agents in parallel (25 s)**
 
-Point at a **sent back** pill if one appears, and at the tool calls scrolling in a lane. Then budget, scheduler and validate run in sequence.
+The agent panel shows a flight agent for each traveler, plus lodging, attractions, transport and weather, all working side by side.
 
-**1:30 Review (45 s)**
+> "This is one Strands Graph. Each traveler gets their own flight agent, searching from their own city within their own budget. Attractions are planned for the group from everyone's picks. The orchestrator checks every result before accepting it: do the dates match, does every price trace back to a page we actually loaded. The model never types a price: it picks option ids, and code joins them to the scraped data."
 
-> "Every decision is a card with its price and the agent's reasoning. Nothing is booked. The link takes me to the provider to finish myself."
+**1:35 Choose your flight and stays (15 s)**
 
-- Flight card: read one tradeoff line, open **Swap** to show the other two options.
-- Lodging: "I was never asked hotel or Airbnb. The agent researched what most travelers pick here and why." Click **Switch to Airbnb**.
+As soon as Alex's flight and rooms are found, Alex's screen switches to **Choose your flight and stays**.
 
-> "Only the lodging agent re-runs. Then budget, scheduler and validation run again. And that override is now a stated preference in my traveler profile for the next trip."
+> "Before any activities are planned, each of us picks our own flight and rooms. The running total shows what's left for everything else."
+
+Pick a different flight, then **Confirm my flight and stays**. The days are planned around it; Sam's and Jo's confirms re-plan them in a second.
+
+**1:50 Review (25 s)**
+
+> "Every decision is a card with its price and the agent's reasoning. I only see my own flight, rooms and transport; the attractions are the group's. Nothing is booked."
+
+- Transport: open **Swap** on a leg, or **Add a rental car**: it only changes my plan and my budget.
+- Attractions: point at **Must do: 2 of 3** and at Golden Gai missing, because Jo marked it not for me.
 
 Point at the budget bar updating by category.
 
@@ -58,7 +67,7 @@ Point at the budget bar updating by category.
 
 Open the **Itinerary** tab.
 
-> "The schedule is deterministic code, not the model: opening hours, travel time between stops, flight times, hotel check-in. Disneyland is outdoors, so it landed on the driest Tokyo day."
+> "The schedule is deterministic code, not the model: opening hours, travel time between stops, everyone's flight times. One shared plan while it fits; if something only one person wants doesn't fit, they split off for it and regroup, and nobody is sent to a place they marked not for me."
 
 Drag **Senso-ji** to another Tokyo day: it re-times and re-validates. Drag it onto a Kyoto day:
 

@@ -2,10 +2,9 @@ import { money, safeHref, whoIsIn } from '../format'
 import type { BookingStep, Category, Traveler, TripView } from '../types'
 import { Chips } from './Chips'
 
-/** What the group books together; each traveler's own flight and stays come first. */
+/** What the group books together; each traveler's own flight, stays and transport come first. */
 const SHARED: [Category, string][] = [
   ['attractions', 'Tickets'],
-  ['transport', 'Getting around'],
 ]
 
 const LINK_LABEL: Record<BookingStep['link'], string> = {
@@ -58,7 +57,8 @@ export function Finish({ view, you, onBack }: Props) {
         </section>
       )}
       {SHARED.map(([category, heading]) => {
-        const steps = booking.filter((step) => step.category === category)
+        // Each traveler's own flight, rooms and transport are listed above, under "Your bookings".
+        const steps = booking.filter((step) => step.category === category && !step.traveler)
         if (steps.length === 0) return null
         return (
           <section key={category} className={`group cat-${category}`}>

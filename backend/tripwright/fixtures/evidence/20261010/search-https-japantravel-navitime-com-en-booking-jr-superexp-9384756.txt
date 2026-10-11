@@ -1,0 +1,23 @@
+Shinkansen Fare Tables | Route & Seat Comparison, Discount Booking | NAVITIME Travel
+https://japantravel.navitime.com/en/booking/jr/superexpress/fare
+
+| Route | Line | Non-Reserved (Ordinary) | Reserved Ordinary (Regular Season) |
+ ---  --- |
+| Tokyo〜Shin-osaka | Tokaido Shinkansen | 13,870JPY | 14,720JPY |
+| Tokyo〜Kyoto | Tokaido Shinkansen | 13,320JPY | 14,170JPY |
+| Tokyo〜Nagoya | Tokaido Shinkansen | 10,560JPY | 11,300JPY |
+| Tokyo〜Hakata | Tokaido-Sanyo Shinkansen | 22,220JPY | 23,810JPY |
+| Tokyo〜Sendai(Miyagi) | Tohoku Shinkansen | 10,560JPY | 11,090JPY |
+| Tokyo〜Shin-Aomori | Tohoku Shinkansen  17,670JPY | [...] About 530 yen cheaper than reserved seats. You only specify the date and route without choosing a specific train, offering schedule flexibility. However, seats may be unavailable during rush hours or peak seasons. Note that Hayabusa, Kagayaki, Komachi, and Tsubasa have no non-reserved cars, and Nozomi also has none during peak periods.
+
+### Reserved Seat (Ordinary Car) [...] \ Based on revised fares effective March 14, 2026. Reserved seat fares vary by season (off-peak/peak) and train type (Nozomi, Hikari, Kodama, etc.).
+
+## Shinkansen Fare Tables by Route
+
+View detailed fare tables (by route, seat type, and train class) for each Shinkansen line below.
+
+## Seat Types & Fare Differences
+
+Shinkansen fares vary significantly by seat type. Choose the best seat based on your needs and budget.
+
+### Non-Reserved Seat (Ordinary Car)

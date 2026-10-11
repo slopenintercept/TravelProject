@@ -14,8 +14,8 @@ traveler's own budget. Attractions are planned once for the group, from everyone
 needs and wants.
 
 Each specialist is a custom graph node that wraps a Strands Agent with the review
-loop: deterministic checks first, then the orchestrator's LLM judgment, up to
-MAX_RETRIES send-backs with specific feedback, then a flagged fallback. A node never
+loop: deterministic checks on every attempt, the orchestrator's LLM judgment on the
+first, up to MAX_RETRIES send-backs with specific feedback, then a flagged fallback. A node never
 raises, so one slow or failing specialist cannot stall the others.
 """
 
@@ -39,7 +39,9 @@ from .models import (
     Flag, Idea, RoutePlan, RouteSegment, Traveler, TravelerIn, TripDates, TripRequest, TripState, new_id,
 )
 from .scheduler import schedule
-from .specialists import PREAMBLE, SPECS, Rejected, Spec, place_key, brief, fetch_weather, same_place
+from .specialists import (
+    NO_TOOLS, PREAMBLE, SPECS, WITH_TOOLS, Rejected, Spec, brief, fetch_weather, place_key, same_place,
+)
 from .toolbox import RunContext, Toolbox
 from .tools import flights
 from .validate import rebudget, validate_itinerary
@@ -136,6 +138,8 @@ class SpecialistNode(MultiAgentBase):
             events.status(state, self.name, "pending", f"No result yet: {reason}")
             return
         self._store(state, who, value)
+        if self.spec.after_fallback:
+            self.spec.after_fallback(state)
         state.flags[self.name] = Flag(kind="fallback", reason=f"Showing saved results: the live run {reason}.")
         events.status(state, self.name, "fallback", f"Using saved results: {reason}", found=self.spec.describe(value))
 
@@ -145,9 +149,10 @@ class SpecialistNode(MultiAgentBase):
             return self._fall_back(state, events, who, "had no inference key (set OPENAI_API_KEY)")
 
         ctx = RunContext(agent=self.name, state=state, traveler=who)
+        tools = spec.tools(Toolbox(ctx))
         agent = Agent(
-            model=make_model(), name=spec.name, system_prompt=PREAMBLE.format(title=spec.title),
-            tools=spec.tools(Toolbox(ctx)),
+            model=make_model(), name=spec.name, tools=tools,
+            system_prompt=PREAMBLE.format(title=spec.title, tools=WITH_TOOLS if tools else NO_TOOLS),
             hooks=[RateLimit(), Activity(self.name, events.emit)], callback_handler=None,
         )
 
@@ -159,7 +164,7 @@ class SpecialistNode(MultiAgentBase):
                 answer = await self._ask(agent, prompt, events)
                 events.status(state, self.name, "under_review", "Orchestrator is checking sources, dates and budget")
                 value = await spec.build(state, ctx, answer)
-                if spec.judged:
+                if spec.judged and attempt == 1:  # one judgment call per result; code checks every attempt
                     await judge(state, spec, value, who)
             except Rejected as rejected:
                 problems = rejected.problems
@@ -332,8 +337,7 @@ def new_trip(request: TripRequest) -> TripState:
     preferences = state.profile.stated_preferences if state.profile else []
     if PREF["airbnb"] in preferences:
         state.lodging_override = "airbnb"
-    if PREF["rental_car"] in preferences:
-        state.transport_override = "rental_car"
+    host.rental_car = PREF["rental_car"] in preferences
     store.save_trip(state)
     return state
 
@@ -517,6 +521,12 @@ def _learn(state: TripState, preference: str | None, forget: list[str]) -> None:
     store.save_profile(profile)
 
 
+def _rental_car(state: TripState, traveler: Traveler, wanted: bool) -> None:
+    traveler.rental_car = wanted
+    if traveler.host:
+        _learn(state, PREF["rental_car"] if wanted else None, [PREF["rental_car"]])
+
+
 async def decide(state: TripState, action: str, card: str, option_id: str | None = None) -> None:
     """Apply one review-screen decision, then re-run only what it affects."""
     kind, _, ref = card.partition(":")
@@ -533,17 +543,32 @@ async def decide(state: TripState, action: str, card: str, option_id: str | None
         state.traveler(traveler_id).lodging.stays[int(index)].selected_id = option_id
     elif action in ("remove", "restore") and kind == "attraction":
         next(a for a in state.attractions if a.id == ref).included = action == "restore"
-    elif action in ("remove", "restore") and kind == "leg":
-        next(leg for leg in state.transport.legs if leg.id == ref).included = action == "restore"
+    elif action in ("swap", "remove", "restore") and kind == "leg":  # one traveler's own leg
+        traveler_id, _, leg_id = ref.partition(":")
+        traveler = state.traveler(traveler_id)
+        at = next(i for i, leg in enumerate(traveler.legs) if leg.id == leg_id)
+        leg = traveler.legs[at]
+        if action == "swap":  # another way to make the same trip; the one they had becomes an alternative
+            options = [leg.model_copy(update={"alternatives": []}), *leg.alternatives]
+            chosen = next(o for o in options if o.id == option_id)
+            traveler.legs[at] = chosen.model_copy(update={"alternatives": [o for o in options if o.id != option_id]})
+        else:
+            leg.included = action == "restore"
+            if leg.kind == "rental_car":
+                _rental_car(state, traveler, leg.included)
     elif action == "switch" and kind == "lodging":
         current = state.lodging_override or state.lodging.common_choice.choice
         state.lodging_override = "hotel" if current == "airbnb" else "airbnb"
         _learn(state, PREF[state.lodging_override], [PREF["airbnb"], PREF["hotel"]])
         rerun = ["lodging"]
-    elif action == "switch" and kind == "transport":
-        state.transport_override = None if state.transport_override else "rental_car"
-        _learn(state, PREF["rental_car"] if state.transport_override else None, [PREF["rental_car"]])
-        rerun = ["transport"]
+    elif action == "switch" and kind == "transport":  # one traveler adds a rental car
+        traveler = state.traveler(ref)
+        _rental_car(state, traveler, True)
+        cars = [leg for leg in traveler.legs if leg.kind == "rental_car"]
+        for leg in cars:
+            leg.included = True
+        if not cars:  # nobody has asked for one before, so the agent has to price it
+            rerun = ["transport"]
     else:
         raise ValueError(f"Cannot {action} {card}")
     await run(state, planning_graph(rerun), "replan")

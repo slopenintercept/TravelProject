@@ -3,7 +3,8 @@
 Each specialist run gets its own Toolbox bound to a RunContext. Tools hand the model
 a short text table; the full structured results stay in the context, keyed by id.
 The agent then answers with ids and reasoning, and Python joins those ids back to the
-real prices, times, source URLs and evidence snapshots. The model never retypes a price.
+real prices, times, source URLs and evidence snapshots. The model never retypes a price
+or a URL: the endpoint writes about 100 characters a second, so short answers are fast ones.
 """
 
 from __future__ import annotations
@@ -32,8 +33,15 @@ class RunContext:
         self.sources[_url_key(url)] = Source(url=url, title=title, evidence_url=evidence_url, fetched_at=fetched_at)
         return self.sources[_url_key(url)]
 
-    def source(self, url: str) -> Source | None:
-        return self.sources.get(_url_key(url))
+    def cite(self, url: str) -> str:
+        """The short id (s1, s2, ...) the tools show for a source, so agents cite it without retyping its URL."""
+        return f"s{list(self.sources).index(_url_key(url)) + 1}"
+
+    def source(self, ref: str) -> Source | None:
+        """A source by the short id an agent cited, or by its URL."""
+        if cited := re.fullmatch(r"s(\d+)", ref.strip(" []").lower()):
+            return next((s for i, s in enumerate(self.sources.values(), 1) if i == int(cited[1])), None)
+        return self.sources.get(_url_key(ref))
 
 
 def _url_key(url: str) -> str:
@@ -159,6 +167,8 @@ class Toolbox:
     async def web_research(self, query: str) -> str:
         """Search the web for travel research. Prefer official tourism sites, travel guides and traveler forums.
 
+        Each result starts with its source id, like [s3]. Cite a source by that id, never by its URL.
+
         Args:
             query: What to look up, e.g. "hotel or Airbnb in Tokyo for first-time visitors".
         """
@@ -168,11 +178,12 @@ class Toolbox:
             return f"Search failed: {e}"
         for r in results:
             self.ctx.add_source(r["url"], r["title"], r["evidence_url"], r["fetched_at"])
-        return "\n\n".join(f"{r['title']}\nURL: {r['url']}\n{r['excerpt']}" for r in results) or "No results."
+        return "\n\n".join(f"[{self.ctx.cite(r['url'])}] {r['title']}\nURL: {r['url']}\n{r['excerpt']}"
+                             for r in results) or "No results."
 
     @tool
     async def read_source(self, url: str) -> str:
-        """Read the text of one web page found by web_research.
+        """Read the text of one web page found by web_research. The result starts with the page's source id.
 
         Args:
             url: The page URL.
@@ -182,13 +193,14 @@ class Toolbox:
         except Exception as e:
             return f"Could not read {url}: {e}"
         self.ctx.add_source(page["url"], page["url"], page["evidence_url"], page["fetched_at"])
-        return page["text"]
+        return f"[{self.ctx.cite(page['url'])}]\n{page['text']}"
 
     @tool
     async def browse_page(self, url: str) -> str:
         """Open a page in a headless browser and read it. A screenshot is saved as evidence.
 
-        Use for official ticket pages, opening hours and closure notices.
+        Use for official ticket pages, opening hours and closure notices. The result starts with the
+        page's source id.
 
         Args:
             url: The page URL.
@@ -200,4 +212,4 @@ class Toolbox:
         except Exception as e:
             return f"Could not open {url}: {e}"
         self.ctx.add_source(page["url"], page["title"], page["evidence_url"], page["fetched_at"])
-        return f"{page['title']}\n{page['text']}"
+        return f"[{self.ctx.cite(page['url'])}] {page['title']}\n{page['text']}"

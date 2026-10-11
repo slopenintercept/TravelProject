@@ -58,6 +58,14 @@ def state():
                            selected_id="f1"),
         lodging=LodgingPlan(common_choice=choice, stays=stays),
     )
+    host.legs = [
+        TransportLeg(id="l_shink", kind="intercity", from_place="Tokyo", to_place="Kyoto",
+                     mode="Shinkansen", duration_minutes=135, price_usd=95, source=SRC),
+        TransportLeg(id="l_back", kind="intercity", from_place="Kyoto", to_place="Tokyo",
+                     mode="Shinkansen", duration_minutes=135, price_usd=95, source=SRC),
+        TransportLeg(id="l_nex", kind="airport_transfer", from_place="NRT", to_place="Tokyo",
+                     mode="Narita Express", duration_minutes=60, price_usd=40, source=SRC),
+    ]
     return TripState(
         id="trip_test", request=request, travelers=[host], lodging=host.lodging.model_copy(deep=True),
         route=RoutePlan(segments=[RouteSegment(city="Tokyo", nights=3), RouteSegment(city="Kyoto", nights=2),
@@ -76,14 +84,7 @@ def state():
         ],
         transport=TransportPlan(
             common_choice=CommonChoice(choice="trains", because="fast and frequent", alternative="rental car"),
-            legs=[
-                TransportLeg(id="l_shink", kind="intercity", from_place="Tokyo", to_place="Kyoto",
-                             mode="Shinkansen", duration_minutes=135, price_usd=95, source=SRC),
-                TransportLeg(id="l_back", kind="intercity", from_place="Kyoto", to_place="Tokyo",
-                             mode="Shinkansen", duration_minutes=135, price_usd=95, source=SRC),
-                TransportLeg(id="l_nex", kind="airport_transfer", from_place="NRT", to_place="Tokyo",
-                             mode="Narita Express", duration_minutes=60, price_usd=40, source=SRC),
-            ],
+            legs=[leg.model_copy() for leg in host.legs],
         ),
         weather=[DayWeather(day=d(day), city="Tokyo", precip_prob=p, source=SRC)
                  for day, p in [(11, 20), (12, 70), (13, 10), (14, 30), (15, 5), (16, 40), (17, 20)]],

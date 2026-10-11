@@ -114,9 +114,10 @@ def _host(state: TripState, traveler_id: str | None) -> Traveler:
 
 
 def _owner(card: str) -> str | None:
-    """Whose card this is: flights ("flight:<traveler>") and stays ("stay:<traveler>:<n>") belong to one traveler."""
+    """Whose card this is: flights ("flight:<traveler>"), stays ("stay:<traveler>:<n>"), transport legs
+    ("leg:<traveler>:<leg>") and adding a rental car ("transport:<traveler>") belong to one traveler."""
     kind, _, ref = card.partition(":")
-    return ref.partition(":")[0] if kind in ("flight", "stay") else None
+    return ref.partition(":")[0] or None if kind in ("flight", "stay", "leg", "transport") else None
 
 
 def _lock(trip_id: str) -> asyncio.Lock:
