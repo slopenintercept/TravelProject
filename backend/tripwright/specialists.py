@@ -737,8 +737,15 @@ async def fetch_weather(state: TripState) -> list[DayWeather]:
 # --- what the orchestrator's reviewer is shown: the whole result, compactly ---------
 
 def review_lodging(state: TripState, plan: LodgingPlan) -> str:
-    lines = [f"Most travelers pick {plan.common_choice.choice} because {plan.common_choice.because}. "
-             "Each traveler gets their own room from these options, by their own budget."]
+    caps = ", ".join(f"{t.name} about ${_nightly_cap(state, t):,.0f} a night" for t in state.travelers)
+    lines = [f"Most travelers pick {plan.common_choice.choice} because {plan.common_choice.because}.",
+             # Without this the reviewer reads "own room" as one traveler paying for every room, and asks for a shared one.
+             "How rooms work here (settled by code, not up for review): every traveler books a room of their own "
+             "and pays for it from their own budget alone; nobody shares and nobody pays for anyone else's room. "
+             "These options span the whole group's budgets, and code then gives each traveler the best-rated one "
+             f"within their own lodging budget ({caps}), so the top pick is not what a tighter budget pays. "
+             "Whether each whole trip fits its budget is worked out afterwards by the budget step. So separate "
+             "rooms, or a top pick above someone's budget, are never reasons to send this back."]
     for stay in plan.stays:
         prices = sorted(o.price_total_usd / max(o.nights, 1) for o in stay.options)
         room = stay.selected
