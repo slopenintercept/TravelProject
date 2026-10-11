@@ -29,7 +29,7 @@ A headline that an agent's work is behind names that agent, with a status dot an
 | Agents working | One line per agent as it reports | The Agents tab, open |
 | Choose | Your flight and a room for each stay, as selectable cards | The draft plan; once someone has confirmed and the days are planned around them, the days so far |
 | Review | **Needs you** (must-sees that did not fit, your budget), your flight, your stays, getting around, and what was left off | Your budget by category and a week calendar: drag an activity to another day, or click one to swap it or take it off |
-| Finish | Your bookings in order, then tickets. Flight and stay links open with the trip's details filled in; ticket and transport links open the provider's page, with a note on what to enter there. Places that need no ticket are listed without a link | The final days |
+| Finish | Pay together (each traveler's share, and whether it is on hold or paid), then your bookings in order, then tickets. Flight and stay links open with the trip's details filled in; ticket and transport links open the provider's page, with a note on what to enter there. Places that need no ticket are listed without a link | The final days |
 
 The design this was built from is in [design/](design/): the approved mockup is `direction-c-lilac.html`, and `implemented/` has screenshots of the running app.
 
@@ -232,6 +232,7 @@ The app answers on `http://<server-ip>:8000`. `linode-cli linodes list --label t
 
 - Agents never enter payment details or passwords and never create accounts. No tool can type into a page.
 - "Booking" means a link. The **Finish** screen lists everything to book in order ([booking.py](backend/tripwright/booking.py)). Flight links open Google Flights on the route, dates, airline and traveler count; hotel links open the hotel's own page on the stay dates; Airbnb links carry dates and guests. Ticket and rail sites don't accept details in a URL, so those steps link to the right page and say exactly what to enter. The user books and pays on the provider's site.
+- Paying together is test mode only. On **Finish**, each traveler approves their own share of the trip on a test card picked from a list ([payments.py](backend/tripwright/payments.py)). Approving places a hold; every card is charged at once when the whole group has approved, and if anyone backs out first, every hold is released. With `STRIPE_SECRET_KEY` set to a Stripe test key, each hold is a test-mode PaymentIntent (authorize now, capture later); without it the holds are kept in the trip. Live keys are refused, no card number is typed, no agent is involved and no money moves.
 - If a site blocks automation or shows a CAPTCHA, the tool raises `Blocked`, the failure is recorded, and the agent uses another provider or saved data. Nothing tries to hide the browser or get past bot detection.
 
 ## Project layout
@@ -253,6 +254,7 @@ backend/tripwright/
   evidence.py       Object Storage or local disk
   cards.py          review-screen cards
   booking.py        finish-screen checklist and detail-carrying provider links
+  payments.py       pay together: a hold per traveler on a test card, charged when everyone is in
   api.py            FastAPI + SSE
   fixtures/         recorded tool results, accepted results and evidence for the demo
 backend/tests/      validator, scheduler, budget, orchestrator (scripted model)

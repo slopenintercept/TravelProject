@@ -8,7 +8,8 @@ Scenario: 7 days in Japan. Alex hosts from Kansas City ($2,500) and invites Sam 
 2. Plan the demo trip once beforehand. A cold group run takes about 4 to 5 minutes; with the cache warm the tools answer instantly, but the model calls still take about 2 minutes, so start the planning step before you begin talking about it.
 3. Safety net: set `DEMO_MODE=true` and restart. Tools then replay recorded results and never browse, while the agents still reason live. If inference itself is down, every specialist falls back to its recorded result and the cards say so. The ideas list has no recorded result yet. Planning the demo trip with `RECORD_FIXTURES=true` records one only on a database that has no saved ideas list for Japan, 7 days: a list saved by an earlier run (step 2 saves one, and it is kept for 30 days) is reused without being recorded. The picks screen shows that saved list whether or not inference is up. With neither a saved nor a recorded list, the picks screen is empty and you add the places by hand with **Add a place**.
 4. Have Sam's and Jo's browsers (or phones) ready: each joins from the invite link on their own device.
-5. Keep the app open on the Start screen, browser at about 1360 px wide. The screen has two panes: the feed on the left asks for each decision, and the board on the right shows the plan, or the agents when you switch its tab.
+5. For paying together: `/api/health` says `"payments": "stripe test mode"`, and the Stripe dashboard is open on test-mode Payments in another tab. Safety net: on the hosted site, `#trip_paydemo/p1` (Alex) and `#trip_paydemo/p2` (Sam) open a finished two-traveler trip that nobody has paid yet.
+6. Keep the app open on the Start screen, browser at about 1360 px wide. The screen has two panes: the feed on the left asks for each decision, and the board on the right shows the plan, or the agents when you switch its tab.
 
 ## Script
 
@@ -75,15 +76,21 @@ Drag a Tokyo activity the whole group is going to (one of the agent's own sugges
 
 > "It refuses and tells me why: I'm in Kyoto that day."
 
-**2:45 Finish (10 s)**
+**2:45 Finish and pay together (30 s)**
 
-Click **Finish** (top right of **Your days**).
+Click **Finish** (top right of **Your days**). At the top is **Pay together**: each traveler and their share. Keep **Visa ···· 4242** selected and click **Approve my share**.
+
+> "Group trips fall apart over money. I approve my share and Stripe places a hold on my card. Nobody is charged until everyone has approved, and if anyone backs out, every hold is released."
+
+On Sam's device, click **Finish**, then **Approve my share**. Both rows turn to **Paid** on both screens. Show the two payments in the Stripe dashboard.
+
+> "Everyone is in, so every card is charged at the same moment. This runs on Stripe test mode: test cards, no real money."
 
 > "This is the hand-off. The flight and hotel links open the provider with my details already in: the flight search on my dates and airline, each hotel's page on my stay dates. Tickets and transport link to the right page, and the step says what to buy there. I just pick and pay."
 
 Click the flight's **Open with details filled in**.
 
-**2:55 Close (5 s)**
+**3:15 Close (5 s)**
 
 > "Strands for the agents, graph, tools, hooks and structured output. Akamai for inference, compute, Postgres and object storage. Tripwright."
 
