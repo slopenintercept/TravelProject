@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { clock, daysBetween, monthDay, weekday } from '../format'
-import type { ItineraryItem, Traveler } from '../types'
+import type { DayWeather, ItineraryItem, Traveler } from '../types'
 
-const HOUR_PX = 44
-const MIN_START = 8 * 60 // the grid shows at least 08:00 to 21:00, wider if something falls outside
-const MIN_END = 21 * 60
+const HOUR_PX = 35
+const LINE_PX = 17
+const MIN_START = 8 * 60 // the grid shows at least 08:00 to 24:00, earlier if something starts before
+const MIN_END = 24 * 60
 
 const minutes = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5))
 
@@ -43,29 +44,36 @@ function layout(items: ItineraryItem[]): Placed[] {
   return placed
 }
 
+/** The city a day is spent in, from what is on it. */
+export function cityOn(day: string, items: ItineraryItem[]): string | undefined {
+  const visits = items.filter((i) => i.day === day && i.kind === 'attraction').map((i) => i.city)
+  return [...new Set(visits)].join(' / ') || items.find((i) => i.day === day)?.city
+}
+
 interface Props {
   items: ItineraryItem[]
   travelers: Traveler[]
-  /** Who is looking: offered first in the view picker. */
+  /** Who is looking: what they do without everyone is pink, what only others do is mint. */
   you?: Traveler
+  /** Show one traveler's days (a traveler id), or '' for everyone's. */
+  viewer?: string
+  /** The forecast for each day's header. */
+  weather?: DayWeather[]
   busy?: boolean
   /** Dragging a block onto another day moves it there (fixed blocks, like flights, stay put). */
   onMove?: (itemId: string, day: string) => void
   /** Clicking a block selects it; the caller shows what can be done with it. */
   onSelect?: (item: ItineraryItem) => void
   selectedId?: string | null
-  /** Messages for items that break a rule (shown as a red outline and in the tooltip). */
+  /** Messages for items that break a rule (shown as a coral outline and in the tooltip). */
   problems?: Map<string, string[]>
-  /** Extra line under a day's date, such as the weather. */
-  dayNote?: (day: string) => string | undefined
 }
 
 /** A week-view calendar: a column per day, a block per activity sized by its time; split-offs side by side. */
-export function CalendarGrid({ items, travelers, you, busy, onMove, onSelect, selectedId, problems, dayNote }: Props) {
-  const [viewer, setViewer] = useState('') // a traveler id, or '' for everyone
+export function Calendar({ items, travelers, you, viewer = '', weather = [], busy, onMove, onSelect, selectedId, problems }: Props) {
   const [dragId, setDragId] = useState<string | null>(null)
   const [overDay, setOverDay] = useState<string | null>(null)
-  if (items.length === 0) return <p className="muted">Nothing on the calendar yet.</p>
+  if (items.length === 0) return <div className="ph">Nothing on the calendar yet.</div>
 
   function drop(day: string) {
     const item = items.find((i) => i.id === dragId)
@@ -82,48 +90,37 @@ export function CalendarGrid({ items, travelers, you, busy, onMove, onSelect, se
   const days = daysBetween(sorted[0].day, sorted[sorted.length - 1].day)
   const top = Math.min(MIN_START, ...items.map((i) => Math.floor(minutes(i.start) / 60) * 60))
   const bottom = Math.max(MIN_END, ...items.map((i) => Math.ceil(minutes(i.end) / 60) * 60))
-  const hours = Array.from({ length: (bottom - top) / 60 }, (_, i) => top / 60 + i)
-  const order = you ? [you, ...travelers.filter((t) => t.id !== you.id)] : travelers
+  const height = ((bottom - top) / 60) * HOUR_PX
+  const labels: number[] = [] // every other hour
+  for (let h = Math.ceil(top / 120) * 2; h * 60 < bottom; h += 2) labels.push(h)
 
   return (
-    <div className="calendar-grid-wrap">
-      {everyone > 1 && (
-        <div className="viewer" role="radiogroup" aria-label="View">
-          <strong>View</strong>
-          <div className="segmented">
-            {[{ id: '', name: 'Everyone' }, ...order.map((t) => ({ id: t.id, name: t.id === you?.id ? 'Just me' : t.name }))].map((t) => (
-              <label key={t.id}>
-                <input type="radio" name="calendar-viewer" checked={viewer === t.id} onChange={() => setViewer(t.id)} />
-                <span>{t.name}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="calendar-grid" style={{ gridTemplateColumns: `52px repeat(${days.length}, minmax(130px, 1fr))` }}>
-        <div className="corner" />
+    <div className="calwrap">
+      <div className="cal" style={{ gridTemplateColumns: `44px repeat(${days.length}, minmax(78px, 1fr))` }}>
+        <div />
         {days.map((day) => {
-          const city = [...new Set(items.filter((i) => i.day === day && i.kind === 'attraction').map((i) => i.city))].join(' / ')
-            || items.find((i) => i.day === day)?.city
-          const note = dayNote?.(day)
+          const forecast = weather.find((w) => w.day === day)
+          const facts = [
+            forecast?.city || cityOn(day, items),
+            forecast?.high_c != null && `${Math.round(forecast.high_c)}°`,
+            forecast?.precip_prob != null && `${Math.round(forecast.precip_prob)}% rain`,
+          ].filter(Boolean)
           return (
-            <div key={day} className="day-head">
-              <strong>{weekday(day)} {monthDay(day)}</strong>
-              {city && <span>{city}</span>}
-              {note && <span className="note">{note}</span>}
+            <div key={day} className="dh" title={forecast?.summary}>
+              {weekday(day)} {monthDay(day)}
+              <small>{facts.join(' · ')}</small>
             </div>
           )
         })}
 
-        <div className="hours" style={{ height: hours.length * HOUR_PX }}>
-          {hours.map((h) => <div key={h} style={{ height: HOUR_PX }}>{String(h).padStart(2, '0')}:00</div>)}
+        <div className="hours" style={{ height }}>
+          {labels.map((h) => <span key={h} style={{ top: ((h * 60 - top) / 60) * HOUR_PX }}>{h}:00</span>)}
         </div>
         {days.map((day) => (
           <div
             key={day}
-            className={overDay === day ? 'day-col over' : 'day-col'}
-            style={{ height: hours.length * HOUR_PX, backgroundSize: `100% ${HOUR_PX}px` }}
+            className={overDay === day ? 'col drop' : 'col'}
+            style={{ height, backgroundSize: `100% ${HOUR_PX}px` }}
             onDragOver={(e) => {
               if (!dragId) return
               e.preventDefault() // allows the drop
@@ -140,23 +137,32 @@ export function CalendarGrid({ items, travelers, you, busy, onMove, onSelect, se
             {layout(shown.filter((i) => i.day === day)).map(({ item, lane, lanes }) => {
               const start = minutes(item.start)
               const length = Math.max(minutes(item.end) - start, 20)
+              const px = Math.max((length / 60) * HOUR_PX - 2, LINE_PX + 2) // never shorter than one line of its title
+              const tight = px < LINE_PX + 12 // no room for the padding above and below that line
               const split = item.kind === 'attraction' && item.travelers.length < everyone
               const issues = problems?.get(item.id)
               const movable = !!onMove && !item.locked && !busy
+              const selectable = !!onSelect && !item.locked
+              // Show as many title lines as fit, and the times only where a spare line is left for them.
+              const lines = tight ? 1 : Math.max(1, Math.floor((px - 12) / LINE_PX))
+              const timed = lines >= 3 && lanes === 1
               return (
                 <div
                   key={item.id}
                   className={[
-                    'block', `kind-${item.kind}`, split && 'split', issues && 'conflict',
-                    selectedId === item.id && 'selected', dragId === item.id && 'dragging', onSelect && !item.locked && 'clickable',
+                    'ev', item.locked && 'fixed', split && (you && item.travelers.includes(you.id) ? 'solo' : 'alt'),
+                    issues && 'conflict', selectedId === item.id && 'sel', dragId === item.id && 'dragging',
+                    selectable && 'clickable', tight && 'tight', lanes > 2 && 'narrow',
                   ].filter(Boolean).join(' ')}
                   style={{
                     top: ((start - top) / 60) * HOUR_PX,
-                    height: (length / 60) * HOUR_PX - 2,
+                    height: px,
                     left: `calc(${(lane / lanes) * 100}% + 2px)`,
                     width: `calc(${100 / lanes}% - 4px)`,
                   }}
                   title={[item.title, `${clock(item.start)}–${clock(item.end)}`, names(item.travelers), ...(issues ?? [])].join('\n')}
+                  role={selectable ? 'button' : undefined}
+                  tabIndex={selectable ? 0 : undefined}
                   draggable={movable}
                   onDragStart={(e) => {
                     e.dataTransfer.setData('text/plain', item.id) // Firefox needs data to start a drag
@@ -167,11 +173,15 @@ export function CalendarGrid({ items, travelers, you, busy, onMove, onSelect, se
                     setDragId(null)
                     setOverDay(null)
                   }}
-                  onClick={() => !item.locked && onSelect?.(item)}
+                  onClick={() => selectable && onSelect?.(item)}
+                  onKeyDown={(e) => {
+                    if (!selectable || (e.key !== 'Enter' && e.key !== ' ')) return
+                    e.preventDefault()
+                    onSelect?.(item)
+                  }}
                 >
-                  <div className="title">{item.title}</div>
-                  <div className="time">{clock(item.start)}–{clock(item.end)}</div>
-                  {item.kind === 'attraction' && <div className="who">{names(item.travelers)}</div>}
+                  <span className="t" style={{ WebkitLineClamp: lines - (timed ? 1 : 0) }}>{item.title}</span>
+                  {timed && <small>{clock(item.start)}–{clock(item.end)}</small>}
                 </div>
               )
             })}

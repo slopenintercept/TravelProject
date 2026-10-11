@@ -1,17 +1,16 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { actAs, api } from './api'
-import { AgentPanel } from './components/AgentPanel'
-import { BudgetBar } from './components/BudgetBar'
+import { Choose } from './components/Choose'
 import { Finish } from './components/Finish'
 import { Gathering } from './components/Gathering'
-import { Itinerary } from './components/Itinerary'
-import { Choose } from './components/Choose'
 import { Join, WhoAreYou } from './components/Join'
 import { Picks } from './components/Picks'
-import { Review, Violations } from './components/Review'
+import { Review } from './components/Review'
+import { Start } from './components/Start'
 import { Timeframe } from './components/Timeframe'
-import { TripForm } from './components/TripForm'
-import { monthDay } from './format'
+import { Working } from './components/Working'
+import { count, monthDay } from './format'
+import { ShellContext, type BoardTab } from './shell'
 import { planningStarted } from './types'
 import { useTrip } from './useTrip'
 
@@ -22,16 +21,19 @@ function routeFromHash() {
   return { tripId: tripId || null, joining: page === 'join', me: page && page !== 'join' ? page : null }
 }
 
+// The screens where the agents are all there is to watch: their board opens on the Agents tab.
+const WATCHING = ['working', 'finding-dates']
+
 export default function App() {
   const [{ tripId, joining, me }, setRoute] = useState(routeFromHash)
-  const [tab, setTab] = useState<'review' | 'itinerary'>('review')
   const [finishing, setFinishing] = useState(false)
   const [editingPicks, setEditingPicks] = useState(false)
   const [rechoosing, setRechoosing] = useState(false)
+  // Which side of the board is open, and the screen that was chosen on: every screen starts on its own default.
+  const [board, setBoard] = useState<{ screen: string; tab: BoardTab; agent: string | null }>({ screen: '', tab: 'plan', agent: null })
   const { view, lanes, busy, sending, error, notice, act, setError, setNotice } = useTrip(tripId)
 
   useEffect(() => actAs(me), [me])
-  const retry = () => tripId && act(api.retry(tripId))
 
   useEffect(() => {
     const onHashChange = () => {
@@ -43,6 +45,10 @@ export default function App() {
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
+
+  if (!tripId) {
+    return <div className="app"><Start onCreated={(id, hostId) => { window.location.hash = `${id}/${hostId}` }} /></div>
+  }
 
   const state = view?.state
   const stage = state?.stage
@@ -68,169 +74,167 @@ export default function App() {
     : rechoosing ? () => setRechoosing(false)
     : stage !== 'review' || choosing ? null
     : finishing ? () => setFinishing(false)
-    : tab === 'itinerary' ? () => setTab('review')
     : () => setRechoosing(true)
 
+  const screen =
+    !view || !state ? 'loading'
+    : joining ? 'join'
+    : !you ? 'who'
+    : picking ? 'picks'
+    : choosing && optionsReady ? 'choose'
+    : choosing || stage === 'choosing' || stage === 'planning' ? 'working'
+    : stage === 'review' ? (finishing ? 'finish' : 'review')
+    : stage === 'gathering' ? 'gathering'
+    : stage === 'awaiting_dates' ? 'dates'
+    : 'finding-dates'
+  const onScreen = board.screen === screen
+  // A choice made on another screen is forgotten, so coming back to that screen starts on its default again.
+  if (board.screen && !onScreen) setBoard({ screen: '', tab: 'plan', agent: null })
+  const tab = onScreen ? board.tab : WATCHING.includes(screen) ? 'agents' : 'plan'
+
   return (
-    <>
-      <header className="topbar">
+    <div className="app">
+      <header className="bar">
         <a className="brand" href="#">Tripwright</a>
         {state && (
-          <span className="trip">
-            {group < 2 && `${state.request.origin} → `}{state.request.destination} · {state.request.days} days
-            {state.dates && ` · ${monthDay(state.dates.start)} – ${monthDay(state.dates.end)}`}
-            {group > 1 && ` · ${group} travelers`}
-          </span>
+          <>
+            <span className="chip">{group < 2 && `${state.request.origin} → `}{state.request.destination}</span>
+            <span className="chip">
+              {state.dates ? `${monthDay(state.dates.start)} – ${monthDay(state.dates.end)}` : count(state.request.days, 'day')}
+            </span>
+            {group > 1 && <span className="chip">{group} travelers</span>}
+          </>
         )}
-        {state && working && <span className="working"><i className="spinner" />Agents working…</span>}
-        {you && group > 1 && (
-          <span className="you">You: <strong>{you.name}</strong> · <a href={`#${tripId}`}>Switch</a></span>
+        {you && <button className="pill sm" disabled={!back} onClick={() => back?.()}>← Back</button>}
+        {state && working && <span className="working"><i className="st working" />Agents working…</span>}
+        <span className="grow" />
+        {you && (
+          <span className="you">You: <b>{you.name}</b>{group > 1 && <> · <a href={`#${tripId}`}>Switch</a></>}</span>
         )}
         {you?.picked && beforePlanning && !editingPicks && (
-          <button className="link" onClick={() => setEditingPicks(true)}>Edit my picks</button>
+          <button className="pill sm" onClick={() => setEditingPicks(true)}>Edit my picks</button>
         )}
-        {tripId && <a className="new-trip" href="#">New trip</a>}
+        <a className="pill sm" href="#">New trip</a>
       </header>
 
-      {state && you && <BudgetBar travelers={[you]} budgets={state.budgets} />}
+      {(error || notice) && (
+        <div className="banners">
+          {error && (
+            <div className="banner error" role="alert">
+              <span>{error}</span>
+              <button onClick={() => setError('')}>Dismiss</button>
+            </div>
+          )}
+          {notice && (
+            <div className="banner" role="status">
+              <span>{notice}</span>
+              <button onClick={() => setNotice('')}>Dismiss</button>
+            </div>
+          )}
+        </div>
+      )}
 
-      <main>
-        {error && (
-          <div className="banner error" role="alert">
-            <span>{error}</span>
-            <button className="link" onClick={() => setError('')}>Dismiss</button>
-          </div>
-        )}
-        {notice && (
-          <div className="banner warn" role="status">
-            <span>{notice}</span>
-            <button className="link" onClick={() => setNotice('')}>Dismiss</button>
-          </div>
-        )}
-
-        {!tripId ? (
-          <TripForm onCreated={(id, hostId) => { window.location.hash = `${id}/${hostId}` }} />
-        ) : !view || !state ? (
-          !error && <p className="lede">Loading your trip…</p>
-        ) : joining ? (
-          <Join
-            state={state}
-            busy={busy}
-            onJoin={async (traveler) => {
-              const joined = await act(api.join(state.id, traveler))
-              if (joined?.you) window.location.hash = `${state.id}/${joined.you}` // their own link from now on
-              return !!joined
-            }}
-          />
-        ) : !you ? (
-          <WhoAreYou state={state} />
-        ) : picking ? (
-          <Picks
-            state={state}
-            you={you}
-            busy={busy}
-            onSave={async (picks) => {
-              const saved = await act(api.savePicks(state.id, you.id, picks))
-              if (saved) {
-                setEditingPicks(false)
-                window.scrollTo(0, 0)
-              }
-              return !!saved
-            }}
-            onAdd={async (name, city) => !!(await act(api.addIdea(state.id, name, city)))}
-            onMore={async (picks) => !!(await act(api.suggestMore(state.id, picks)))}
-          />
-        ) : choosing && optionsReady ? (
-          <>
-            <AgentPanel lanes={lanes} travelers={state.travelers} compact onRetry={retry} busy={busy} />
-            <Choose
-              state={state}
-              you={you}
-              sending={sending}
-              onConfirm={async (flightId, stayIds) => {
-                if (await act(api.confirmChoices(state.id, you.id, flightId, stayIds))) {
-                  setRechoosing(false)
-                  window.scrollTo(0, 0)
-                }
-              }}
-            />
-          </>
-        ) : choosing || stage === 'choosing' ? (
-          <>
-            <h1>{choosing ? 'Planning your flight and stays' : 'Planning activities around your choices'}</h1>
-            <p className="lede">
-              {choosing
-                ? "The agents are finding your flight and rooms. You'll choose them here as soon as they're ready."
-                : 'The agents are still researching activities, transport and weather. Your days are planned around your flight and rooms as soon as they finish.'}
-            </p>
-            <AgentPanel lanes={lanes} travelers={state.travelers} onRetry={retry} busy={busy} />
-          </>
-        ) : stage === 'review' && finishing ? (
-          <Finish view={view} you={you} />
-        ) : stage === 'review' ? (
-          <>
-            <AgentPanel lanes={lanes} travelers={state.travelers} compact onRetry={retry} busy={busy} />
-            <nav className="tabs" role="tablist">
-              <button role="tab" aria-selected={tab === 'review'} onClick={() => setTab('review')}>Review</button>
-              <button role="tab" aria-selected={tab === 'itinerary'} onClick={() => setTab('itinerary')}>Itinerary</button>
-            </nav>
-            <Violations violations={state.violations} />
-            {tab === 'review' ? (
+      {!view || !state ? (
+        <>
+          <main className="feed">{!error && <p className="say">Loading your trip…</p>}</main>
+          <aside className="board" />
+        </>
+      ) : (
+        <ShellContext.Provider
+          value={{
+            state, you: you ?? null, lanes, busy, tab,
+            agent: onScreen ? board.agent : null,
+            showTab: (next, agent) => setBoard({ screen, tab: next, agent: agent ?? null }),
+            retry: () => act(api.retry(state.id)),
+          }}
+        >
+          {/* Keyed by screen, so each one starts scrolled to its top with its own state. */}
+          <Fragment key={screen}>
+            {joining ? (
+              <Join
+                state={state}
+                busy={busy}
+                onJoin={async (traveler) => {
+                  const joined = await act(api.join(state.id, traveler))
+                  if (joined?.you) window.location.hash = `${state.id}/${joined.you}` // their own link from now on
+                  return !!joined
+                }}
+              />
+            ) : !you ? (
+              <WhoAreYou state={state} />
+            ) : screen === 'picks' ? (
+              <Picks
+                state={state}
+                you={you}
+                busy={busy}
+                onSave={async (picks) => {
+                  const saved = await act(api.savePicks(state.id, you.id, picks))
+                  if (saved) setEditingPicks(false)
+                  return !!saved
+                }}
+                onAdd={async (name, city) => !!(await act(api.addIdea(state.id, name, city)))}
+                onMore={async (picks) => !!(await act(api.suggestMore(state.id, picks)))}
+              />
+            ) : screen === 'choose' ? (
+              <Choose
+                state={state}
+                you={you}
+                sending={sending}
+                onConfirm={async (flightId, stayIds) => {
+                  if (await act(api.confirmChoices(state.id, you.id, flightId, stayIds))) setRechoosing(false)
+                }}
+              />
+            ) : screen === 'working' ? (
+              choosing ? (
+                <Working state={state} title="Planning your flight and stays">
+                  The agents are finding your flight and rooms. You'll choose them here as soon as they're ready.
+                </Working>
+              ) : stage === 'choosing' ? (
+                <Working state={state} title="Planning activities around your choices">
+                  The agents are still researching activities, transport and weather. Your days are planned around
+                  your flight and rooms as soon as they finish.
+                </Working>
+              ) : (
+                <Working state={state} title="Planning your trip">
+                  Each specialist researches on its own. The orchestrator checks every result and sends back what
+                  does not hold up.
+                </Working>
+              )
+            ) : screen === 'finish' ? (
+              <Finish view={view} you={you} />
+            ) : screen === 'review' ? (
               <Review
                 view={view}
                 you={you}
                 busy={busy}
                 onDecision={(action, card, optionId) => act(api.decide(state.id, action, card, optionId))}
                 onApplyBudget={(travelerId) => act(api.applyBudget(state.id, travelerId))}
+                onMove={(itemId, day) => act(api.moveItem(state.id, itemId, day))}
+                onSwap={(itemId, attractionId) => act(api.swapItem(state.id, itemId, attractionId))}
+                onFinish={() => setFinishing(true)}
               />
-            ) : (
-              <Itinerary
+            ) : screen === 'gathering' ? (
+              <Gathering
                 state={state}
                 you={you}
                 busy={busy}
-                onMove={(itemId, day) => act(api.moveItem(state.id, itemId, day))}
-                onSwap={(itemId, attractionId) => act(api.swapItem(state.id, itemId, attractionId))}
-                onRemove={(attractionId) => act(api.decide(state.id, 'remove', `attraction:${attractionId}`))}
+                onRemove={async (travelerId) => {
+                  const left = await act(api.leave(state.id, travelerId))
+                  if (left && travelerId === you.id) window.location.hash = state.id
+                }}
+                onPlan={() => act(api.plan(state.id))}
+              />
+            ) : (
+              <Timeframe
+                state={state}
+                canChoose={you.host}
+                busy={busy}
+                onChoose={(start) => act(api.chooseDates(state.id, start))}
               />
             )}
-            <button className="primary big finish-button" disabled={busy} onClick={() => { setFinishing(true); window.scrollTo(0, 0) }}>
-              Finish →
-            </button>
-          </>
-        ) : stage === 'planning' ? (
-          <>
-            <h1>Planning your trip</h1>
-            <p className="lede">
-              Each specialist researches on its own. The orchestrator checks every result and sends back what does not hold up.
-            </p>
-            <AgentPanel lanes={lanes} travelers={state.travelers} />
-          </>
-        ) : stage === 'gathering' ? (
-          <Gathering
-            state={state}
-            you={you}
-            busy={busy}
-            onRemove={async (travelerId) => {
-              const left = await act(api.leave(state.id, travelerId))
-              if (left && travelerId === you.id) window.location.hash = state.id
-            }}
-            onPlan={() => act(api.plan(state.id))}
-          />
-        ) : (
-          <>
-            <Timeframe
-              state={state}
-              canChoose={you.host}
-              busy={busy}
-              onChoose={(start) => act(api.chooseDates(state.id, start))}
-            />
-            <AgentPanel lanes={lanes} travelers={state.travelers} />
-          </>
-        )}
-      </main>
-      <button className="big back-button" disabled={!back} onClick={() => { back?.(); window.scrollTo(0, 0) }}>
-        ← Back
-      </button>
-    </>
+          </Fragment>
+        </ShellContext.Provider>
+      )}
+    </div>
   )
 }

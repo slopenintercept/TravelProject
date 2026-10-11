@@ -1,52 +1,90 @@
-import { clock, whoIsIn } from '../format'
-import type { Traveler, TripState } from '../types'
-import { CalendarGrid } from './CalendarGrid'
+import type { ReactNode } from 'react'
+import { daysBetween, weekday, whoIsIn } from '../format'
+import { planningStarted, type TripState } from '../types'
+import { AgentTag } from './Agents'
+import { cityOn } from './Calendar'
+import { Route } from './Route'
 
-const STILL_WORKING = ['working', 'under_review', 'sent_back']
+/** Place names match whatever their capitals and spacing. */
+export const placeKey = (name: string) => name.toLowerCase().split(/\s+/).join(' ')
+
+interface Props {
+  state: TripState
+  /** Names of the places the traveler looking has marked must do: these stand out on the days. */
+  musts?: string[]
+  /** Leave the agent's tag off, where the board has no Agents tab for it to open. */
+  untagged?: boolean
+  /** What sits under the days: the tallies and "Save my picks". */
+  children?: ReactNode
+}
 
 /** The rough sketch of the days from everyone's picks, rebuilt shortly after anyone saves theirs. */
-export function DraftPlan({ state, you }: { state: TripState; you: Traveler }) {
+export function DraftPlan({ state, musts = [], untagged, children }: Props) {
   const { draft, travelers } = state
-  const status = state.agents.draft
-  const building = !!status && STILL_WORKING.includes(status.status)
-  const names = (ids: string[]) => whoIsIn(travelers.filter((t) => ids.includes(t.id)).map((t) => t.name), travelers.length)
+  // The draft is rebuilt only until planning starts; after that its agent's last status is stale.
+  const live = !planningStarted(state.stage)
+  const status = live ? state.agents.draft : undefined
+  const route = draft?.route ?? state.route
+  const must = new Set(musts.map(placeKey))
+  const names = (ids: string[]) => travelers.filter((t) => ids.includes(t.id)).map((t) => t.name)
+  const visits = draft?.itinerary.filter((i) => i.kind === 'attraction') ?? []
+  const sorted = [...(draft?.itinerary ?? [])].sort((a, b) => (a.day + a.start).localeCompare(b.day + b.start))
+  const days = sorted.length ? daysBetween(sorted[0].day, sorted[sorted.length - 1].day) : []
 
   return (
-    <section className="draft panel">
-      <header>
+    <>
+      <div className="board-h">
         <h2>Draft plan</h2>
-        <span className="muted">
-          {building ? <><i className="spinner" />{status.message || 'Updating…'}</>
-            : status?.status === 'failed' ? `Couldn't update the draft: ${status.message}`
-              : draft?.built_at ? `Updated ${clock(draft.built_at.slice(11, 19))}` : ''}
-        </span>
-      </header>
-      <p className="muted">
-        A rough sketch from everyone's picks, rebuilt a few seconds after anyone saves theirs. Times are typical
-        ones; real flights, hotels, hours and prices come when the host starts planning.
-        {draft?.route && <> Route: <strong>{draft.route.segments.map((s) => `${s.city} (${s.nights}n)`).join(' → ')}</strong>.</>}
+        {!untagged && live && <AgentTag agent="draft" />}
+      </div>
+      {route && <Route route={route} />}
+      <p className="small">
+        {live
+          ? "A rough sketch from everyone's picks, rebuilt a few seconds after anyone saves theirs. Times are typical ones; real flights, hotels, hours and prices come when the host starts planning."
+          : "The rough sketch from everyone's picks. Your real days replace it once flights and stays are chosen."}
       </p>
 
-      {!draft ? (
-        <p className="muted">{building ? 'Building the first draft…' : 'The draft appears once people have marked some places.'}</p>
+      {days.length === 0 ? (
+        <div className="draft"><div className="ph" style={{ gridColumn: '1 / -1', height: 170 }}>
+          {!live ? 'Your days appear here once flights and stays are chosen.'
+            : status?.status === 'failed' ? `Couldn't update the draft: ${status.message}`
+            : status && ['working', 'under_review', 'sent_back'].includes(status.status) ? 'Building the first draft…'
+            : 'The draft appears once people have marked some places.'}
+        </div></div>
       ) : (
-        <>
-          {draft.note && <p className="note">{draft.note}</p>}
-          <CalendarGrid items={draft.itinerary} travelers={travelers} you={you} />
-          {draft.unscheduled.length > 0 && (
-            <div className="unfit">
-              <h3>Doesn't fit yet</h3>
+        <div className="draft" style={{ gridTemplateColumns: `repeat(${Math.min(days.length, 7)}, minmax(0, 1fr))` }}>
+          {days.map((day) => (
+            <div key={day} className="dcol">
+              <h3>{weekday(day)} {Number(day.slice(8))}<small>{cityOn(day, sorted)}</small></h3>
               <ul>
-                {draft.unscheduled.map((u) => (
-                  <li key={u.attraction_id}>
-                    <strong>{u.name}</strong> <span className="muted">({names(u.wanted_by).join(', ')}): {u.reason}</span>
+                {visits.filter((i) => i.day === day).sort((a, b) => a.start.localeCompare(b.start)).map((item) => (
+                  <li key={item.id} className={must.has(placeKey(item.title)) ? 'must' : undefined}>
+                    {item.title}
+                    {item.travelers.length < travelers.length && <small>{names(item.travelers).join(', ')} only</small>}
                   </li>
                 ))}
               </ul>
             </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
-    </section>
+
+      {children}
+
+      {draft?.note && <p className="aside">{draft.note}</p>}
+      {draft && draft.unscheduled.length > 0 && (
+        <div className="aside">
+          <b>Doesn't fit yet</b>
+          <ul>
+            {draft.unscheduled.map((u) => (
+              <li key={u.attraction_id}>
+                <b>{u.name}</b>
+                {u.wanted_by.length > 0 && ` (${whoIsIn(names(u.wanted_by), travelers.length).join(', ')})`}: {u.reason}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
   )
 }

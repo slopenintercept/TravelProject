@@ -1,6 +1,10 @@
 import { useState } from 'react'
-import { dateRange, money, temp, tomorrow } from '../format'
+import { capitalize, count, dateRange, money, temp, tomorrow } from '../format'
 import type { DateWindow, TripState } from '../types'
+import { AgentTag } from './Agents'
+import { Board } from './Board'
+import { EmptyPlan } from './Route'
+import { Crew } from './Working'
 
 interface Props {
   state: TripState
@@ -19,6 +23,7 @@ function weather(w: DateWindow): string {
   return parts.join(' · ')
 }
 
+/** Choosing dates: one card per window the agents compared, or the host's own start date. */
 export function Timeframe({ state, canChoose, busy, onChoose }: Props) {
   const [custom, setCustom] = useState(state.request.start_date ?? '')
   const { windows, request } = state
@@ -26,64 +31,68 @@ export function Timeframe({ state, canChoose, busy, onChoose }: Props) {
   const host = state.travelers.find((t) => t.host)?.name ?? 'The host'
 
   return (
-    <section className="timeframe">
-      <h1>{ready ? 'When do you want to go?' : 'Finding the best time to go'}</h1>
-      <p className="lede">
-        {!ready
-          ? `Agents are researching weather, crowds and fares for ${request.days} days in ${request.destination}.`
-          : !canChoose
-            ? `${host} is choosing the dates from these options.`
-            : windows.length > 0
-            ? 'The agents compared weather, crowds and fares. Choose a window, or pick your own start date.'
-            : 'The agents had no data to suggest dates for this trip. Pick your own start date to keep going.'}
-      </p>
-
-      {windows.length > 0 && (
-        <div className="windows">
-          {windows.map((w) => (
-            <article key={w.id} className="panel window">
-              <h2>{dateRange(w.start, w.end)}</h2>
-              <dl>
-                <dt>Weather</dt>
-                <dd>{weather(w) || 'No weather data'}</dd>
-                <dt>Crowds</dt>
-                <dd><span className={`pill crowd-${w.crowd_level}`}>{w.crowd_level}</span></dd>
-                <dt>Cheapest fare</dt>
-                <dd>
-                  <strong>{w.cheapest_fare_usd !== null ? money(w.cheapest_fare_usd) : 'Not found'}</strong>
-                  {w.price_trend && <span className="muted"> · {w.price_trend}</span>}
-                </dd>
-                {w.notes && (
-                  <>
-                    <dt>Notes</dt>
-                    <dd>{w.notes}</dd>
-                  </>
-                )}
-              </dl>
-              {w.reasoning && <p className="reasoning">{w.reasoning}</p>}
-              {canChoose && (
-                <button className="primary" disabled={!ready || busy} onClick={() => onChoose(w.start)}>
-                  Choose these dates
-                </button>
-              )}
-            </article>
-          ))}
+    <>
+      <main className="feed">
+        <div className="hd top">
+          <h1 className="display h-40">{ready ? 'When do you want to go?' : 'Finding the best time to go'}</h1>
+          <AgentTag agent="timeframe" />
         </div>
-      )}
+        <p className="say">
+          {!ready
+            ? `Agents are researching weather, crowds and fares for ${count(request.days, 'day')} in ${request.destination}.`
+            : !canChoose
+              ? `${host} is choosing the dates from these options.`
+              : windows.length > 0
+                ? 'The agents compared weather, crowds and fares. Choose a window, or pick your own start date.'
+                : 'The agents had no data to suggest dates for this trip. Pick your own start date to keep going.'}
+        </p>
+        {!ready && <Crew />}
 
-      {ready && canChoose && (
-        <form
-          className="custom-date"
-          onSubmit={(e) => {
-            e.preventDefault()
-            onChoose(custom)
-          }}
-        >
-          <label htmlFor="custom-start">{windows.length > 0 ? 'or pick your own start date' : 'Start date'}</label>
-          <input id="custom-start" type="date" required min={tomorrow()} value={custom} onChange={(e) => setCustom(e.target.value)} />
-          <button disabled={busy}>Use this date</button>
-        </form>
-      )}
-    </section>
+        {windows.map((w) => (
+          <article key={w.id} className="card choice">
+            <div className="top">
+              <div>
+                <span className="cap">{capitalize(w.crowd_level)} crowds</span>
+                <h3>{dateRange(w.start, w.end)}</h3>
+              </div>
+              <div className="price" title="Cheapest fare found">{w.cheapest_fare_usd !== null ? money(w.cheapest_fare_usd) : ''}</div>
+            </div>
+            <div className="facts">
+              <span className="chip wrap">{weather(w) || 'No weather data'}</span>
+              {w.cheapest_fare_usd === null && <span className="chip">No fare found</span>}
+            </div>
+            {w.reasoning && <p className="why"><b>Why these dates.</b> {w.reasoning}</p>}
+            {(w.price_trend || w.notes) && <p className="why">{[w.price_trend, w.notes].filter(Boolean).join(' ')}</p>}
+            {canChoose && (
+              <div className="go flush">
+                <button className="pill sm solid" disabled={!ready || busy} onClick={() => onChoose(w.start)}>Choose these dates</button>
+              </div>
+            )}
+          </article>
+        ))}
+
+        {ready && canChoose && (
+          <form
+            className="own-date"
+            onSubmit={(e) => {
+              e.preventDefault()
+              onChoose(custom)
+            }}
+          >
+            <div className="card ticket">
+              <label className="row">
+                <span>{windows.length > 0 ? 'Or pick your own start date' : 'Start date'}</span>
+                <input className="field" type="date" required min={tomorrow()} value={custom} onChange={(e) => setCustom(e.target.value)} />
+              </label>
+            </div>
+            <div className="go"><button className="pill" disabled={busy}>Use this date</button></div>
+          </form>
+        )}
+      </main>
+
+      <Board plan="Your route" detailed={!ready}>
+        <EmptyPlan route={state.route} days={request.days} />
+      </Board>
+    </>
   )
 }

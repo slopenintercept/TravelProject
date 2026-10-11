@@ -57,6 +57,7 @@ function reduceLanes(lanes: Lanes, action: LaneAction): Lanes {
       if (event.type === 'agent') {
         const { status, attempt, message, found } = event
         lane = { ...lane, status, attempt, message, found }
+        if (status === 'working' && attempt <= 1) lane.rejections = [] // a new run starts its own count
         if (status === 'sent_back') {
           lane.rejections = [...lane.rejections, message]
           log = [...log, { kind: 'sent_back', text: message }]

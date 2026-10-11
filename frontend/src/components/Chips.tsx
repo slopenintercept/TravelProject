@@ -3,7 +3,7 @@ export function Chips({ label, items }: { label: string; items: string[] }) {
   if (items.length === 0) return null
   return (
     <p className="chips">
-      <span className="label">{label}</span>
+      <span className="cap">{label}</span>
       {items.map((item, i) => <span key={i} className="chip">{item}</span>)}
     </p>
   )

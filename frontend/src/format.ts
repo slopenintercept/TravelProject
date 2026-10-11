@@ -31,6 +31,14 @@ export function daysBetween(first: string, last: string): string[] {
 }
 
 
+/** "3 places", "1 place" */
+export const count = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`
+
+const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve']
+/** Small numbers as words, for headlines: "three stays". */
+export const inWords = (n: number) => WORDS[n] ?? String(n)
+export const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
 /** Who something is for, by name: the whole group reads as "Everyone". */
 export const whoIsIn = (names: string[], groupSize: number) => (names.length === groupSize ? ['Everyone'] : names)
 
