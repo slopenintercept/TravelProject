@@ -81,7 +81,7 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 - Remote: `https://github.com/slopenintercept/TravelProject.git` (public).
 - Current branch: `combine-picks-and-group-trips`, pushed. It holds everything: Brandon's picks, per-person links and draft plan, merged with the user's `group-trips-live-run`.
-- `main` was fast-forwarded to this branch on 2026-10-10 at the user's request, after 107 tests and the frontend build passed on a clean copy. The user wants `main` kept up to date; fast-forward it again after new commits land here.
+- `main` was fast-forwarded to this branch on 2026-10-10 at the user's request, after 107 tests and the frontend build passed on a clean copy. That was a one-time request, not a standing rule: commits made here afterwards are not in `main` until the user asks for another fast-forward.
 - To fast-forward `main` without leaving this branch or touching the working folder: `git push origin origin/combine-picks-and-group-trips:refs/heads/main`, then `git fetch && git branch -f main origin/main`.
 - `group-trips-live-run` is pushed at `b370be3` and is fully contained in the current branch.
 - `agents-faster` is a local-only branch at `0326c82`, the same change as `b370be3`.
