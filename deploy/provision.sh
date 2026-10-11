@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create the Akamai data services and write their settings into .env:
+# Create the Akamai data services and write their settings into .env.hosted:
 #   - Object Storage bucket + a bucket-scoped access key (evidence snapshots)
 #   - Managed PostgreSQL (trip state, traveler profile, tool-result cache)
 # These are billable. Safe to run again: it reuses whatever already exists.
@@ -21,7 +21,7 @@ if ! linode-cli obj ls "$bucket" --cluster "$CLUSTER" >/dev/null 2>&1; then
   echo "Created bucket $bucket."
 fi
 
-# 2. An access key limited to that bucket. The secret is shown only once, so it goes straight into .env.
+# 2. An access key limited to that bucket. The secret is shown only once, so it goes straight into .env.hosted.
 if [[ -z $(get_env OBJ_KEY_ID) || $(get_env OBJ_BUCKET) != "$bucket" ]]; then
   read -r key_id access secret <<<"$(linode-cli object-storage keys-create --label "$KEY_LABEL" \
     --bucket_access "[{\"region\": \"$REGION\", \"bucket_name\": \"$bucket\", \"permissions\": \"read_write\"}]" \
@@ -31,7 +31,7 @@ if [[ -z $(get_env OBJ_KEY_ID) || $(get_env OBJ_BUCKET) != "$bucket" ]]; then
   set_env OBJ_ACCESS_KEY "$access"
   set_env OBJ_SECRET_KEY "$secret"
   set_env OBJ_KEY_ID "$key_id"
-  echo "Created access key $KEY_LABEL and wrote OBJ_* to .env."
+  echo "Created access key $KEY_LABEL and wrote OBJ_* to .env.hosted."
 fi
 
 # 3. The database. Only this machine is on the allow list until deploy.sh adds the Linode.
@@ -59,5 +59,5 @@ set_env DATABASE_URL "postgresql://$user:$password@$host:$port/defaultdb?sslmode
 
 echo
 echo "Bucket:   $bucket at $OBJ_ENDPOINT"
-echo "Database: $host:$port (DATABASE_URL written to .env)"
+echo "Database: $host:$port (DATABASE_URL written to .env.hosted)"
 echo "Next: bash deploy/deploy.sh"

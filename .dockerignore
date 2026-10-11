@@ -1,4 +1,5 @@
 .env
+.env.hosted
 .git
 data
 **/.venv

@@ -25,4 +25,4 @@ key_id=$(get_env OBJ_KEY_ID)
 [[ -z $key_id ]] || { linode-cli object-storage keys-delete "$key_id"; echo "Revoked access key $KEY_LABEL."; }
 
 for key in OBJ_ENDPOINT OBJ_BUCKET OBJ_ACCESS_KEY OBJ_SECRET_KEY OBJ_KEY_ID DATABASE_URL; do set_env "$key" ""; done
-echo "Cleared the Akamai settings in .env."
+echo "Cleared the Akamai settings in .env.hosted."

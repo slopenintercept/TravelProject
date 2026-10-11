@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Deploy Tripwright on an Akamai compute instance (Linode).
 # Creates a Cloud Firewall and a Linode, waits for cloud-init to install Docker, lets the
-# Linode into the database, copies the code and .env over SSH, starts docker compose, and
+# Linode into the database, copies the code and the settings over SSH, starts docker compose, and
 # waits until http://<ip>:8000/api/health answers. Billable. Safe to run again.
 #   bash deploy/deploy.sh
 #   SSH_KEY=~/.ssh/other_key bash deploy/deploy.sh
@@ -54,11 +54,15 @@ if [[ -n $id && -n $(get_env DATABASE_URL) ]]; then
   fi
 fi
 
-# 4. Copy the code and .env, then build and start the container. The build log stays on the Linode.
+# 4. Copy the code and the settings, then build and start the container. backend/ and frontend/ are cleared
+#    first, so a file deleted here does not stay behind on the server. The server's .env is the local one
+#    with the hosted services' settings from .env.hosted. The build log stays on the Linode.
 tar --exclude node_modules --exclude .venv --exclude dist --exclude __pycache__ -czf - \
-  backend frontend Dockerfile compose.yaml .dockerignore .env \
-  | ssh "${ssh_opts[@]}" "root@$ip" "tar -xzf - -C $APP_DIR"
-echo "Code and .env copied. Building and starting the container (the first build takes a few minutes)."
+  backend frontend Dockerfile compose.yaml .dockerignore \
+  | ssh "${ssh_opts[@]}" "root@$ip" "rm -rf ${APP_DIR:?}/backend ${APP_DIR:?}/frontend && tar -xzf - -C $APP_DIR"
+{ grep -vE '^(OBJ_[A-Z_]+|DATABASE_URL)=' .env; cat "$HOSTED_ENV"; } \
+  | ssh "${ssh_opts[@]}" "root@$ip" "umask 077 && cat > $APP_DIR/.env"
+echo "Code and settings copied. Building and starting the container (the first build takes a few minutes)."
 ssh "${ssh_opts[@]}" "root@$ip" "cd $APP_DIR && { docker compose up -d --build > deploy.log 2>&1 || { tail -n 30 deploy.log; exit 1; }; }"
 
 # 5. Wait for the app to answer.

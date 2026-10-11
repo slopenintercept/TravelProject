@@ -29,12 +29,17 @@ if ! command -v linode-cli >/dev/null; then
   exit 1
 fi
 
-# get_env KEY: print KEY's value from .env. Prints nothing if KEY is missing.
+# The hosted services' settings (OBJ_*, DATABASE_URL) are kept in .env.hosted, not .env, so a server or
+# script run on this machine stays on its local SQLite file and data/evidence. deploy.sh sends both files.
+HOSTED_ENV=.env.hosted
+[[ -f $HOSTED_ENV ]] || install -m 600 /dev/null "$HOSTED_ENV"
+
+# get_env KEY: print KEY's value from .env.hosted. Prints nothing if KEY is missing.
 get_env() {
-  { grep "^$1=" .env || true; } | tail -n 1 | tr -d '\r' | cut -d= -f2- | sed -e "s/^[\"']//" -e "s/[\"']\$//"
+  { grep "^$1=" "$HOSTED_ENV" || true; } | tail -n 1 | tr -d '\r' | cut -d= -f2- | sed -e "s/^[\"']//" -e "s/[\"']\$//"
 }
 
-# set_env KEY VALUE: replace the KEY= line in .env, or add one at the end.
+# set_env KEY VALUE: replace the KEY= line in .env.hosted, or add one at the end.
 set_env() {
   local tmp
   tmp=$(mktemp)
@@ -43,7 +48,7 @@ set_env() {
     index($0, key "=") == 1 { if (!done) print line; done = 1; next }
     { print }
     END { if (!done) print line }
-  ' .env > "$tmp" && cat "$tmp" > .env
+  ' "$HOSTED_ENV" > "$tmp" && cat "$tmp" > "$HOSTED_ENV"
   rm -f "$tmp"
 }
 

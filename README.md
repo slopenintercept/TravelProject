@@ -173,7 +173,7 @@ backend/.venv/bin/uvicorn tripwright.api:app --app-dir backend --port 8000
 Open http://localhost:8000, click **Use the demo trip**, then **Start planning**.
 
 - `GET /api/health` shows which services are live and which are on their local fallback (SQLite, evidence on disk).
-- **Which database:** with `DATABASE_URL` set in `.env` (which `deploy/provision.sh` does), a local server reads and writes the hosted trips. To keep a local server on the SQLite file `data/tripwright.db`, start it with `DATABASE_URL=` in front of the command.
+- **Which database:** a local server uses the SQLite file `data/tripwright.db` and saves page snapshots to `data/evidence`. The hosted database and bucket are named in `.env.hosted`, which only the deploy scripts read, so nothing you run on your own machine touches hosted trips.
 - The server does not reload. Restart it after editing the backend, and run `npm run build` again after editing `frontend/src`.
 - Restarting a server stops any agent run in progress: runs live in the server process.
 
@@ -206,25 +206,25 @@ cd backend && .venv/bin/python -m tripwright.scenario
 This creates a seven-traveler Japan trip with dates set and everyone's picks saved, and prints its links, so you can join as an eighth traveler or switch to the host and start planning.
 
 - The research (flights, rooms, attractions, transport, weather) does not start until the host starts planning. Opening the trip does build the draft plan about ten seconds later, and joining or saving picks rebuilds it: with a key set, each build is one route planner call and one short note from the orchestrator.
-- It writes to whichever database `.env` names. If your server is on the SQLite file, run it as `cd backend && DATABASE_URL= .venv/bin/python -m tripwright.scenario`: the `DATABASE_URL=` has to sit right before `.venv/bin/python`, because in front of `cd` it has no effect.
+- It writes to the SQLite file `data/tripwright.db`, the one a local server reads.
 
 ### Without keys, and DEMO_MODE
 
 - **No `OPENAI_API_KEY`:** every specialist goes straight to its fallback. For the demo trip (Kansas City → Japan, 7 days) that is the result of a real live run on 2026-10-10, recorded in [fixtures/recorded.json](backend/tripwright/fixtures/recorded.json) and shown with a "saved result" flag. The exception is the ideas agent: no list of places is recorded, so unless your database already has one from an earlier live run, the picks screen starts empty and you add places yourself with **Add a place**, or save with none. Any other trip shows the agents as pending.
 - **`DEMO_MODE=true`:** tools never touch the network. They replay recorded results (same call, or the closest recorded call to the same tool). The agents still reason live if a key is set, so the demo survives a site changing or blocking us.
-- **`RECORD_FIXTURES=true`:** live tool results and accepted agent results are also written to the fixtures file. To refresh the demo: start the server with `RECORD_FIXTURES=true OBJ_BUCKET=` in front of the command, so the snapshots are written to `data/evidence` and not to Object Storage. Plan the demo trip once, then `cp -R data/evidence/* backend/tripwright/fixtures/evidence/`. The list of places is the exception: if the database has one saved for a 7-day Japan trip in the last 30 days, it is reused and not recorded.
+- **`RECORD_FIXTURES=true`:** live tool results and accepted agent results are also written to the fixtures file. To refresh the demo: start the server with `RECORD_FIXTURES=true` in front of the command. Plan the demo trip once, then `cp -R data/evidence/* backend/tripwright/fixtures/evidence/`. The list of places is the exception: if the database has one saved for a 7-day Japan trip in the last 30 days, it is reused and not recorded.
 
 ## Deploy on Akamai
 
 Needs `linode-cli` configured with a token, and an SSH key at `~/.ssh/id_ed25519`. These create billable resources.
 
 ```bash
-bash deploy/provision.sh   # Object Storage bucket + key, Managed PostgreSQL; writes OBJ_* and DATABASE_URL to .env
-bash deploy/deploy.sh      # firewall, Linode, Docker; copies the code and .env; waits for /api/health
+bash deploy/provision.sh   # Object Storage bucket + key, Managed PostgreSQL; writes OBJ_* and DATABASE_URL to .env.hosted
+bash deploy/deploy.sh      # firewall, Linode, Docker; copies the code, .env and .env.hosted; waits for /api/health
 bash deploy/teardown.sh    # deletes everything labelled tripwright-*
 ```
 
-`deploy.sh` is also how you update a server that is already running: it reuses what exists, copies the working folder (uncommitted changes included, so check `git status` first), rebuilds the container and waits for `/api/health`. Rebuilding restarts the app, which stops any trip that is being planned at that moment.
+`deploy.sh` is also how you update a server that is already running: it reuses what exists, replaces the server's `backend/` and `frontend/` with the working folder's (uncommitted changes included, so check `git status` first), rebuilds the container and waits for `/api/health`. Rebuilding restarts the app, which stops any trip that is being planned at that moment.
 
 The app answers on `http://<server-ip>:8000`. `linode-cli linodes list --label tripwright-app` prints the address.
 
