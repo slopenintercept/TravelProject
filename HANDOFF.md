@@ -81,8 +81,9 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 - Remote: `https://github.com/slopenintercept/TravelProject.git` (public).
 - Current branch: `combine-picks-and-group-trips`, pushed. It holds everything: Brandon's picks, per-person links and draft plan, merged with the user's `group-trips-live-run`.
+- `main` was fast-forwarded to this branch on 2026-10-10 at the user's request, after 107 tests and the frontend build passed on a clean copy. The user wants `main` kept up to date; fast-forward it again after new commits land here.
+- To fast-forward `main` without leaving this branch or touching the working folder: `git push origin origin/combine-picks-and-group-trips:refs/heads/main`, then `git fetch && git branch -f main origin/main`.
 - `group-trips-live-run` is pushed at `b370be3` and is fully contained in the current branch.
-- `main` is at `e26e27e` (Brandon's picks design spec). Nothing has been merged into it; the user has not asked for that.
 - `agents-faster` is a local-only branch at `0326c82`, the same change as `b370be3`.
 - GitHub push protection once blocked a push because a third-party Mapbox token sat inside scraped page text. It was redacted, not bypassed, and `tools/research.py` now strips such tokens.
 
@@ -108,7 +109,7 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 ## Work in progress, not committed
 
-`backend/tests/test_orchestrator.py` has an uncommitted new test, `test_attractions_are_planned_by_an_agent_per_city_at_once_and_reviewed_as_one_list`, which fails because the feature is not written yet: one attractions agent per city, run in parallel and reviewed as one list. It was being edited in another session when this file was updated; that session owns it. Without that test, 107 tests pass.
+Another session is changing attractions planning to one agent per city on the route, run in parallel and reviewed as one list. Its edits are uncommitted and not in `main`. When this file was last updated they touched `README.md`, `.claude/launch.json`, `backend/tests/test_orchestrator.py` (new test `test_attractions_are_planned_by_an_agent_per_city_at_once_and_reviewed_as_one_list`), `backend/tripwright/orchestrator.py`, `backend/tripwright/specialists.py`, `frontend/src/components/Review.tsx` and `frontend/src/styles.css`. That session owns them: do not commit, stash or revert them from another chat. The committed state passes 107 tests.
 
 ## Not done or not verified
 
