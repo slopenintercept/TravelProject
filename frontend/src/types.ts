@@ -5,6 +5,9 @@ export type Pace = 'relaxed' | 'balanced' | 'packed'
 export type Category = 'flights' | 'lodging' | 'attractions' | 'transport'
 export const CATEGORIES: Category[] = ['flights', 'lodging', 'attractions', 'transport']
 
+/** Once planning starts, nobody joins, leaves or re-picks places. */
+export const planningStarted = (stage: string) => ['planning', 'choosing', 'review'].includes(stage)
+
 // --- models.py -------------------------------------------------------------------
 
 export interface Source {
@@ -14,13 +17,30 @@ export interface Source {
   fetched_at: string | null
 }
 
-/** What each person fills in: where they fly from, their budget, and what they need vs want to see. */
+/** What each person fills in: where they fly from and their budget. What they want to see comes from their picks. */
 export interface TravelerIn {
   name: string
   origin: string
   budget_usd: number
-  need: string[]
-  want: string[]
+}
+
+/** One place on the trip's shared list, found by the ideas agent or added by a traveler. */
+export interface Idea {
+  id: string
+  name: string
+  city: string
+  category: string
+  why: string
+  source: Source | null
+  added_by: string | null // traveler id; null for the agents' suggestions
+  suggested_for: string | null // traveler id who asked the agents for more like their picks
+}
+
+/** A traveler's marks on the ideas list, by place name. */
+export interface Picks {
+  need: string[] // must do
+  want: string[] // interested
+  skip: string[] // not for me
 }
 
 /** The host's form: the trip itself plus the host's own preferences. */
@@ -135,9 +155,11 @@ export interface LodgingPlan {
 }
 
 /** One person on the trip. Flights are found for each traveler individually. */
-export interface Traveler extends TravelerIn {
+export interface Traveler extends TravelerIn, Picks {
   id: string
   host: boolean
+  picked: boolean // has saved their marks on the ideas list
+  confirmed: boolean // has chosen their flight and rooms; the days are planned around them
   flights: FlightPlan | null
   lodging: LodgingPlan | null // the rooms picked for this traveler, by their own budget
 }
@@ -149,6 +171,7 @@ export interface Attraction {
   must_have: boolean // someone needs to see it
   need_by: string[] // traveler ids
   want_by: string[]
+  skip_by: string[] // marked it not for me
   why: string
   duration_minutes: number
   ticket_price_usd: number // per traveler
@@ -275,10 +298,12 @@ export interface TripState {
   id: string
   request: TripRequest
   // gathering: dates are set and the host is waiting for invited travelers' preferences.
-  stage: 'created' | 'timeframe' | 'awaiting_dates' | 'gathering' | 'planning' | 'review'
+  // choosing: the agents are researching and each traveler chooses their flight and rooms; review once anyone has.
+  stage: 'created' | 'timeframe' | 'awaiting_dates' | 'gathering' | 'planning' | 'choosing' | 'review'
   travelers: Traveler[] // the host first
   profile: TravelerProfile | null
   route: RoutePlan | null
+  ideas: Idea[] // the shared list everyone marks
   windows: DateWindow[]
   dates: TripDates | null
   lodging: LodgingPlan | null // the options researched once for the group
@@ -324,9 +349,10 @@ export interface Card {
   flag: Flag | null
   alternatives: Alternative[]
   switch_label: string | null
-  // Attractions only: names of who needs it, who wants it, and who is going.
+  // Attractions only: names of who needs it, who wants it, who skips it, and who is going.
   need_by: string[]
   want_by: string[]
+  skip_by: string[]
   going: string[]
 }
 
@@ -355,6 +381,7 @@ export interface TripView {
   booking: BookingStep[]
   busy: boolean
   message: string
+  you: string | null // set when joining: the new traveler's id
 }
 
 export type DecisionAction = 'approve' | 'remove' | 'restore' | 'swap' | 'switch'

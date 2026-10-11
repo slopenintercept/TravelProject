@@ -38,9 +38,10 @@ class Card(BaseModel):
     flag: Flag | None = None
     alternatives: list[Alternative] = []
     switch_label: str | None = None  # one-click switch to the alternative default
-    # Attractions only: names of who needs it, who wants it, and who is going.
+    # Attractions only: names of who needs it, who wants it, who skips it, and who is going.
     need_by: list[str] = []
     want_by: list[str] = []
+    skip_by: list[str] = []
     going: list[str] = []
 
 
@@ -110,15 +111,15 @@ def review_cards(state: TripState) -> list[Card]:
     on_plan = {i.ref_id: i.travelers for i in state.itinerary if i.kind == "attraction"}
     for a in state.attractions:
         hours = f"{a.opens:%H:%M} to {a.closes:%H:%M}" if a.opens and a.closes else "open all day"
-        going = on_plan.get(a.id, [])
+        going = on_plan.get(a.id) or [t for t in everyone if t not in a.skip_by]
         cards.append(Card(
             id=f"attraction:{a.id}", category="attractions", title=a.name,
             detail=f"{a.city} · {hours} · about {a.duration_minutes // 60}h {a.duration_minutes % 60:02d}m"
                    f"{' · ' + a.availability_note if a.availability_note else ''}",
-            price_usd=a.ticket_price_usd * len(going or everyone), reasoning=a.why, sources=[a.source],
+            price_usd=a.ticket_price_usd * len(going), reasoning=a.why, sources=[a.source],
             booking_url=a.booking_url, status=status(f"attraction:{a.id}", a.included), must_have=a.must_have,
             flag=state.flags.get("attractions"), need_by=state.names(a.need_by), want_by=state.names(a.want_by),
-            going=state.names(going),
+            skip_by=state.names(a.skip_by), going=state.names(on_plan.get(a.id, [])),
         ))
 
     if state.transport:

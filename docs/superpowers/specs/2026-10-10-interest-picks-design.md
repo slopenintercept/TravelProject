@@ -64,7 +64,7 @@ Approaches not taken: researching every option in full up front (slow first scre
   - every `source_url` was returned by a tool in this run;
   - between 12 and 25 places;
   - no duplicate names (case- and space-insensitive);
-  - every city is in the destination (same check the attractions review uses for cities).
+  - every place has a city. (It can't be checked against the route the way attractions are: picking a place in a city not yet on the route is how that city gets onto it.)
 - Fallback and the review loop are the existing `SpecialistNode` behavior. The result is stored in `state.ideas`.
 - `timeframe_graph` adds `ideas` with an edge from `route`, next to `profile` and `timeframe`.
 

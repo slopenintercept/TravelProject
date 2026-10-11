@@ -1,11 +1,11 @@
 # Tripwright
 
-An agentic trip planner built for Hack Midwest. Describe a trip (where from, where to, how long, budget, must-sees) and a team of AI agents plans it end to end: dates, flights, lodging, attractions, local transport and a day-by-day itinerary that fits the budget and has no scheduling conflicts. The agents gather live data by browsing provider sites, every price is stored with its source URL and a saved snapshot of the page it came from, and you approve, swap or remove every decision before anything is booked.
+An agentic trip planner built for Hack Midwest. Describe a trip (where from, where to, how long, budget), mark what sounds good on a list of places the agents research for you, invite the others coming along to do the same, and a team of AI agents plans it end to end: dates, flights, lodging, attractions, local transport and a day-by-day itinerary that fits the budget and has no scheduling conflicts. The agents gather live data by browsing provider sites, every price is stored with its source URL and a saved snapshot of the page it came from, and you approve, swap or remove every decision before anything is booked.
 
 - **Strands Agents SDK** runs every agent: a Strands `Graph` dispatches specialists in parallel, each a Strands `Agent` with `@tool` functions, Pydantic structured output, hooks and streaming.
 - **Akamai Cloud** hosts it: the hackathon's hosted inference endpoint is the model provider, a Linode runs the API and the Chromium workers, Managed PostgreSQL holds trip state, and Object Storage holds the evidence snapshots.
 
-Demo scenario: 7 days in Japan from Kansas City, $2,500 total, must include Tokyo Disneyland and Kyoto. See [DEMO.md](DEMO.md) for the 3-minute script.
+Demo scenario: 7 days in Japan from Kansas City, $2,500 total, with Tokyo Disneyland and Kyoto's Fushimi Inari marked must do. See [DEMO.md](DEMO.md) for the 3-minute script.
 
 ## Architecture
 
@@ -15,7 +15,7 @@ flowchart LR
     API["FastAPI<br/>trip endpoints + SSE"]
     subgraph Strands["Strands Graph (orchestrator)"]
         direction TB
-        S1["Stage 1: form submitted<br/>route, then profile ∥ timeframe"]
+        S1["Stage 1: form submitted<br/>route, then profile ∥ timeframe ∥ ideas"]
         S2["Stage 2: dates chosen<br/>flight ∥ lodging ∥ attractions ∥ transport ∥ weather"]
         S3["Stage 3: budget → scheduler → validate_itinerary"]
         S1 --> S2 --> S3
@@ -39,9 +39,11 @@ Each stage is one run of a Strands `Graph` ([orchestrator.py](backend/tripwright
 
 ```
 Stage 1  form submitted      route ──┬── profile
-                                     └── timeframe (suggests 2-3 date windows)
+                                     ├── timeframe (suggests 2-3 date windows)
+                                     └── ideas (15-25 places everyone marks must do / interested / not for me)
 
-Stage 2  dates chosen        flight ─────┐
+Stage 2  everyone's in       route (re-planned from everyone's picks), then
+                             flight ─────┐
                              lodging ────┤
                              attractions ┼──► budget ──► scheduler ──► validate
                              transport ──┤
@@ -109,7 +111,7 @@ cd backend
 python3 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 .venv/bin/playwright install chromium
-.venv/bin/pytest                # 32 tests: validator, scheduler, budget, review loop, booking links
+.venv/bin/pytest                # 63 tests: validator, scheduler, budget, review loop, booking links, picks, API roles
 
 cd ../frontend
 npm install

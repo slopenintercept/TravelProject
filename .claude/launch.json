@@ -6,6 +6,12 @@
       "runtimeExecutable": "/Users/deep/Documents/Travel Project/backend/.venv/bin/python",
       "runtimeArgs": ["-m", "uvicorn", "tripwright.api:app", "--app-dir", "/Users/deep/Documents/Travel Project/backend", "--port", "8000"],
       "port": 8000
+    },
+    {
+      "name": "tripwright-windows",
+      "runtimeExecutable": "C:\\Users\\brand\\OneDrive\\Documents\\GitHub\\TravelProject\\backend\\.venv\\Scripts\\python.exe",
+      "runtimeArgs": ["-m", "uvicorn", "tripwright.api:app", "--app-dir", "C:\\Users\\brand\\OneDrive\\Documents\\GitHub\\TravelProject\\backend", "--port", "8000"],
+      "port": 8000
     }
   ]
 }

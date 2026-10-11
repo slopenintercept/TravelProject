@@ -3,21 +3,22 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 from datetime import date
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from . import config, evidence, orchestrator, store
 from .booking import BookingStep, booking_steps
 from .cards import Card, review_cards
 from .events import bus
-from .models import TravelerIn, TripRequest, TripState
+from .models import Traveler, TravelerIn, TripRequest, TripState
 
 app = FastAPI(title="Tripwright")
 FRONTEND = config.ROOT / "frontend" / "dist"
@@ -27,6 +28,9 @@ _live: dict[str, TripState] = {}  # trips being worked on; the database copy lag
 _locks: dict[str, asyncio.Lock] = {}
 _tasks: set[asyncio.Task] = set()
 
+You = Annotated[str | None, Header(alias="X-Traveler")]  # the traveler id from the person's own trip link
+STARTED = ("planning", "choosing", "review")  # once planning starts, nobody joins, leaves or re-picks places
+
 
 class TripView(BaseModel):
     state: TripState
@@ -34,6 +38,7 @@ class TripView(BaseModel):
     booking: list[BookingStep]  # the finish screen: what to book, in order, with links
     busy: bool
     message: str = ""
+    you: str | None = None  # set when joining: the new traveler's id
 
 
 class DatesIn(BaseModel):
@@ -44,6 +49,26 @@ class DecisionIn(BaseModel):
     action: Literal["approve", "remove", "restore", "swap", "switch"]
     card: str
     option_id: str | None = None
+
+
+class PicksIn(BaseModel):
+    """Place names from the ideas list: must do, interested, not for me."""
+
+    need: list[str] = []
+    want: list[str] = []
+    skip: list[str] = []
+
+
+class IdeaIn(BaseModel):
+    name: str = Field(min_length=1)
+    city: str = ""
+
+
+class ChoicesIn(BaseModel):
+    """A traveler's flight (None when no flight was found) and one room per stay, in stay order."""
+
+    flight_id: str | None = None
+    stay_ids: list[str] = []
 
 
 class TravelerRef(BaseModel):
@@ -65,8 +90,33 @@ def _trip(trip_id: str) -> TripState:
         state = store.load_trip(trip_id)
         if state is None:
             raise HTTPException(404, "Trip not found")
+        orchestrator.recover(state)  # nothing is running for it in this process
         _live[trip_id] = state
+        if state.stage == "choosing" and any(t.confirmed for t in state.travelers):
+            _background(state, orchestrator.schedule_choices(state))  # research was cut off after someone chose
     return _live[trip_id]
+
+
+def _acting(state: TripState, traveler_id: str | None) -> Traveler:
+    """Who is making this request (the `X-Traveler` header). Each person on the trip has their own link;
+    there are no accounts, so this keeps people to their own choices rather than securing them."""
+    acting = next((t for t in state.travelers if t.id == traveler_id), None)
+    if acting is None:
+        raise HTTPException(403, "Choose who you are on this trip first")
+    return acting
+
+
+def _host(state: TripState, traveler_id: str | None) -> Traveler:
+    acting = _acting(state, traveler_id)
+    if not acting.host:
+        raise HTTPException(403, "Only the host can do that")
+    return acting
+
+
+def _owner(card: str) -> str | None:
+    """Whose card this is: flights ("flight:<traveler>") and stays ("stay:<traveler>:<n>") belong to one traveler."""
+    kind, _, ref = card.partition(":")
+    return ref.partition(":")[0] if kind in ("flight", "stay") else None
 
 
 def _lock(trip_id: str) -> asyncio.Lock:
@@ -78,11 +128,12 @@ def _view(state: TripState, message: str = "") -> TripView:
                     busy=_lock(state.id).locked(), message=message)
 
 
-def _background(state: TripState, work) -> None:
-    """Run a stage without blocking the request; one stage at a time per trip."""
+def _background(state: TripState, work, exclusive: bool = True) -> None:
+    """Run a stage without blocking the request. Exclusive stages run one at a time per trip and show the
+    trip as busy; finding more places for one traveler doesn't, so everyone can keep marking meanwhile."""
 
     async def runner() -> None:
-        async with _lock(state.id):
+        async with _lock(state.id) if exclusive else contextlib.nullcontext():
             try:
                 await work
             except Exception as e:
@@ -114,7 +165,7 @@ async def create_trip(request: TripRequest) -> TripView:
 
 
 @app.get("/api/trips/{trip_id}")
-def get_trip(trip_id: str) -> TripView:
+async def get_trip(trip_id: str) -> TripView:  # async: loading a trip may resume its scheduling
     return _view(_trip(trip_id))
 
 
@@ -131,9 +182,10 @@ async def events(trip_id: str) -> StreamingResponse:
 
 
 @app.post("/api/trips/{trip_id}/dates")
-async def choose_dates(trip_id: str, body: DatesIn) -> TripView:
+async def choose_dates(trip_id: str, body: DatesIn, you: You = None) -> TripView:
     """The host sets the dates. Planning waits until everyone invited has added their preferences."""
     state = _trip(trip_id)
+    _host(state, you)
     if body.start <= date.today():
         raise HTTPException(400, "Pick a start date in the future")
     async with _lock(trip_id):
@@ -145,16 +197,21 @@ async def choose_dates(trip_id: str, body: DatesIn) -> TripView:
 async def join(trip_id: str, body: TravelerIn) -> TripView:
     """An invited traveler adds themselves and their preferences."""
     state = _trip(trip_id)
-    if state.stage in ("planning", "review"):
+    if state.stage in STARTED:
         raise HTTPException(400, "Planning has already started for this trip")
-    orchestrator.join(state, body)
-    return _view(state)
+    joined = orchestrator.join(state, body)
+    view = _view(state)
+    view.you = joined.id
+    return view
 
 
 @app.delete("/api/trips/{trip_id}/travelers/{traveler_id}")
-async def leave(trip_id: str, traveler_id: str) -> TripView:
+async def leave(trip_id: str, traveler_id: str, you: You = None) -> TripView:
+    """The host removes someone, or a traveler leaves."""
     state = _trip(trip_id)
-    if state.stage in ("planning", "review"):
+    if _acting(state, you).id != traveler_id:
+        _host(state, you)
+    if state.stage in STARTED:
         raise HTTPException(400, "Planning has already started for this trip")
     try:
         orchestrator.leave(state, traveler_id)
@@ -163,10 +220,64 @@ async def leave(trip_id: str, traveler_id: str) -> TripView:
     return _view(state)
 
 
+def _picking(state: TripState) -> None:
+    """Marks and added places are open until planning starts, once the ideas agent has finished."""
+    if state.stage in STARTED:
+        raise HTTPException(400, "Planning has already started for this trip")
+    if not orchestrator.ideas_ready(state):
+        raise HTTPException(400, "Agents are still finding places")
+
+
+@app.put("/api/trips/{trip_id}/travelers/{traveler_id}/picks")
+async def save_picks(trip_id: str, traveler_id: str, body: PicksIn, you: You = None) -> TripView:
+    """A traveler marks places on the ideas list: must do, interested, or not for me."""
+    state = _trip(trip_id)
+    if _acting(state, you).id != traveler_id:
+        raise HTTPException(403, "Each traveler picks for themselves")
+    _picking(state)
+    try:
+        orchestrator.save_picks(state, traveler_id, body.need, body.want, body.skip)
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
+    return _view(state)
+
+
+@app.post("/api/trips/{trip_id}/ideas")
+async def add_idea(trip_id: str, body: IdeaIn, you: You = None) -> TripView:
+    """Anyone on the trip adds a place the agents did not suggest."""
+    state = _trip(trip_id)
+    acting = _acting(state, you)
+    _picking(state)
+    try:
+        orchestrator.add_idea(state, acting.id, body.name, body.city)
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
+    return _view(state)
+
+
+@app.post("/api/trips/{trip_id}/ideas/more")
+async def suggest_more(trip_id: str, body: PicksIn, you: You = None) -> TripView:
+    """Find more places like what this traveler marked so far. Their marks are kept (they stay on the
+    picks screen), and the new places are added to the shared list when the agent is done."""
+    state = _trip(trip_id)
+    acting = _acting(state, you)
+    _picking(state)
+    if orchestrator.finding_more(state, acting.id):
+        raise HTTPException(400, "Already finding more places for you")
+    try:
+        orchestrator.save_picks(state, acting.id, body.need, body.want, body.skip, picked=False)
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
+    bus(trip_id).status(state, f"more_ideas:{acting.id}", "working", "Finding more places like your picks", 1)
+    _background(state, orchestrator.suggest_more(state, acting.id), exclusive=False)
+    return _view(state)
+
+
 @app.post("/api/trips/{trip_id}/plan")
-async def plan(trip_id: str) -> TripView:
+async def plan(trip_id: str, you: You = None) -> TripView:
     """Everyone's in: find each traveler's flights and lodging, and plan attractions for the group."""
     state = _trip(trip_id)
+    _host(state, you)
     if state.dates is None:
         raise HTTPException(400, "Choose the dates first")
     state.stage = "planning"
@@ -174,9 +285,35 @@ async def plan(trip_id: str) -> TripView:
     return _view(state)
 
 
-@app.post("/api/trips/{trip_id}/decisions")
-async def decide(trip_id: str, body: DecisionIn) -> TripView:
+@app.put("/api/trips/{trip_id}/travelers/{traveler_id}/choices")
+async def confirm_choices(trip_id: str, traveler_id: str, body: ChoicesIn, you: You = None) -> TripView:
+    """A traveler confirms their flight and rooms. The days are planned around them now, or, while the agents
+    are still researching, as soon as they finish."""
     state = _trip(trip_id)
+    if _acting(state, you).id != traveler_id:
+        raise HTTPException(403, "Each traveler chooses their own flight and rooms")
+    if state.stage not in ("choosing", "review"):
+        raise HTTPException(400, "Planning hasn't started yet")
+    if not orchestrator.options_ready(state, traveler_id):
+        raise HTTPException(400, "Your options are still being found")
+    try:
+        orchestrator.confirm_choices(state, traveler_id, body.flight_id, body.stay_ids)
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
+    if not _lock(trip_id).locked():  # otherwise the research run schedules the days when it ends
+        async with _lock(trip_id):
+            await orchestrator.schedule_choices(state)
+    return _view(state)
+
+
+@app.post("/api/trips/{trip_id}/decisions")
+async def decide(trip_id: str, body: DecisionIn, you: You = None) -> TripView:
+    """Each traveler decides on their own flight and stays; anyone on the trip decides on what is shared."""
+    state = _trip(trip_id)
+    acting = _acting(state, you)
+    owner = _owner(body.card)
+    if owner is not None and owner != acting.id:
+        raise HTTPException(403, "Only that traveler can change their own flight and stays")
     if body.action == "switch":  # re-runs a specialist, so it goes to the background
         _background(state, orchestrator.decide(state, body.action, body.card, body.option_id))
         await asyncio.sleep(0)
@@ -190,16 +327,19 @@ async def decide(trip_id: str, body: DecisionIn) -> TripView:
 
 
 @app.post("/api/trips/{trip_id}/budget/apply")
-async def apply_budget(trip_id: str, body: TravelerRef) -> TripView:
+async def apply_budget(trip_id: str, body: TravelerRef, you: You = None) -> TripView:
     state = _trip(trip_id)
+    if _acting(state, you).id != body.traveler:
+        raise HTTPException(403, "Only that traveler can apply swaps to their own budget")
     async with _lock(trip_id):
         await orchestrator.apply_budget_proposal(state, body.traveler)
     return _view(state)
 
 
 @app.post("/api/trips/{trip_id}/itinerary/move")
-async def move_item(trip_id: str, body: MoveIn) -> TripView:
+async def move_item(trip_id: str, body: MoveIn, you: You = None) -> TripView:
     state = _trip(trip_id)
+    _acting(state, you)
     async with _lock(trip_id):
         try:
             message = await orchestrator.move_item(state, body.item_id, body.day)
@@ -209,8 +349,9 @@ async def move_item(trip_id: str, body: MoveIn) -> TripView:
 
 
 @app.post("/api/trips/{trip_id}/itinerary/swap")
-async def swap_item(trip_id: str, body: SwapIn) -> TripView:
+async def swap_item(trip_id: str, body: SwapIn, you: You = None) -> TripView:
     state = _trip(trip_id)
+    _acting(state, you)
     async with _lock(trip_id):
         try:
             await orchestrator.swap_item(state, body.item_id, body.attraction_id)

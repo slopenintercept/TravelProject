@@ -1,7 +1,15 @@
-import type { DecisionAction, TravelerIn, TripRequest, TripView } from './types'
+import type { DecisionAction, Picks, TravelerIn, TripRequest, TripView } from './types'
 
-async function request(path: string, init?: RequestInit): Promise<TripView> {
-  const res = await fetch(`/api/trips${path}`, init)
+/** The traveler this tab is acting as (from their own trip link); sent with every request. */
+let traveler = ''
+export function actAs(travelerId: string | null) {
+  traveler = travelerId ?? ''
+}
+
+async function request(path: string, init: RequestInit = {}): Promise<TripView> {
+  const headers = new Headers(init.headers)
+  if (traveler) headers.set('X-Traveler', traveler)
+  const res = await fetch(`/api/trips${path}`, { ...init, headers })
   if (!res.ok) throw new Error(await errorDetail(res))
   return res.json()
 }
@@ -35,7 +43,21 @@ export const api = {
   chooseDates: (id: string, start: string) => post(`/${id}/dates`, { start }),
   join: (id: string, traveler: TravelerIn) => post(`/${id}/travelers`, traveler),
   leave: (id: string, travelerId: string) => request(`/${id}/travelers/${travelerId}`, { method: 'DELETE' }),
+  savePicks: (id: string, travelerId: string, picks: Picks) =>
+    request(`/${id}/travelers/${travelerId}/picks`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(picks),
+    }),
+  addIdea: (id: string, name: string, city: string) => post(`/${id}/ideas`, { name, city }),
+  suggestMore: (id: string, picks: Picks) => post(`/${id}/ideas/more`, picks),
   plan: (id: string) => post(`/${id}/plan`),
+  confirmChoices: (id: string, travelerId: string, flight_id: string | null, stay_ids: string[]) =>
+    request(`/${id}/travelers/${travelerId}/choices`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ flight_id, stay_ids }),
+    }),
   decide: (id: string, action: DecisionAction, card: string, option_id?: string) =>
     post(`/${id}/decisions`, { action, card, option_id }),
   applyBudget: (id: string, traveler: string) => post(`/${id}/budget/apply`, { traveler }),

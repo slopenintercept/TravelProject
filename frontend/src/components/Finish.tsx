@@ -1,5 +1,5 @@
 import { money, safeHref, whoIsIn } from '../format'
-import type { BookingStep, Category, TripView } from '../types'
+import type { BookingStep, Category, Traveler, TripView } from '../types'
 import { Chips } from './Chips'
 
 /** What the group books together; each traveler's own flight and stays come first. */
@@ -16,16 +16,19 @@ const LINK_LABEL: Record<BookingStep['link'], string> = {
 
 interface Props {
   view: TripView
+  you: Traveler
   onBack: () => void
 }
 
-/** The hand-off: everything to book, in order, each with a link that already carries the trip's details. */
-export function Finish({ view, onBack }: Props) {
+/** The hand-off: everything to book, in order, each with a link that already carries the trip's details.
+ *  Each traveler sees their own flight and stays, and the bookings the group shares. */
+export function Finish({ view, you, onBack }: Props) {
   const { booking, state } = view
   const { travelers } = state
   const solo = travelers.length < 2
-  const total = booking.reduce((sum, step) => sum + step.price_usd, 0)
-  const budget = travelers.reduce((sum, t) => sum + t.budget_usd, 0)
+  const mine = booking.filter((step) => step.traveler === you.id)
+  // Shared tickets are priced for everyone going; the budget has each traveler's own share.
+  const total = state.budgets[you.id]?.spent_usd ?? booking.reduce((sum, step) => sum + step.price_usd, 0)
   let number = 0
   const list = (steps: BookingStep[]) => (
     <ol className="steps">
@@ -48,16 +51,12 @@ export function Finish({ view, onBack }: Props) {
         You book and pay there yourself. Tripwright never does.
       </p>
 
-      {travelers.map((t) => {
-        const steps = booking.filter((step) => step.traveler === t.id)
-        if (steps.length === 0) return null
-        return (
-          <section key={t.id} className="group">
-            <h2>{solo ? 'Your bookings' : `${t.name}'s bookings`}</h2>
-            {list(steps)}
-          </section>
-        )
-      })}
+      {mine.length > 0 && (
+        <section className="group">
+          <h2>Your bookings</h2>
+          {list(mine)}
+        </section>
+      )}
       {SHARED.map(([category, heading]) => {
         const steps = booking.filter((step) => step.category === category)
         if (steps.length === 0) return null
@@ -71,8 +70,8 @@ export function Finish({ view, onBack }: Props) {
 
       <footer className="finish-total">
         <div>
-          <strong>{money(total)}</strong> to book
-          <span className="muted"> of {solo ? 'your' : "the group's combined"} {money(budget)} budget</span>
+          <strong>{money(total)}</strong> {solo ? 'to book' : 'is your share'}
+          <span className="muted"> of your {money(you.budget_usd)} budget</span>
         </div>
         <button onClick={onBack}>Back to review</button>
       </footer>

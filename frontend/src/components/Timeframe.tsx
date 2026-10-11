@@ -4,6 +4,8 @@ import type { DateWindow, TripState } from '../types'
 
 interface Props {
   state: TripState
+  /** Only the host picks the dates; everyone else sees the options. */
+  canChoose: boolean
   busy: boolean
   onChoose: (start: string) => void
 }
@@ -17,10 +19,11 @@ function weather(w: DateWindow): string {
   return parts.join(' · ')
 }
 
-export function Timeframe({ state, busy, onChoose }: Props) {
+export function Timeframe({ state, canChoose, busy, onChoose }: Props) {
   const [custom, setCustom] = useState(state.request.start_date ?? '')
   const { windows, request } = state
   const ready = state.stage === 'awaiting_dates'
+  const host = state.travelers.find((t) => t.host)?.name ?? 'The host'
 
   return (
     <section className="timeframe">
@@ -28,7 +31,9 @@ export function Timeframe({ state, busy, onChoose }: Props) {
       <p className="lede">
         {!ready
           ? `Agents are researching weather, crowds and fares for ${request.days} days in ${request.destination}.`
-          : windows.length > 0
+          : !canChoose
+            ? `${host} is choosing the dates from these options.`
+            : windows.length > 0
             ? 'The agents compared weather, crowds and fares. Choose a window, or pick your own start date.'
             : 'The agents had no data to suggest dates for this trip. Pick your own start date to keep going.'}
       </p>
@@ -56,15 +61,17 @@ export function Timeframe({ state, busy, onChoose }: Props) {
                 )}
               </dl>
               {w.reasoning && <p className="reasoning">{w.reasoning}</p>}
-              <button className="primary" disabled={!ready || busy} onClick={() => onChoose(w.start)}>
-                Choose these dates
-              </button>
+              {canChoose && (
+                <button className="primary" disabled={!ready || busy} onClick={() => onChoose(w.start)}>
+                  Choose these dates
+                </button>
+              )}
             </article>
           ))}
         </div>
       )}
 
-      {ready && (
+      {ready && canChoose && (
         <form
           className="custom-date"
           onSubmit={(e) => {

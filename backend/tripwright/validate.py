@@ -96,6 +96,12 @@ def validate_itinerary(state: TripState) -> list[Violation]:
             report("OPENING_HOURS", f"{day:%a %b %d}: {a.name} is scheduled {item.start:%H:%M}-{item.end:%H:%M}, "
                                     f"outside {hours}.", (item.id,))
 
+    # Nobody is sent to a place they marked not for me.
+    for item in visits:
+        a = attractions.get(item.ref_id)
+        for name in state.names([t for t in item.travelers if a and t in a.skip_by]):
+            report("SKIPPED_BUT_GOING", f"{name} marked {a.name} not for me but is going.")
+
     # Everything someone needs to see is on the plan, and they are the ones going.
     if state.itinerary:
         going = {i.ref_id: i.travelers for i in visits}

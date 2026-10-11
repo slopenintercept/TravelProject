@@ -1,17 +1,15 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { api } from '../api'
-import { commaList, tomorrow } from '../format'
+import { tomorrow } from '../format'
 import type { Pace } from '../types'
 
 const PACES: Pace[] = ['relaxed', 'balanced', 'packed']
 
 const EMPTY = {
-  name: '', origin: '', destination: '', days: '', start_date: '', budget_usd: '', need: '', want: '',
-  pace: 'balanced' as Pace,
+  name: '', origin: '', destination: '', days: '', start_date: '', budget_usd: '', pace: 'balanced' as Pace,
 }
 const DEMO: typeof EMPTY = {
   ...EMPTY, name: 'Alex', origin: 'Kansas City', destination: 'Japan', days: '7', budget_usd: '2500',
-  need: 'Tokyo Disneyland, Kyoto', want: 'teamLab Planets',
 }
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
@@ -24,7 +22,7 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
   )
 }
 
-export function TripForm({ onCreated }: { onCreated: (tripId: string) => void }) {
+export function TripForm({ onCreated }: { onCreated: (tripId: string, hostId: string) => void }) {
   const [form, setForm] = useState(EMPTY)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
@@ -42,11 +40,9 @@ export function TripForm({ onCreated }: { onCreated: (tripId: string) => void })
         days: Number(form.days),
         start_date: form.start_date || null,
         budget_usd: Number(form.budget_usd),
-        need: commaList(form.need),
-        want: commaList(form.want),
         pace: form.pace,
       })
-      onCreated(view.state.id)
+      onCreated(view.state.id, view.state.travelers[0].id)
     } catch (err) {
       setError((err as Error).message)
       setSending(false)
@@ -58,7 +54,10 @@ export function TripForm({ onCreated }: { onCreated: (tripId: string) => void })
       <div className="form-head">
         <div>
           <h1>Plan a trip</h1>
-          <p className="lede">A team of agents researches it in parallel. You review every choice and do the booking yourself.</p>
+          <p className="lede">
+            A team of agents researches it in parallel. Next you'll pick what sounds good from the places they find,
+            then review every choice and do the booking yourself.
+          </p>
         </div>
         <button type="button" onClick={() => setForm(DEMO)}>Use the demo trip</button>
       </div>
@@ -81,12 +80,6 @@ export function TripForm({ onCreated }: { onCreated: (tripId: string) => void })
         </Field>
         <Field label="What's your total budget?" hint="US dollars, for the whole trip">
           <input required type="number" min={1} step="any" value={form.budget_usd} onChange={(e) => set({ budget_usd: e.target.value })} placeholder="2500" />
-        </Field>
-        <Field label="What do you need to see?" hint="Optional. Separate them with commas.">
-          <input value={form.need} onChange={(e) => set({ need: e.target.value })} placeholder="Tokyo Disneyland, Kyoto" />
-        </Field>
-        <Field label="What would you like to see?" hint="Optional. Separate them with commas.">
-          <input value={form.want} onChange={(e) => set({ want: e.target.value })} placeholder="teamLab Planets" />
         </Field>
         <fieldset className="field">
           <legend>How packed should the itinerary be?</legend>

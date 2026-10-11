@@ -1,12 +1,14 @@
-import { Fragment, useState } from 'react'
+import { useState } from 'react'
 import { money, safeHref, whoIsIn } from '../format'
-import { CATEGORIES, type Card, type Category, type DecisionAction, type Flag, type TripView, type Violation } from '../types'
+import {
+  CATEGORIES, type Card, type Category, type DecisionAction, type Flag, type Traveler, type TripView, type Violation,
+} from '../types'
 import { Chips } from './Chips'
 
 type Decide = (action: DecisionAction, card: string, optionId?: string) => void
 
 /** `state.flags` is keyed by agent name, not by category. Flights have one agent per traveler
- *  ("flight:<traveler>"), so those flags are shown under each traveler. */
+ *  ("flight:<traveler>"), so each traveler sees their own flight flag. */
 const AGENT: Record<Category, string> = {
   flights: 'flight', lodging: 'lodging', attractions: 'attractions', transport: 'transport',
 }
@@ -77,6 +79,7 @@ function ItemCard({ card, groupSize, busy, onDecision }: { card: Card; groupSize
         <div className="who">
           <Chips label="Needs it" items={card.need_by} />
           <Chips label="Wants it" items={card.want_by} />
+          <Chips label="Skipping" items={card.skip_by} />
           <Chips label="Going" items={whoIsIn(card.going, groupSize)} />
         </div>
       )}
@@ -132,51 +135,49 @@ function ItemCard({ card, groupSize, busy, onDecision }: { card: Card; groupSize
 
 interface Props {
   view: TripView
+  /** Who is looking: they decide on their own flight, stays and budget, and with everyone on what is shared. */
+  you: Traveler
   busy: boolean
   onDecision: Decide
   onApplyBudget: (travelerId: string) => void
 }
 
-export function Review({ view, busy, onDecision, onApplyBudget }: Props) {
+export function Review({ view, you, busy, onDecision, onApplyBudget }: Props) {
   const { state, cards } = view
   const { travelers } = state
-  const solo = travelers.length < 2
+  const proposal = state.budget_proposals[you.id]
   const item = (card: Card) => (
     <ItemCard key={card.id} card={card} groupSize={travelers.length} busy={busy} onDecision={onDecision} />
   )
 
   return (
     <div className="review">
-      {travelers.map((t) => {
-        const proposal = state.budget_proposals[t.id]
-        if (!proposal) return null
-        const over = solo ? 'Over budget' : `${t.name} is over budget`
-        return (
-          <div key={t.id} className="banner warn">
-            <div>
-              <strong>
-                {proposal.swaps.length === 0
-                  ? `${over}, and no swap would bring it down.`
-                  : `${over}. These swaps bring ${solo ? 'the trip' : `${t.name}'s total`} to ${money(proposal.new_total_usd)}${proposal.fits ? `, within ${solo ? 'your' : 'their'} budget.` : ', which is still over.'}`}
-              </strong>
-              <ul>
-                {proposal.swaps.map((swap, i) => (
-                  <li key={i}>{swap.title} <span className="saves">saves {money(swap.saves_usd)}</span></li>
-                ))}
-              </ul>
-            </div>
-            {proposal.swaps.length > 0 && (
-              <button className="primary" disabled={busy} onClick={() => onApplyBudget(t.id)}>Apply swaps</button>
-            )}
+      {proposal && (
+        <div className="banner warn">
+          <div>
+            <strong>
+              {proposal.swaps.length === 0
+                ? "You're over budget, and no swap would bring it down."
+                : `You're over budget. These swaps bring your total to ${money(proposal.new_total_usd)}${proposal.fits ? ', within your budget.' : ', which is still over.'}`}
+            </strong>
+            <ul>
+              {proposal.swaps.map((swap, i) => (
+                <li key={i}>{swap.title} <span className="saves">saves {money(swap.saves_usd)}</span></li>
+              ))}
+            </ul>
           </div>
-        )
-      })}
+          {proposal.swaps.length > 0 && (
+            <button className="primary" disabled={busy} onClick={() => onApplyBudget(you.id)}>Apply swaps</button>
+          )}
+        </div>
+      )}
 
       {CATEGORIES.map((category) => {
         const group = cards.filter((card) => card.category === category)
-        const items = group.filter((card) => card.kind !== 'default')
+        // Flights and stays are each traveler's own: everyone sees only theirs.
+        const items = group.filter((card) => card.kind !== 'default' && (!card.traveler || card.traveler === you.id))
         // The reason is shown once per group; each affected card carries a short pill.
-        const flag = state.flags[AGENT[category]]
+        const flag = category === 'flights' ? state.flags[`flight:${you.id}`] : state.flags[AGENT[category]]
         return (
           <section key={category} className={`group cat-${category}`}>
             <h2><i className="dot" />{category}</h2>
@@ -186,20 +187,7 @@ export function Review({ view, busy, onDecision, onApplyBudget }: Props) {
               {group.filter((card) => card.kind === 'default').map((card) => (
                 <DefaultCard key={card.id} card={card} busy={busy} onDecision={onDecision} />
               ))}
-              {category === 'flights' || category === 'lodging'
-                ? travelers.map((t) => {
-                    const theirs = items.filter((card) => card.traveler === t.id)
-                    const theirFlag = category === 'flights' ? state.flags[`flight:${t.id}`] : undefined
-                    if (theirs.length === 0 && !theirFlag) return null
-                    return (
-                      <Fragment key={t.id}>
-                        {!solo && <h3>{t.name}</h3>}
-                        {theirFlag && <FlagBadge flag={theirFlag} />}
-                        {theirs.map(item)}
-                      </Fragment>
-                    )
-                  })
-                : items.map(item)}
+              {items.map(item)}
             </div>
           </section>
         )

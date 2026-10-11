@@ -30,8 +30,6 @@ export function daysBetween(first: string, last: string): string[] {
   return days
 }
 
-/** "Kyoto, Nara" -> ["Kyoto", "Nara"] */
-export const commaList = (text: string) => text.split(',').map((name) => name.trim()).filter(Boolean)
 
 /** Who something is for, by name: the whole group reads as "Everyone". */
 export const whoIsIn = (names: string[], groupSize: number) => (names.length === groupSize ? ['Everyone'] : names)

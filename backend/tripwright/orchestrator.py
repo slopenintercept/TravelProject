@@ -2,8 +2,8 @@
 
 Stages (each one is a Graph run; nodes with no edge between them run in parallel):
 
-    form submitted   route -> [profile | timeframe]
-    everyone's in    route, then
+    form submitted   route -> [profile | timeframe | ideas]   (ideas: the places everyone marks)
+    everyone's in    route (from everyone's picks), then
                      [a flight agent per traveler | lodging | attractions | transport | weather]
                          -> scheduler -> budget -> validate
     any user change  [only the affected specialists] -> scheduler -> budget -> validate
@@ -35,9 +35,11 @@ from . import config, recorded, store
 from .budget import apply_swaps
 from .events import Bus, bus
 from .llm import Activity, RateLimit, make_model
-from .models import Flag, RoutePlan, RouteSegment, Traveler, TravelerIn, TripDates, TripRequest, TripState, new_id
+from .models import (
+    Flag, Idea, RoutePlan, RouteSegment, Traveler, TravelerIn, TripDates, TripRequest, TripState, new_id,
+)
 from .scheduler import schedule
-from .specialists import PREAMBLE, SPECS, Rejected, Spec, brief, fetch_weather
+from .specialists import PREAMBLE, SPECS, Rejected, Spec, place_key, brief, fetch_weather, same_place
 from .toolbox import RunContext, Toolbox
 from .tools import flights
 from .validate import rebudget, validate_itinerary
@@ -101,7 +103,11 @@ class SpecialistNode(MultiAgentBase):
         return MultiAgentResult(status=Status.COMPLETED)
 
     def _store(self, state: TripState, who: Traveler | None, value) -> None:
-        setattr(who or state, self.spec.field, value)
+        if self.spec.append:  # more places for the shared list, never replacing it
+            current = getattr(state, self.spec.field)
+            current += [v for v in value if not any(same_place(v.name, c.name) for c in current)]
+        else:
+            setattr(who or state, self.spec.field, value)
         if self.spec.after:
             self.spec.after(state)
 
@@ -117,7 +123,7 @@ class SpecialistNode(MultiAgentBase):
     def _fall_back(self, state: TripState, events: Bus, who: Traveler | None, reason: str) -> None:
         """Use the last accepted result for this trip (database, then demo fixtures), flagged for the user."""
         key = _result_key(self.spec, state, who)
-        saved = store.cache_get(key, SAVED_RESULT_TTL_S) or recorded.saved(key)
+        saved = (store.cache_get(key, SAVED_RESULT_TTL_S) or recorded.saved(key)) if self.spec.saved_fallback else None
         try:
             if saved is None:
                 raise ValueError("there is no saved result")
@@ -269,25 +275,27 @@ def _all_done(names: list[str]):
 
 def timeframe_graph() -> Graph:
     builder = GraphBuilder()
-    for name in ("route", "profile", "timeframe"):
+    for name in ("route", "profile", "timeframe", "ideas"):
         builder.add_node(_node(name), name)
-    builder.add_edge("route", "profile")
-    builder.add_edge("route", "timeframe")
+    for name in ("profile", "timeframe", "ideas"):
+        builder.add_edge("route", name)
     builder.set_execution_timeout(config.AGENT_TIMEOUT_S * 2 + 30)
     return builder.build()
 
 
-def planning_graph(specialists: list[str]) -> Graph:
-    """The given specialists in parallel, then scheduler -> budget -> validate."""
+def planning_graph(specialists: list[str], schedule: bool = True) -> Graph:
+    """The given specialists in parallel, then scheduler -> budget -> validate. `schedule=False` is the
+    research run, before anyone has chosen their flight and rooms."""
     builder = GraphBuilder()
     for name in specialists:
         builder.add_node(_node(name), name)
-    for name, step in (("scheduler", scheduler_step), ("budget", budget_step), ("validate", validate_step)):
-        builder.add_node(StepNode(name, step), name)
-    for name in specialists:
-        builder.add_edge(name, "scheduler", condition=_all_done(specialists))
-    builder.add_edge("scheduler", "budget")
-    builder.add_edge("budget", "validate")
+    if schedule:
+        for name, step in (("scheduler", scheduler_step), ("budget", budget_step), ("validate", validate_step)):
+            builder.add_node(StepNode(name, step), name)
+        for name in specialists:
+            builder.add_edge(name, "scheduler", condition=_all_done(specialists))
+        builder.add_edge("scheduler", "budget")
+        builder.add_edge("budget", "validate")
     builder.set_execution_timeout(config.AGENT_TIMEOUT_S + 60)
     return builder.build()
 
@@ -379,17 +387,123 @@ def leave(state: TripState, traveler_id: str) -> None:
     _saved(state)
 
 
+def ideas_ready(state: TripState) -> bool:
+    """The ideas agent has finished (or never ran), so the list can be marked and added to."""
+    status = state.agents.get("ideas")
+    return status is None or status.status not in ("working", "under_review", "sent_back")
+
+
+def save_picks(state: TripState, traveler_id: str, need: list[str], want: list[str], skip: list[str],
+               picked: bool = True) -> None:
+    """One traveler's marks on the ideas list, stored by the list's own spelling of each place.
+    `picked=False` keeps their marks without finishing the step (they asked for more places first)."""
+    listed = {place_key(i.name): i.name for i in state.ideas}
+    marked: dict[str, list[str]] = {"need": [], "want": [], "skip": []}
+    seen: set[str] = set()
+    for kind, names in (("need", need), ("want", want), ("skip", skip)):
+        for name in names:
+            key = place_key(name)
+            if key not in listed:
+                raise ValueError(f"{name} is not on the list")
+            if key in seen:
+                raise ValueError(f"{listed[key]} is marked more than once")
+            seen.add(key)
+            marked[kind].append(listed[key])
+    traveler = state.traveler(traveler_id)
+    traveler.need, traveler.want, traveler.skip = marked["need"], marked["want"], marked["skip"]
+    traveler.picked = traveler.picked or picked
+    _saved(state)
+
+
+def finding_more(state: TripState, traveler_id: str) -> bool:
+    status = state.agents.get(f"more_ideas:{traveler_id}")
+    return status is not None and status.status in ("working", "under_review", "sent_back")
+
+
+async def suggest_more(state: TripState, traveler_id: str) -> None:
+    """More places for one traveler, like what they marked; added to the shared list for everyone."""
+    builder = GraphBuilder()
+    name = f"more_ideas:{traveler_id}"
+    builder.add_node(_node(name), name)
+    builder.set_execution_timeout(config.AGENT_TIMEOUT_S + 30)
+    await run(state, builder.build(), "more_ideas")
+
+
+def add_idea(state: TripState, traveler_id: str, name: str, city: str) -> Idea:
+    """A place someone wants that the agents did not suggest; it is researched with everything else at planning."""
+    if any(same_place(i.name, name) for i in state.ideas):
+        raise ValueError(f"{name} is already on the list")
+    idea = Idea(id=new_id("i"), name=name.strip(), city=city.strip(), category="Added by the group", added_by=traveler_id)
+    state.ideas.append(idea)
+    _saved(state)
+    return idea
+
+
 async def plan_trip(state: TripState) -> None:
-    """Everyone's in: re-plan the route for the whole group, then run every specialist in parallel."""
+    """Everyone's in: re-plan the route from everyone's picks, then run every specialist in parallel.
+
+    Activities, transport and weather don't depend on anyone's flight or rooms, so they research at the
+    same time; the days are only scheduled once someone has chosen their flight and rooms."""
     state.stage = "planning"
     try:
-        if len(state.travelers) > 1:  # the first route only knew the host's must-sees
-            await run(state, route_graph(), "route")
-            await _set_dates(state, state.dates.start)
-        await run(state, planning_graph(research_nodes(state)), "planning")
-    finally:  # even if the stage failed, show what was found, with the gaps flagged
-        state.stage = "review"
+        await run(state, route_graph(), "route")  # the first route was planned before anyone picked places
+        await _set_dates(state, state.dates.start)
+        state.stage = "choosing"
         _saved(state)
+        await run(state, planning_graph(research_nodes(state), schedule=False), "research")
+    finally:  # even if a stage failed, show what was found, with the gaps flagged
+        if any(t.confirmed for t in state.travelers):
+            await schedule_choices(state)
+        else:
+            state.stage = "choosing"
+            _saved(state)
+
+
+def recover(state: TripState) -> None:
+    """A trip loaded after a server restart: whatever was running then is gone. Mark those agents stopped and
+    put the trip back where people can carry on (pick dates, or start planning again)."""
+    for name, status in state.agents.items():
+        if status.status in ("working", "under_review", "sent_back"):
+            status.status, status.message = "failed", "Stopped when the server restarted"
+            state.flags.setdefault(name, Flag(kind="pending", reason="Stopped when the server restarted"))
+    if state.stage == "timeframe":
+        state.stage = "awaiting_dates"
+    elif state.stage == "planning":
+        state.stage = "gathering"
+
+
+async def schedule_choices(state: TripState) -> None:
+    """Plan the days around everyone's flights and rooms (the agents' top picks for anyone who hasn't chosen)."""
+    await run(state, planning_graph([]), "schedule")
+    state.stage = "review"
+    _saved(state)
+
+
+def options_ready(state: TripState, traveler_id: str) -> bool:
+    """This traveler's flight and lodging agents have finished (accepted, or fell back), so they can choose."""
+    if state.stage == "review":
+        return True
+    working = ("idle", "working", "under_review", "sent_back")
+    return all(a in state.agents and state.agents[a].status not in working for a in (f"flight:{traveler_id}", "lodging"))
+
+
+def confirm_choices(state: TripState, traveler_id: str, flight_id: str | None, stay_ids: list[str]) -> None:
+    """A traveler's own flight and one room per stay, from their options."""
+    traveler = state.traveler(traveler_id)
+    if traveler.flights and not any(o.id == flight_id for o in traveler.flights.options):
+        raise ValueError("That flight is not one of your options")
+    stays = traveler.lodging.stays if traveler.lodging else []
+    if len(stay_ids) != len(stays):
+        raise ValueError("Choose one room for each stay")
+    for stay, room_id in zip(stays, stay_ids):
+        if not any(o.id == room_id for o in stay.options):
+            raise ValueError(f"That room is not an option for the {stay.city} stay")
+    if traveler.flights:
+        traveler.flights.selected_id = flight_id
+    for stay, room_id in zip(stays, stay_ids):
+        stay.selected_id = room_id
+    traveler.confirmed = True
+    _saved(state)
 
 
 def _learn(state: TripState, preference: str | None, forget: list[str]) -> None:

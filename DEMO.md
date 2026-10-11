@@ -1,12 +1,12 @@
 # Tripwright: 3-minute demo script
 
-Scenario: 7 days in Japan from Kansas City, $2,500 total, must include Tokyo Disneyland and Kyoto.
+Scenario: 7 days in Japan from Kansas City, $2,500 total. On the picks screen, mark Tokyo Disneyland and Fushimi Inari Taisha (Kyoto) **Must do** and teamLab Planets **Interested**.
 
 ## Before you go on stage
 
 1. `.env` has `OPENAI_API_KEY` (team key) and `TAVILY_API_KEY`. Open `/api/health` and check `inference.key` is true.
 2. Plan the demo trip once beforehand. A cold run takes about 3 minutes (most of it Google Flights page loads for the date windows); with the cache warm, the tools answer instantly and only the model calls remain.
-3. Safety net: set `DEMO_MODE=true` and restart. Tools then replay recorded results and never browse, while the agents still reason live. If inference itself is down, every specialist falls back to its recorded result and the cards say so.
+3. Safety net: set `DEMO_MODE=true` and restart. Tools then replay recorded results and never browse, while the agents still reason live. If inference itself is down, every specialist falls back to its recorded result and the cards say so. The ideas list has no recorded result until someone plans the demo trip once with `RECORD_FIXTURES=true`; without one, the picks screen is empty and you add the three places by hand with **Add a place**.
 4. Keep the app open on the new-trip form, browser at about 1360 px wide.
 
 ## Script
@@ -17,15 +17,25 @@ Scenario: 7 days in Japan from Kansas City, $2,500 total, must include Tokyo Dis
 
 Click **Use the demo trip**, then **Plan my trip**.
 
-**0:15 Timeframe (30 s)**
+**0:15 Picks (20 s)**
 
-Three date windows appear, each with typical weather, crowd level and the cheapest fare the agent actually found.
+The ideas agent's list of places appears, grouped by category.
+
+> "I never typed what I wanted to see. The ideas agent researched Japan and gave me a menu. I mark what I must do, what interests me, and what's not for me, and everyone I invite marks the same list."
+
+Mark Tokyo Disneyland and Fushimi Inari **Must do**, teamLab Planets **Interested**, then **Save my picks**.
+
+**0:35 Timeframe (20 s)**
+
+Three date windows appear, each with typical weather, crowd level and the cheapest fare the agent actually found. The timeframe agent was working while you picked.
 
 > "I didn't give dates. The timeframe agent researched crowds and seasons, then checked real fares and three years of weather history for each window. The cheapest window is hundreds of dollars below the others. Behind every number is a source URL and a snapshot of the page, saved to Akamai Object Storage."
 
-Point at the route lane's **attempt 2**: the route planner usually proposes Tokyo then Kyoto, and the orchestrator sends it back to add a last night in Tokyo for the flight home. Then click **Choose these dates** on the first window.
+Click **Choose these dates** on the first window, then **Everyone's in: plan the trip**.
 
-**0:45 Agents in parallel (45 s)**
+**0:55 Agents in parallel (35 s)**
+
+The route planner runs first, from your picks: point at its **attempt 2** if it appears (it usually proposes Tokyo then Kyoto, and the orchestrator sends it back to add a last night in Tokyo for the flight home).
 
 The agent panel shows flight, lodging, attractions, transport and weather working side by side.
 

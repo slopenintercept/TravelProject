@@ -9,6 +9,8 @@ from the model's own text for flights and lodging.
 
 from __future__ import annotations
 
+import re
+import unicodedata
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import date, time, timedelta
@@ -19,7 +21,7 @@ from pydantic import BaseModel, Field, TypeAdapter
 from .budget import allotted
 from .geo import haversine_km, same_city
 from .models import (
-    Attraction, CommonChoice, DateWindow, DayWeather, FlightPlan, LodgingPlan, LodgingStay, RoutePlan,
+    Attraction, CommonChoice, DateWindow, DayWeather, FlightPlan, Idea, LodgingPlan, LodgingStay, RoutePlan,
     RouteSegment, Source, TransportLeg, TransportPlan, Traveler, TravelerProfile, TripState, new_id,
 )
 from .scheduler import stay_plan
@@ -31,8 +33,9 @@ SUGGESTIONS = {"relaxed": 3, "balanced": 5, "packed": 8}
 
 PREAMBLE = (
     "You are the {title} on Tripwright, a team of travel-planning agents led by an orchestrator. "
-    "Gather real data with your tools. Never invent a price, time, option id or URL: use only what "
-    "your tools returned. Call only the tools you were given; you cannot delegate to other agents. "
+    "Gather real data with your tools; if you were given no tools, answer from the information in the "
+    "request. Never invent a price, time, option id or URL: use only what your tools returned. Call only "
+    "the tools you were given (there is no WebSearch or WebFetch); you cannot delegate to other agents. "
     "Keep every explanation to one or two plain sentences."
 )
 
@@ -50,8 +53,10 @@ def brief(state: TripState, who: Traveler | None = None) -> str:
     r = state.request
     lines = [f"Trip: {r.destination}, {r.days} days, {r.pace} pace, {len(state.travelers)} traveler(s)."]
     for t in state.travelers:
+        skips = f"; not interested in: {', '.join(t.skip)}" if t.skip else ""
         lines.append(f"- {t.name}: flying from {t.origin}, budget ${t.budget_usd:,.0f}; needs to see: "
-                     f"{', '.join(t.need) or 'nothing specified'}; would like to see: {', '.join(t.want) or 'nothing specified'}.")
+                     f"{', '.join(t.need) or 'nothing specified'}; would like to see: "
+                     f"{', '.join(t.want) or 'nothing specified'}{skips}.")
     if who:
         lines.append(f"You are planning for {who.name} only.")
     if state.profile:
@@ -67,16 +72,35 @@ def brief(state: TripState, who: Traveler | None = None) -> str:
     return "\n".join(lines)
 
 
-def wishes(state: TripState) -> list[tuple[str, str, list[str], list[str]]]:
-    """Everyone's attraction requests merged: (wish id, text, ids who need it, ids who want it)."""
+def place_key(name: str) -> str:
+    return " ".join(name.lower().split())
+
+
+def same_place(a: str, b: str) -> bool:
+    """Place names match ignoring case and spacing ("tokyo  disneyland" is "Tokyo Disneyland")."""
+    return place_key(a) == place_key(b)
+
+
+def like_place(a: str, b: str) -> bool:
+    """Looser than same_place: accents are ignored and one name may contain the other ("Sensō-ji Temple" is like
+    "Senso-ji"). Used to keep suggestions away from what someone marked not for me."""
+    def plain(name: str) -> str:
+        return place_key("".join(c for c in unicodedata.normalize("NFKD", name) if not unicodedata.combining(c)))
+    a, b = plain(a), plain(b)
+    short, long = sorted((a, b), key=len)
+    return a == b or (len(short) >= 4 and re.search(rf"\b{re.escape(short)}\b", long) is not None)
+
+
+def wishes(state: TripState) -> list[tuple[str, str, list[str], list[str], list[str]]]:
+    """Everyone's marks merged: (wish id, text, ids who need it, ids who want it, ids who skip it)."""
     merged: dict[str, dict] = {}
     for t in state.travelers:
-        for kind, names in (("need", t.need), ("want", t.want)):
+        for kind, names in (("need", t.need), ("want", t.want), ("skip", t.skip)):
             for name in names:
                 if name.strip():
-                    wish = merged.setdefault(name.strip().lower(), {"text": name.strip(), "need": [], "want": []})
+                    wish = merged.setdefault(place_key(name), {"text": name.strip(), "need": [], "want": [], "skip": []})
                     wish[kind].append(t.id)
-    return [(f"w{i}", w["text"], w["need"], w["want"]) for i, w in enumerate(merged.values(), 1)]
+    return [(f"w{i}", w["text"], w["need"], w["want"], w["skip"]) for i, w in enumerate(merged.values(), 1)]
 
 
 def _sources(ctx: RunContext, urls: list[str]) -> list[Source]:
@@ -129,6 +153,95 @@ async def build_route(state: TripState, ctx: RunContext, out: RouteOut) -> Route
         raise Rejected([f"the route must end in {gateway}, where the flight home leaves from: "
                         f"move one night from another stay to a final night in {gateway}"])
     return RoutePlan(segments=segments, arrival_day_offset=offset)
+
+
+# --- ideas: the shared list of places every traveler marks ----------------------
+
+IDEAS_MIN, IDEAS_MAX = 12, 25
+
+
+class IdeaOut(BaseModel):
+    name: str = Field(description="The place or experience, e.g. Fushimi Inari Taisha or a sumo tournament")
+    city: str = Field(description="The city or town it is in")
+    category: str = Field(description="A short category, e.g. Sights, Food, Nature, Culture, Nightlife, Family, Day trips")
+    why: str = Field(description="Why a visitor would go, one sentence")
+    source_url: str = Field(description="URL from web_research that describes it")
+
+
+class IdeasOut(BaseModel):
+    ideas: list[IdeaOut] = Field(description="15 to 25 distinct places and experiences")
+
+
+MORE_MIN, MORE_MAX = 5, 10
+
+
+def _check_ideas(ctx: RunContext, out: IdeasOut, low: int, high: int, problems: list[str]) -> list[Idea]:
+    """The checks every ideas result gets: count, no duplicates, a city and a real source for each place."""
+    ideas, seen = [], set()
+    if not low <= len(out.ideas) <= high:
+        bound = f"at least {low}" if len(out.ideas) < low else f"at most {high}"
+        problems.append(f"suggest {bound} places (you gave {len(out.ideas)})")
+    for i in out.ideas:
+        key = place_key(i.name)
+        if key in seen:
+            problems.append(f'"{key}" is listed twice')
+            continue
+        seen.add(key)
+        if not i.city.strip():
+            problems.append(f"{i.name}: needs a city")
+            continue
+        source = ctx.source(i.source_url)
+        if source is None:
+            problems.append(f"{i.name}: source_url was not returned by your tools")
+            continue
+        ideas.append(Idea(id=new_id("i"), name=i.name.strip(), city=i.city.strip(), category=i.category.strip(),
+                          why=i.why, source=source))
+    return ideas
+
+
+async def build_ideas(state: TripState, ctx: RunContext, out: IdeasOut) -> list[Idea]:
+    problems: list[str] = []
+    ideas = _check_ideas(ctx, out, IDEAS_MIN, IDEAS_MAX, problems)
+    if problems:
+        raise Rejected(problems)
+    return ideas
+
+
+async def build_more_ideas(state: TripState, ctx: RunContext, out: IdeasOut) -> list[Idea]:
+    """More places for one traveler: new to the list, and nothing like what anyone marked not for me."""
+    problems: list[str] = []
+    ideas = _check_ideas(ctx, out, MORE_MIN, MORE_MAX, problems)
+    for idea in ideas:
+        idea.suggested_for = ctx.traveler.id
+        if any(same_place(idea.name, listed.name) for listed in state.ideas):
+            problems.append(f'"{place_key(idea.name)}" is already on the list')
+        elif skippers := [t.name for t in state.travelers if any(like_place(idea.name, s) for s in t.skip)]:
+            problems.append(f"{idea.name}: {' and '.join(skippers)} marked a place like it not for me")
+    if problems:
+        raise Rejected(problems)
+    return ideas
+
+
+def more_ideas_task(state: TripState, who: Traveler | None = None) -> str:
+    listed = ", ".join(i.name for i in state.ideas) or "(nothing yet)"
+    return (f"{brief(state)}\n\n{who.name} wants more places to choose from, like the ones they marked must do or "
+            f"interested and unlike the ones they marked not for me (see above). These are already on the list, so "
+            f"do not repeat them: {listed}.\nSuggest {MORE_MIN} to {MORE_MAX} new places and experiences in "
+            f"{state.request.destination} that fit {who.name}'s picks, and avoid anything like a place anyone on the "
+            "trip marked not for me. Give each its city, a short category (reuse the list's categories where they "
+            f"fit) and one sentence on why it suits {who.name}. Use web_research; every source_url must be a URL your "
+            "tools returned.")
+
+
+def ideas_task(state: TripState, who: Traveler | None = None) -> str:
+    r = state.request
+    return (f"{brief(state)}\n\nSuggest {IDEAS_MIN + 3} to {IDEAS_MAX} distinct places and experiences in "
+            f"{r.destination} for the travelers to choose from. They will mark each one must do, interested or "
+            "not for me, and the trip is then planned from their picks, so offer real variety: famous sights and "
+            "lesser-known ones, food, nature, culture, nightlife, family attractions and day trips that fit "
+            f"{r.days} days at a {r.pace} pace. Give each its city, a short category and one sentence on why "
+            "someone would go. Use web_research, one or two searches per category; every source_url must be a "
+            "URL your tools returned.")
 
 
 # --- timeframe ---------------------------------------------------------------
@@ -377,13 +490,21 @@ class AttractionsOut(BaseModel):
 async def build_attractions(state: TripState, ctx: RunContext, out: AttractionsOut) -> list[Attraction]:
     problems, found = [], []
     cities = [s.city for s in state.route.segments]
-    asked = {wish_id: (text, need, want) for wish_id, text, need, want in wishes(state)}
+    merged = wishes(state)
+    asked = {wish_id: (text, need, want) for wish_id, text, need, want, _ in merged}
+    skipped = {wish_id: skip for wish_id, _, _, _, skip in merged}
     covered: set[str] = set()
     order = [t.id for t in state.travelers]
     for a in out.attractions:
         mine = [asked[w] for w in a.wish_ids if w in asked]
         need_by = [t for t in order if any(t in need for _, need, _ in mine)]
         want_by = [t for t in order if t not in need_by and any(t in want for _, _, want in mine)]
+        # Skipped by wish id or, for the agent's own suggestions, by name.
+        skip_by = [t.id for t in state.travelers if t.id not in need_by + want_by and (
+            any(t.id in skipped.get(w, []) for w in a.wish_ids) or any(same_place(a.name, s) for s in t.skip))]
+        if skip_by and not need_by + want_by:
+            problems.append(f"{a.name}: {' and '.join(state.names(skip_by))} marked it not for me")
+            continue
         source = ctx.source(a.source_url)
         if source is None:
             # Something a traveler needs has to be fixed; an unsourced extra is simply left out.
@@ -404,7 +525,8 @@ async def build_attractions(state: TripState, ctx: RunContext, out: AttractionsO
             coords = None
         covered.update(w for w in a.wish_ids if w in asked)
         found.append(Attraction(
-            id=new_id("a"), name=a.name, city=city, must_have=bool(need_by), need_by=need_by, want_by=want_by, why=a.why,
+            id=new_id("a"), name=a.name, city=city, must_have=bool(need_by), need_by=need_by, want_by=want_by,
+            skip_by=skip_by, why=a.why,
             duration_minutes=a.duration_minutes, ticket_price_usd=a.ticket_price_usd, opens=_time(a.opens),
             closes=_time(a.closes), closed_weekdays=[d for d in a.closed_weekdays if 0 <= d <= 6],
             outdoor=a.outdoor, availability_note=a.availability_note, lat=coords and coords[0],
@@ -420,13 +542,17 @@ async def build_attractions(state: TripState, ctx: RunContext, out: AttractionsO
 
 def attractions_task(state: TripState, who: Traveler | None = None) -> str:
     cities = ", ".join(dict.fromkeys(s.city for s in state.route.segments))
-    requests = "\n".join(
-        f"{wish_id}: {text} (needed by: {', '.join(state.names(need)) or 'nobody'}; wanted by: "
-        f"{', '.join(state.names(want)) or 'nobody'})"
-        for wish_id, text, need, want in wishes(state)
-    ) or "(nobody asked for anything specific)"
+    def request(wish_id, text, need, want, skip) -> str:
+        who = [f"needed by: {', '.join(state.names(need)) or 'nobody'}",
+               f"wanted by: {', '.join(state.names(want)) or 'nobody'}"]
+        if skip:
+            who.append(f"not for: {', '.join(state.names(skip))}")
+        return f"{wish_id}: {text} ({'; '.join(who)})"
+
+    requests = "\n".join(request(*w) for w in wishes(state)) or "(nobody asked for anything specific)"
     return (f"{brief(state)}\n\nPlan attractions for the whole group. These are the travelers' requests:\n{requests}\n\n"
-            "Cover every request someone needs, and as many wanted ones as you can. Give each attraction the "
+            "Cover every request someone needs, and as many wanted ones as you can. Never add a place as one of "
+            "your own suggestions if it is listed as not for someone. Give each attraction the "
             "wish_ids it covers; if a request is a city or region, pick its one or two top sights and give "
             f"both that wish id. Then suggest up to {SUGGESTIONS[state.request.pace]} more, with empty wish_ids, "
             "that fit this group, the weather on these dates, popularity, and being close to what is already "
@@ -547,10 +673,14 @@ def review_lodging(state: TripState, plan: LodgingPlan) -> str:
 
 
 def review_attractions(state: TripState, found: list[Attraction]) -> str:
+    def who(a: Attraction) -> str:
+        line = (f"needed by {', '.join(state.names(a.need_by)) or 'nobody'}, "
+                f"wanted by {', '.join(state.names(a.want_by)) or 'nobody'}")
+        return line + (f", skipped by {', '.join(state.names(a.skip_by))}" if a.skip_by else "")
+
     return "\n".join(
         f"- {a.name} ({a.city}): {a.duration_minutes} min, ${a.ticket_price_usd:,.0f}, "
-        f"{f'{a.opens:%H:%M}-{a.closes:%H:%M}' if a.opens and a.closes else 'always open'}; "
-        f"needed by {', '.join(state.names(a.need_by)) or 'nobody'}, wanted by {', '.join(state.names(a.want_by)) or 'nobody'}"
+        f"{f'{a.opens:%H:%M}-{a.closes:%H:%M}' if a.opens and a.closes else 'always open'}; {who(a)}"
         for a in found)
 
 
@@ -578,6 +708,8 @@ class Spec:
     per_traveler: bool = False  # run once for each traveler, with their own origin and budget
     after: Callable[[TripState], None] | None = None  # runs once the result is stored
     review: Callable[[TripState, Any], str] | None = None  # what the reviewer is shown; defaults to describe()
+    append: bool = False  # the result is a list added to TripState's field, skipping places already there
+    saved_fallback: bool = True  # on failure, show the last accepted result; off when only a fresh answer fits
 
     def dump(self, value) -> str:
         return TypeAdapter(self.type).dump_json(value).decode()
@@ -596,6 +728,11 @@ SPECS = {s.name: s for s in [
                          "flights land and end there too, so everyone can fly home. Nights must total the trip "
                          "days minus arrival_day_offset."),
          build_route, lambda t: [], lambda r: " → ".join(f"{s.city} ({s.nights}n)" for s in r.segments)),
+    Spec("ideas", "Ideas agent", "ideas", list[Idea], IdeasOut, ideas_task, build_ideas,
+         lambda t: [t.web_research, t.read_source], lambda ideas: f"{len(ideas)} places to choose from"),
+    Spec("more_ideas", "Ideas agent", "ideas", list[Idea], IdeasOut, more_ideas_task, build_more_ideas,
+         lambda t: [t.web_research, t.read_source], lambda ideas: f"{len(ideas)} more places",
+         per_traveler=True, append=True, saved_fallback=False),
     Spec("timeframe", "Timeframe & weather agent", "windows", list[DateWindow], TimeframeOut, timeframe_task,
          build_timeframe, lambda t: [t.web_research, t.window_outlook],
          lambda ws: "; ".join(f"{w.start:%b %d}–{w.end:%b %d}" for w in ws)),

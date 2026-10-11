@@ -49,18 +49,40 @@ class RateLimit(HookProvider):
             self._recent.append(time.monotonic())
 
 
+MAX_UNKNOWN_TOOLS = 3
+
+
+class UnknownTools(Exception):
+    """The model kept calling tools it was never given; the attempt ends and the orchestrator sends it back."""
+
+
 class Activity(HookProvider):
-    """Streams each tool call to the activity panel and caps tool results at a safe size."""
+    """Streams each tool call to the activity panel and caps tool results at a safe size.
+
+    Some models call tools they were never given (e.g. "WebSearch"). Each such call is cancelled with the
+    real tool list, and after MAX_UNKNOWN_TOOLS the attempt ends instead of looping until the timeout."""
 
     def __init__(self, agent: str, emit) -> None:
         self.agent, self.emit = agent, emit
+        self.unknown: list[str] = []
 
     def register_hooks(self, registry: HookRegistry, **kwargs) -> None:
         registry.add_callback(BeforeToolCallEvent, self.before_tool)
         registry.add_callback(AfterToolCallEvent, self.after_tool)
 
     def before_tool(self, event: BeforeToolCallEvent) -> None:
-        self.emit("tool", agent=self.agent, tool=event.tool_use["name"], input=event.tool_use.get("input", {}))
+        name = event.tool_use["name"]
+        self.emit("tool", agent=self.agent, tool=name, input=event.tool_use.get("input", {}))
+        if event.selected_tool is not None:
+            return
+        self.unknown.append(name)
+        if len(self.unknown) >= MAX_UNKNOWN_TOOLS:
+            raise UnknownTools(f"called tools that don't exist: {', '.join(dict.fromkeys(self.unknown))}. "
+                               "Use only your own tools, or answer directly from the information you were given")
+        tools = ", ".join(event.agent.tool_names)
+        event.cancel_tool = (f"There is no tool named {name}. "
+                             + (f"Your tools are: {tools}. " if tools else "You have no tools: use the information you were given. ")
+                             + "Answer now with the structured result if you have what you need.")
 
     def after_tool(self, event: AfterToolCallEvent) -> None:
         for block in event.result.get("content", []):

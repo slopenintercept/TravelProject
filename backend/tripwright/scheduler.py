@@ -186,10 +186,12 @@ def schedule(state: TripState) -> None:
         return start
 
     def fit_split(a: Attraction, f: DayFrame, who: list[str]) -> tuple[int, ItineraryItem] | None:
-        """A slot for `who` alone, during a shared activity none of them asked for."""
+        """A slot for `who` alone, during a shared activity none of them asked for or that they skip."""
         for host in placed[f.day]:
             during = by_id[host.ref_id]
-            if not set(who) < set(host.travelers) or set(who) & set(during.need_by + during.want_by):
+            free = all(t in during.skip_by or (t in host.travelers and t not in during.need_by + during.want_by)
+                       for t in who)
+            if not free or not set(host.travelers) - set(who):
                 continue
             hop = travel_minutes(during, a)
             start = open_at(a, f, to_min(host.start) + hop, to_min(host.end) - hop)
@@ -203,6 +205,9 @@ def schedule(state: TripState) -> None:
     )
     leftover: list[tuple[Attraction, str]] = []
     for a in todo:
+        going = [t for t in everyone if t not in a.skip_by]  # whoever skips it is free meanwhile
+        if not going:
+            continue
         pinned = a.id in pins
         days = [f for f in frames if (f.day == pins[a.id] if pinned else same_city(f.city, a.city))]
         days.sort(key=lambda f: (_rain_rank(state, a, f.day), len(placed[f.day]), bool(f.fixed), f.day))
@@ -212,7 +217,7 @@ def schedule(state: TripState) -> None:
             if isinstance(start, str):
                 reason = start
                 continue
-            new = item(a, f.day, start, everyone, pinned)
+            new = item(a, f.day, start, going, pinned)
             placed[f.day].append(new)
             cursor[f.day] = to_min(new.end)
             break
@@ -244,11 +249,16 @@ def schedule(state: TripState) -> None:
 def _plan_note(state: TripState, splits: list[ItineraryItem]) -> str:
     if len(state.travelers) < 2 or not state.itinerary:
         return ""
-    if not splits:
-        return "One shared itinerary: everything everyone asked for fits together."
-    paths = {tuple(i.id for i in state.itinerary if t.id in i.travelers) for t in state.travelers}
-    moments = "; ".join(
+    skipped = {a.id: a.skip_by for a in state.attractions}
+    moments = [
+        f"{' and '.join(state.names(who))} skip{'s' * (len(who) == 1)} {i.title} on {i.day:%a %b} {i.day.day}"
+        for i in state.itinerary if i.kind == "attraction" and i not in splits
+        and (who := [t for t in skipped.get(i.ref_id, []) if t not in i.travelers])
+    ] + [
         f"{' and '.join(state.names(s.travelers))} split{'s' * (len(s.travelers) == 1)} off for {s.title} on {s.day:%a %b} {s.day.day}"
         for s in splits
-    )
-    return f"{len(paths)} itineraries that regroup: {moments}."
+    ]
+    if not moments:
+        return "One shared itinerary: everything everyone asked for fits together."
+    paths = {tuple(i.id for i in state.itinerary if t.id in i.travelers) for t in state.travelers}
+    return f"{len(paths)} itineraries that regroup: {'; '.join(moments)}."

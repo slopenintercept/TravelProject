@@ -130,21 +130,23 @@ export function useTrip(tripId: string | null) {
   }, [tripId, load])
 
   /** Run a user action; `message` on the response is the server refusing it (for example a calendar move).
-   *  Resolves to whether the request went through. */
-  const act = useCallback(async (request: Promise<TripView>) => {
+   *  Resolves to the response, or null if the request failed. */
+  const act = useCallback(async (request: Promise<TripView>): Promise<TripView | null> => {
     setPending(true)
     setError('')
     setNotice('')
     try {
-      setNotice((await load(request)).message)
-      return true
+      const next = await load(request)
+      setNotice(next.message)
+      return next
     } catch (e) {
       setError((e as Error).message)
-      return false
+      return null
     } finally {
       setPending(false)
     }
   }, [load])
 
-  return { view, lanes, busy: pending || !!view?.busy, error, notice, act, setError, setNotice }
+  // `sending`: this tab's own request is in flight; `busy` also counts the trip's background work.
+  return { view, lanes, busy: pending || !!view?.busy, sending: pending, error, notice, act, setError, setNotice }
 }

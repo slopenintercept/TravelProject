@@ -20,7 +20,7 @@ import re
 from contextlib import asynccontextmanager
 from datetime import datetime
 
-from playwright.async_api import Browser, Page, async_playwright
+from playwright.async_api import Browser, Page, Playwright, async_playwright
 from playwright.async_api import TimeoutError as PlaywrightTimeout
 
 from .. import config, evidence
@@ -30,6 +30,7 @@ PAGE_CHARS = 5000
 BLOCK_STATUSES = {403, 429, 502, 503}
 BLOCK_MARKERS = ("captcha", "unusual traffic", "verify you are human", "are you a robot", "access denied")
 
+_playwright: Playwright | None = None  # one driver process, kept even when a launch fails
 _browser: Browser | None = None
 _launch_lock = asyncio.Lock()
 _slots = asyncio.Semaphore(config.BROWSER_WORKERS)
@@ -40,11 +41,14 @@ class Blocked(Exception):
 
 
 async def _get_browser() -> Browser:
-    global _browser
+    """The shared Chromium. Each `async_playwright().start()` spawns a driver process, so it is started once:
+    starting one per launch leaked a process every time a launch failed (e.g. Chromium not installed)."""
+    global _playwright, _browser
     async with _launch_lock:
         if _browser is None or not _browser.is_connected():
-            playwright = await async_playwright().start()
-            _browser = await playwright.chromium.launch(headless=True)
+            if _playwright is None:
+                _playwright = await async_playwright().start()
+            _browser = await _playwright.chromium.launch(headless=True)
     return _browser
 
 

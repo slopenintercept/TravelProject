@@ -1,33 +1,41 @@
 import { useEffect, useState } from 'react'
-import { api } from './api'
+import { actAs, api } from './api'
 import { AgentPanel } from './components/AgentPanel'
 import { BudgetBar } from './components/BudgetBar'
 import { Finish } from './components/Finish'
 import { Gathering } from './components/Gathering'
 import { Itinerary } from './components/Itinerary'
-import { Join } from './components/Join'
+import { Choose } from './components/Choose'
+import { Join, WhoAreYou } from './components/Join'
+import { Picks } from './components/Picks'
 import { Review, Violations } from './components/Review'
 import { Timeframe } from './components/Timeframe'
 import { TripForm } from './components/TripForm'
 import { monthDay } from './format'
+import { planningStarted } from './types'
 import { useTrip } from './useTrip'
 
-/** The trip id lives in the URL hash, so a reload resumes the trip: `#<tripId>`, or `#<tripId>/join` for the invite link. */
+/** The trip lives in the URL hash, so a reload resumes it. Each traveler has their own link, `#<tripId>/<travelerId>`;
+ *  `#<tripId>/join` is the invite link, and a bare `#<tripId>` asks who you are. */
 function routeFromHash() {
   const [tripId, page] = window.location.hash.slice(1).split('/')
-  return { tripId: tripId || null, joining: page === 'join' }
+  return { tripId: tripId || null, joining: page === 'join', me: page && page !== 'join' ? page : null }
 }
 
 export default function App() {
-  const [{ tripId, joining }, setRoute] = useState(routeFromHash)
+  const [{ tripId, joining, me }, setRoute] = useState(routeFromHash)
   const [tab, setTab] = useState<'review' | 'itinerary'>('review')
   const [finishing, setFinishing] = useState(false)
-  const { view, lanes, busy, error, notice, act, setError, setNotice } = useTrip(tripId)
+  const [editingPicks, setEditingPicks] = useState(false)
+  const { view, lanes, busy, sending, error, notice, act, setError, setNotice } = useTrip(tripId)
+
+  useEffect(() => actAs(me), [me])
 
   useEffect(() => {
     const onHashChange = () => {
       setRoute(routeFromHash())
       setFinishing(false)
+      setEditingPicks(false)
     }
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
@@ -36,8 +44,18 @@ export default function App() {
   const state = view?.state
   const stage = state?.stage
   const group = state?.travelers.length ?? 0
+  const you = state?.travelers.find((t) => t.id === me)
   // The first response of a stage can arrive before the server marks the trip busy.
-  const working = busy || stage === 'created' || stage === 'timeframe' || stage === 'planning'
+  const working = busy || stage === 'created' || stage === 'timeframe' || stage === 'planning' || stage === 'choosing'
+  // Everyone marks the ideas list before planning starts, and can come back to change their marks until then.
+  const beforePlanning = !!stage && !planningStarted(stage)
+  const picking = !!you && beforePlanning && (!you.picked || editingPicks)
+  // Then each traveler chooses their own flight and rooms, once their agents have found the options.
+  const choosing = !!you && (stage === 'choosing' || stage === 'review') && !you.confirmed
+  const optionsReady = !!you && (stage === 'review' || [`flight:${you.id}`, 'lodging'].every((agent) => {
+    const status = state?.agents[agent]?.status
+    return !!status && !['idle', 'working', 'under_review', 'sent_back'].includes(status)
+  }))
 
   return (
     <>
@@ -51,10 +69,16 @@ export default function App() {
           </span>
         )}
         {state && working && <span className="working"><i className="spinner" />Agents working…</span>}
+        {you && group > 1 && (
+          <span className="you">You: <strong>{you.name}</strong> · <a href={`#${tripId}`}>Switch</a></span>
+        )}
+        {you?.picked && beforePlanning && !editingPicks && (
+          <button className="link" onClick={() => setEditingPicks(true)}>Edit my picks</button>
+        )}
         {tripId && <a className="new-trip" href="#">New trip</a>}
       </header>
 
-      {state && <BudgetBar travelers={state.travelers} budgets={state.budgets} />}
+      {state && you && <BudgetBar travelers={[you]} budgets={state.budgets} />}
 
       <main>
         {error && (
@@ -71,7 +95,7 @@ export default function App() {
         )}
 
         {!tripId ? (
-          <TripForm onCreated={(id) => { window.location.hash = id }} />
+          <TripForm onCreated={(id, hostId) => { window.location.hash = `${id}/${hostId}` }} />
         ) : !view || !state ? (
           !error && <p className="lede">Loading your trip…</p>
         ) : joining ? (
@@ -80,12 +104,49 @@ export default function App() {
             busy={busy}
             onJoin={async (traveler) => {
               const joined = await act(api.join(state.id, traveler))
-              if (joined) window.location.hash = state.id
-              return joined
+              if (joined?.you) window.location.hash = `${state.id}/${joined.you}` // their own link from now on
+              return !!joined
             }}
           />
+        ) : !you ? (
+          <WhoAreYou state={state} />
+        ) : picking ? (
+          <Picks
+            state={state}
+            you={you}
+            busy={busy}
+            onSave={async (picks) => {
+              const saved = await act(api.savePicks(state.id, you.id, picks))
+              if (saved) {
+                setEditingPicks(false)
+                window.scrollTo(0, 0)
+              }
+              return !!saved
+            }}
+            onAdd={async (name, city) => !!(await act(api.addIdea(state.id, name, city)))}
+            onMore={async (picks) => !!(await act(api.suggestMore(state.id, picks)))}
+          />
+        ) : choosing && optionsReady ? (
+          <Choose
+            state={state}
+            you={you}
+            sending={sending}
+            onConfirm={async (flightId, stayIds) => {
+              if (await act(api.confirmChoices(state.id, you.id, flightId, stayIds))) window.scrollTo(0, 0)
+            }}
+          />
+        ) : choosing || stage === 'choosing' ? (
+          <>
+            <h1>{choosing ? 'Planning your flight and stays' : 'Planning activities around your choices'}</h1>
+            <p className="lede">
+              {choosing
+                ? "The agents are finding your flight and rooms. You'll choose them here as soon as they're ready."
+                : 'The agents are still researching activities, transport and weather. Your days are planned around your flight and rooms as soon as they finish.'}
+            </p>
+            <AgentPanel lanes={lanes} travelers={state.travelers} />
+          </>
         ) : stage === 'review' && finishing ? (
-          <Finish view={view} onBack={() => setFinishing(false)} />
+          <Finish view={view} you={you} onBack={() => setFinishing(false)} />
         ) : stage === 'review' ? (
           <>
             <AgentPanel lanes={lanes} travelers={state.travelers} compact />
@@ -97,6 +158,7 @@ export default function App() {
             {tab === 'review' ? (
               <Review
                 view={view}
+                you={you}
                 busy={busy}
                 onDecision={(action, card, optionId) => act(api.decide(state.id, action, card, optionId))}
                 onApplyBudget={(travelerId) => act(api.applyBudget(state.id, travelerId))}
@@ -124,14 +186,22 @@ export default function App() {
         ) : stage === 'gathering' ? (
           <Gathering
             state={state}
+            you={you}
             busy={busy}
-            onAdd={(traveler) => act(api.join(state.id, traveler))}
-            onRemove={(travelerId) => act(api.leave(state.id, travelerId))}
+            onRemove={async (travelerId) => {
+              const left = await act(api.leave(state.id, travelerId))
+              if (left && travelerId === you.id) window.location.hash = state.id
+            }}
             onPlan={() => act(api.plan(state.id))}
           />
         ) : (
           <>
-            <Timeframe state={state} busy={busy} onChoose={(start) => act(api.chooseDates(state.id, start))} />
+            <Timeframe
+              state={state}
+              canChoose={you.host}
+              busy={busy}
+              onChoose={(start) => act(api.chooseDates(state.id, start))}
+            />
             <AgentPanel lanes={lanes} travelers={state.travelers} />
           </>
         )}

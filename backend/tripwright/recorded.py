@@ -24,7 +24,7 @@ class NotRecorded(Exception):
 
 
 def _load() -> dict:
-    return json.loads(FIXTURES.read_text()) if FIXTURES.exists() else {}
+    return json.loads(FIXTURES.read_text(encoding="utf-8")) if FIXTURES.exists() else {}
 
 
 def _words(key: str) -> set[str]:
@@ -54,7 +54,7 @@ def record(key: str, value) -> None:
     recorded = _load()
     recorded[key] = value
     FIXTURES.parent.mkdir(exist_ok=True)
-    FIXTURES.write_text(json.dumps(recorded, indent=1, default=str, ensure_ascii=False))
+    FIXTURES.write_text(json.dumps(recorded, indent=1, default=str, ensure_ascii=False), encoding="utf-8")
 
 
 async def cached(key: str, fetch: Callable[[], Awaitable], ttl_s: float = DEFAULT_TTL_S, fuzzy: bool = True):

@@ -30,7 +30,8 @@ class Source(BaseModel):
 
 
 class TravelerIn(BaseModel):
-    """What each person fills in: where they fly from, their budget, and what they need vs want to see."""
+    """What each person fills in: where they fly from and their budget. What they need and want to see
+    comes from their picks on the ideas list; the fields stay here so older trips still load."""
 
     name: str = Field(min_length=1)
     origin: str = Field(min_length=1)
@@ -168,11 +169,30 @@ class LodgingPlan(BaseModel):
     stays: list[LodgingStay]
 
 
+class Idea(BaseModel):
+    """One place on the trip's shared list, found by the ideas agent or added by a traveler."""
+
+    id: str
+    name: str
+    city: str = ""
+    category: str = ""
+    why: str = ""
+    source: Source | None = None
+    added_by: str | None = None  # traveler id; None for the agent's suggestions
+    suggested_for: str | None = None  # traveler id who asked the agents for more like their picks
+
+
 class Traveler(TravelerIn):
-    """One person on the trip, with their own flight and their own rooms picked to their own budget."""
+    """One person on the trip, with their own flight and their own rooms picked to their own budget.
+
+    Their marks on the ideas list are the place names in `need` (must do), `want` (interested)
+    and `skip` (not for me); a name is in at most one of them."""
 
     id: str
     host: bool = False
+    skip: list[str] = []
+    picked: bool = False  # has saved their marks
+    confirmed: bool = False  # has chosen their flight and rooms; the days are planned around them
     flights: FlightPlan | None = None
     lodging: LodgingPlan | None = None  # this traveler's room for each stay, chosen from the group's options
 
@@ -184,6 +204,7 @@ class Attraction(BaseModel):
     must_have: bool = False  # someone needs to see it
     need_by: list[str] = []  # traveler ids
     want_by: list[str] = []
+    skip_by: list[str] = []  # marked it not for me: they are free while the others go
     why: str = ""
     duration_minutes: int = 120
     ticket_price_usd: float = 0  # per traveler
@@ -307,10 +328,13 @@ class TripState(BaseModel):
     id: str
     request: TripRequest
     # gathering: dates are set and the host is waiting for invited travelers' preferences.
-    stage: Literal["created", "timeframe", "awaiting_dates", "gathering", "planning", "review"] = "created"
+    # choosing: the agents are researching and each traveler chooses their flight and rooms; the days are
+    # scheduled once anyone has (review).
+    stage: Literal["created", "timeframe", "awaiting_dates", "gathering", "planning", "choosing", "review"] = "created"
     travelers: list[Traveler] = []  # the host first
     profile: TravelerProfile | None = None
     route: RoutePlan | None = None
+    ideas: list[Idea] = []  # the shared list everyone marks
     windows: list[DateWindow] = []
     dates: TripDates | None = None
     lodging: LodgingPlan | None = None  # what the lodging agent found: the options for each stay
