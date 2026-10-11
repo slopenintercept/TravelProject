@@ -7,7 +7,13 @@
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
 
-# 1. The bucket.
+# 1. The bucket. linode-cli's obj plugin makes itself an access key with no region, which the API
+#    answers with a 500, so it is handed a temporary key that is deleted when this script ends.
+read -r boot_id LINODE_CLI_OBJ_ACCESS_KEY LINODE_CLI_OBJ_SECRET_KEY <<<"$(linode-cli object-storage keys-create \
+  --label tripwright-bootstrap --regions "$REGION" --text --no-headers --format id,access_key,secret_key)"
+export LINODE_CLI_OBJ_ACCESS_KEY LINODE_CLI_OBJ_SECRET_KEY
+trap 'linode-cli object-storage keys-delete "$boot_id" >/dev/null' EXIT
+
 bucket=$(get_env OBJ_BUCKET)
 [[ $bucket == tripwright-* ]] || bucket=$(bucket_name)
 if ! linode-cli obj ls "$bucket" --cluster "$CLUSTER" >/dev/null 2>&1; then
