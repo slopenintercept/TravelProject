@@ -10,8 +10,8 @@ from strands.models.model import Model
 
 from tripwright import config, orchestrator, recorded, store
 from tripwright.events import bus
-from tripwright.models import RoutePlan, RouteSegment, Traveler, TripDates, TripRequest, TripState
-from tripwright.tools import flights, places
+from tripwright.models import Idea, RoutePlan, RouteSegment, Traveler, TripDates, TripRequest, TripState
+from tripwright.tools import flights, places, research
 
 
 class ScriptedModel(Model):
@@ -198,6 +198,43 @@ async def test_each_traveler_gets_their_own_flight_agent_and_they_run_in_paralle
     assert [t.flights.selected_id for t in trip.travelers] == ["f2", "f2"]
     assert {"flight:p1", "flight:p2"} <= set(trip.agents)
     assert set(trip.budgets) == {"p1", "p2"}
+
+
+async def test_attractions_are_planned_by_an_agent_per_city_at_once_and_reviewed_as_one_list(trip, monkeypatch):
+    async def search(query):
+        return [{"title": "Guide", "url": "https://example.com/guide", "excerpt": "", "evidence_url": "/e", "fetched_at": None}]
+
+    async def no_geocode(place):
+        return None
+    monkeypatch.setattr(research, "search", search)
+    monkeypatch.setattr(places, "geocode", no_geocode)
+    trip.route = RoutePlan(segments=[RouteSegment(city="Tokyo", nights=3), RouteSegment(city="Kyoto", nights=2),
+                                     RouteSegment(city="Tokyo", nights=1)], arrival_day_offset=1)
+    trip.ideas = [Idea(id=f"i{n}", name=name, city=city) for n, (name, city) in enumerate(
+        [("Senso-ji", "Tokyo"), ("teamLab Planets", "Tokyo"), ("Fushimi Inari", "Kyoto"), ("Nara Park", "Nara")], 1)]
+    trip.travelers[0].need, trip.travelers[0].want = ["Senso-ji", "teamLab Planets", "Fushimi Inari"], ["Nara Park"]
+
+    def city_agent(*found):
+        return ScriptedModel([[("tool", "web_research", {"query": "hours"})], [("tool", "AttractionsOut", {"attractions": [
+            {"name": name, "city": city, "wish_ids": [wish], "why": "", "duration_minutes": 90, "ticket_price_usd": 5,
+             "opens": "09:00", "closes": "17:00", "closed_weekdays": [], "outdoor": False, "availability_note": "",
+             "source_id": "s1", "booking_url": ""} for name, city, wish in found]})]], delay=0.4)
+    tokyo = city_agent(("Senso-ji", "Tokyo", "w1"), ("teamLab Planets", "Tokyo", "w2"))
+    kyoto = city_agent(("Fushimi Inari", "Kyoto", "w3"), ("Nara Park", "Kyoto", "w4"))
+    script(monkeypatch, tokyo, kyoto, ScriptedModel([[("tool", "Verdict", {"accept": True, "feedback": ""})]]))
+
+    started = time.monotonic()
+    await orchestrator.run(trip, orchestrator.planning_graph(["attractions"], schedule=False), "planning")
+
+    assert time.monotonic() - started < 1.4  # two agents x two 0.4s model calls each would be 1.6s in series
+    asked_tokyo, asked_kyoto = tokyo.seen[0]["content"][0]["text"], kyoto.seen[0]["content"][0]["text"]
+    assert "w1: Senso-ji" in asked_tokyo and "w2: teamLab Planets" in asked_tokyo and "w3:" not in asked_tokyo
+    # Nara is not on the route, so its request goes to the city agent with the fewest of its own.
+    assert "w3: Fushimi Inari" in asked_kyoto and "w4: Nara Park" in asked_kyoto and "w1:" not in asked_kyoto
+    assert statuses(trip, "attractions") == ["working", "under_review", "accepted"]  # one lane, one review
+    assert [(a.name, a.city, a.must_have) for a in trip.attractions] == [
+        ("Senso-ji", "Tokyo", True), ("teamLab Planets", "Tokyo", True), ("Fushimi Inari", "Kyoto", True),
+        ("Nara Park", "Kyoto", False)]
 
 
 def test_no_inference_key_goes_straight_to_pending(trip, monkeypatch):

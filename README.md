@@ -66,7 +66,7 @@ What is individual and what is shared:
 - **Ideas:** one shared list of places, found by the ideas agent when the trip is created. Each traveler marks it on their own link (must do, interested, not for me), can add places, and can ask for more like their picks.
 - **Flight and rooms:** each traveler confirms their own before the days are scheduled around them.
 - **Transport:** each traveler gets their own copy of the legs, and can swap or remove one or add a rental car on their own budget.
-- **Attractions:** one agent for the group. Everyone's marks are merged, and each attraction comes back tied to who needs it, who wants it and who skips it.
+- **Attractions:** planned for the group, by one agent per city on the route working at the same time (the model writes slowly, so two short lists finish sooner than one long one). Everyone's marks are merged and filed under the city each place is in, the lists are joined and reviewed as one, and each attraction comes back tied to who needs it, who wants it and who skips it.
 - **Itinerary:** the scheduler ([scheduler.py](backend/tripwright/scheduler.py)) puts everything on one shared itinerary while it fits, needs before wants. Whoever marked a place not for me is free while the others go. Something only some travelers asked for that does not fit is scheduled for just them, during a group activity none of them asked for (or one they skip), and they regroup after. The group's day starts once the last person has landed and ends when the first person leaves for their flight home.
 - **Budgets:** per traveler: their flight, their rooms, tickets for what they attend, and the transport legs they keep.
 

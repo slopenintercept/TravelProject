@@ -572,8 +572,26 @@ def relink_wishes(state: TripState) -> None:
         a.must_have = bool(a.need_by)
 
 
-def attractions_task(state: TripState, who: Traveler | None = None) -> str:
-    cities = ", ".join(dict.fromkeys(s.city for s in state.route.segments))
+def _wishes_by_city(state: TripState) -> dict[str, list]:
+    """Everyone's requests, filed under the route city each place is in (the ideas list knows). A place
+    somewhere else, like a day trip, goes to whichever city has the fewest, to keep the agents' loads even."""
+    by_city = {s.city: [] for s in state.route.segments}
+    where = {place_key(i.name): i.city for i in state.ideas}
+    elsewhere = []
+    for wish in wishes(state):
+        city = next((c for c in by_city if same_city(c, where.get(place_key(wish[1]), ""))), None)
+        (by_city[city] if city else elsewhere).append(wish)
+    for wish in elsewhere:
+        min(by_city.values(), key=len).append(wish)
+    return by_city
+
+
+def attractions_task(state: TripState, who: Traveler | None = None, city: str | None = None) -> str:
+    """The whole trip's attractions or, given `city`, that city's share for an agent working beside the others'."""
+    nights: dict[str, int] = {}
+    for s in state.route.segments:
+        nights[s.city] = nights.get(s.city, 0) + s.nights
+    cities = ", ".join(nights)
     def request(wish_id, text, need, want, skip) -> str:
         who = [f"needed by: {', '.join(state.names(need)) or 'nobody'}",
                f"wanted by: {', '.join(state.names(want)) or 'nobody'}"]
@@ -581,20 +599,34 @@ def attractions_task(state: TripState, who: Traveler | None = None) -> str:
             who.append(f"not for: {', '.join(state.names(skip))}")
         return f"{wish_id}: {text} ({'; '.join(who)})"
 
-    requests = "\n".join(request(*w) for w in wishes(state)) or "(nobody asked for anything specific)"
+    mine = _wishes_by_city(state)[city] if city else wishes(state)
+    requests = "\n".join(request(*w) for w in mine) or "(nobody asked for anything specific)"
     # The more the travelers asked for themselves, the fewer extras the plan has room for.
     extras = max(1, SUGGESTIONS[state.request.pace] - sum(bool(want) and not need for _, _, need, want, _ in wishes(state)))
-    return (f"{brief(state)}\n\nPlan attractions for the whole group. These are the travelers' requests:\n{requests}\n\n"
+    scope, where = "Plan attractions for the whole group. These are the travelers' requests", ""
+    if city:
+        others = " and ".join(c for c in nights if c != city)
+        scope = (f"Plan the group's attractions for {city}. Another agent is planning {others} at the same time, so "
+                 "these are the only requests that are yours, whatever else the travelers above asked for")
+        extras, where = max(1, round(extras * nights[city] / sum(nights.values()))), f" in or around {city}"
+    return (f"{brief(state)}\n\n{scope}:\n{requests}\n\n"
             "Cover every request someone needs, and as many wanted ones as you can. Never add a place as one of "
             "your own suggestions if it is listed as not for someone. Give each attraction the "
             "wish_ids it covers; if a request is a city or region, pick its one or two top sights and give "
-            f"both that wish id. Then suggest up to {extras} more, with empty wish_ids, "
+            f"both that wish id. Then suggest up to {extras} more{where}, with empty wish_ids, "
             "that fit this group, the weather on these dates, popularity, and being close to what is already "
             "planned. For each one find the adult ticket price "
             "in USD, opening hours, closed weekdays, typical visit length and booking advice. Work quickly: "
             "one web_research per attraction is enough, and use browse_page only when a search result lacks "
             "the price or hours. Every source_id must be an id your tools showed, like s4. "
             f"Each attraction's city must be one of: {cities}.")
+
+
+def attractions_split(state: TripState) -> list[str]:
+    """One prompt per city on the route, each for its own agent. The endpoint writes about 100 characters a
+    second, so two agents writing half the list each finish far sooner than one writing all of it."""
+    cities = list(dict.fromkeys(s.city for s in state.route.segments))
+    return [attractions_task(state, city=c) for c in cities] if len(cities) > 1 else [attractions_task(state)]
 
 
 # --- transport -----------------------------------------------------------------
@@ -803,6 +835,8 @@ class Spec:
     extra_time: Callable[[TripState], int] | None = None  # seconds beyond AGENT_TIMEOUT_S, for work that grows
     max_tokens: int | None = None  # a longer answer than MODEL_MAX_TOKENS allows (else it is cut off and empty)
     saved_fallback: bool = True  # on failure, show the last accepted result; off when only a fresh answer fits
+    split: Callable[[TripState], list[str]] | None = None  # several prompts, each answered by its own agent at once
+    join: Callable[[list], Any] | None = None  # makes those agents' answers one, for a single review
 
     def dump(self, value) -> str:
         return TypeAdapter(self.type).dump_json(value).decode()
@@ -843,7 +877,8 @@ SPECS = {s.name: s for s in [
          lambda a: f"{len(a)} attractions, {sum(x.must_have for x in a)} needed by someone",
          judged=True, review=review_attractions, after_fallback=relink_wishes,
          # One search per requested place and a longer answer: a big group's picks need more time and room.
-         extra_time=lambda s: SECONDS_PER_WISH * len(wishes(s)), max_tokens=config.MODEL_OUTPUT_LIMIT),
+         extra_time=lambda s: SECONDS_PER_WISH * len(wishes(s)), max_tokens=config.MODEL_OUTPUT_LIMIT,
+         split=attractions_split, join=lambda outs: AttractionsOut(attractions=[a for o in outs for a in o.attractions])),
     Spec("transport", "Transport agent", "transport", TransportPlan, TransportOut, transport_task, build_transport,
          lambda t: [t.web_research, t.read_source],
          lambda p: f"{p.common_choice.choice}; {len(p.legs)} legs, ${sum(x.price_usd for x in p.legs):,.0f}",

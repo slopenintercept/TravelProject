@@ -11,7 +11,7 @@ Stages (each one is a Graph run; nodes with no edge between them run in parallel
 Each traveler gets their own flight agent (own origin, own budget). One lodging agent
 researches the options, and each traveler's room is then picked from them by that
 traveler's own budget. Attractions are planned once for the group, from everyone's
-needs and wants.
+needs and wants, by one agent per city working at the same time and reviewed as one list.
 
 Each specialist is a custom graph node that wraps a Strands Agent with the review
 loop: deterministic checks on every attempt, the orchestrator's LLM judgment on the
@@ -150,19 +150,25 @@ class SpecialistNode(MultiAgentBase):
             return self._fall_back(state, events, who, "had no inference key (set OPENAI_API_KEY)")
 
         ctx = RunContext(agent=self.name, state=state, traveler=who)
-        tools = spec.tools(Toolbox(ctx))
-        agent = Agent(
-            model=make_model(spec.max_tokens), name=spec.name, tools=tools,
-            system_prompt=PREAMBLE.format(title=spec.title, tools=WITH_TOOLS if tools else NO_TOOLS),
-            hooks=[RateLimit(), Activity(self.name, events.emit)], callback_handler=None,
-        )
+        # Usually one agent; a split specialist has one per prompt, working at the same time on a shared context.
+        prompts, agents, problems = spec.split(state) if spec.split else [spec.task(state, who)], [], []
+        for _ in prompts:
+            tools = spec.tools(Toolbox(ctx))
+            agents.append(Agent(
+                model=make_model(spec.max_tokens), name=spec.name, tools=tools,
+                system_prompt=PREAMBLE.format(title=spec.title, tools=WITH_TOOLS if tools else NO_TOOLS),
+                hooks=[RateLimit(), Activity(self.name, events.emit)], callback_handler=None,
+            ))
 
-        prompt, problems = spec.task(state, who), []
         for attempt in range(1, config.MAX_RETRIES + 2):
             events.status(state, self.name, "working",
                           "Gathering data" if attempt == 1 else "Reworking after review", attempt)
             try:
-                answer = await self._ask(agent, prompt, events)
+                answers = await asyncio.gather(*(self._ask(a, p, events) for a, p in zip(agents, prompts)),
+                                               return_exceptions=True)  # let every agent finish before a retry
+                if failed := next((a for a in answers if isinstance(a, Exception)), None):
+                    raise failed
+                answer = spec.join(answers) if spec.join else answers[0]
                 events.status(state, self.name, "under_review", "Orchestrator is checking sources, dates and budget")
                 value = await spec.build(state, ctx, answer)
                 if spec.judged and attempt == 1:  # one judgment call per result; code checks every attempt
@@ -174,8 +180,9 @@ class SpecialistNode(MultiAgentBase):
             else:
                 return self._accept(state, events, who, value)
             events.status(state, self.name, "sent_back", "; ".join(problems), attempt)
-            prompt = ("The orchestrator sent your result back:\n" + "\n".join(f"- {p}" for p in problems)
-                      + "\nFix these and answer again.")
+            yours = " the ones about your own places and requests" if len(agents) > 1 else " these"
+            prompts = ["The orchestrator sent your result back:\n" + "\n".join(f"- {p}" for p in problems)
+                       + f"\nFix{yours} and answer again."] * len(agents)
         self._fall_back(state, events, who, "failed review: " + "; ".join(problems))
 
     async def _ask(self, agent: Agent, prompt: str, events: Bus):
