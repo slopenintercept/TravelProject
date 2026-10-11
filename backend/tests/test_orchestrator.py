@@ -237,6 +237,24 @@ async def test_attractions_are_planned_by_an_agent_per_city_at_once_and_reviewed
         ("Nara Park", "Kyoto", False)]
 
 
+async def test_places_to_choose_from_are_reused_for_the_same_destination_and_length(trip, monkeypatch):
+    async def search(query):
+        return [{"title": "Guide", "url": "https://example.com/guide", "excerpt": "", "evidence_url": "/e", "fetched_at": None}]
+    monkeypatch.setattr(research, "search", search)
+    trip.request.destination = f"Reuseland {time.time_ns()}"
+    later = trip.model_copy(deep=True, update={"id": f"{trip.id}_later"})
+    later.request.origin = "Somewhere else"
+    found = [{"name": f"Place {n}", "city": "Tokyo", "category": "Sights", "why": "", "source_id": "s1"} for n in range(15)]
+    script(monkeypatch, ScriptedModel([[("tool", "web_research", {"query": "sights"})], [("tool", "IdeasOut", {"ideas": found})]]))
+
+    await orchestrator.run(trip, orchestrator.planning_graph(["ideas"], schedule=False), "ideas")
+    await orchestrator.run(later, orchestrator.planning_graph(["ideas"], schedule=False), "ideas")  # no model is left to ask
+
+    assert statuses(trip, "ideas") == ["working", "under_review", "accepted"]
+    assert statuses(later, "ideas") == ["accepted"] and later.agents["ideas"].message == "Reused from an earlier trip like this one"
+    assert [i.name for i in later.ideas] == [i.name for i in trip.ideas] and len(later.ideas) == 15
+
+
 def test_no_inference_key_goes_straight_to_pending(trip, monkeypatch):
     monkeypatch.setattr(config, "OPENAI_API_KEY", "")
     asyncio.run(orchestrator.run(trip, orchestrator.planning_graph(["flight:p1"]), "planning"))

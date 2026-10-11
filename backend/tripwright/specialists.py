@@ -181,7 +181,7 @@ class IdeaOut(BaseModel):
 
 
 class IdeasOut(BaseModel):
-    ideas: list[IdeaOut] = Field(description="15 to 25 distinct places and experiences")
+    ideas: list[IdeaOut] = Field(description="Distinct places and experiences, as many as the task asks for")
 
 
 MORE_MIN, MORE_MAX = 5, 10
@@ -245,15 +245,32 @@ def more_ideas_task(state: TripState, who: Traveler | None = None) -> str:
             "tools showed, like s4.")
 
 
-def ideas_task(state: TripState, who: Traveler | None = None) -> str:
+def ideas_task(state: TripState, who: Traveler | None = None, city: str | None = None) -> str:
+    """The whole destination's places or, given `city`, that city's share for an agent working beside the others'."""
     r = state.request
-    return (f"{brief(state)}\n\nSuggest {IDEAS_MIN + 3} to {IDEAS_MAX} distinct places and experiences in "
-            f"{r.destination} for the travelers to choose from. They will mark each one must do, interested or "
+    low, high, where = IDEAS_MIN + 3, IDEAS_MAX, r.destination
+    if city:  # a share of the list in step with the nights spent there
+        nights = {c: sum(s.nights for s in state.route.segments if s.city == c) for c in dict.fromkeys(s.city for s in state.route.segments)}
+        high = max(1, high * nights[city] // sum(nights.values()))
+        low = min(high, -(-low * nights[city] // sum(nights.values())))
+        others = " and ".join(c for c in nights if c != city)
+        where = (f"and around {city} (day trips from {city} count). Another agent is covering {others} at the "
+                 f"same time, so leave {others} to it. These are")
+    return (f"{brief(state)}\n\nSuggest {low} to {high} distinct places and experiences in "
+            f"{where} for the travelers to choose from. They will mark each one must do, interested or "
             "not for me, and the trip is then planned from their picks, so offer real variety: famous sights and "
             "lesser-known ones, food, nature, culture, nightlife, family attractions and day trips that fit "
             f"{r.days} days at a {r.pace} pace. Give each its city, a short category and under 10 words on why "
-            "someone would go. Use web_research, one or two searches per category; every source_id must be an "
-            "id your tools showed, like s4.")
+            "someone would go. Use web_research once per category, and send all of those searches together in "
+            "your first step rather than a few at a time, so you can answer straight after; every source_id "
+            "must be an id your tools showed, like s4.")
+
+
+def ideas_split(state: TripState) -> list[str]:
+    """One prompt per city on the route, each for its own agent, for the same reason as the attractions:
+    two agents writing half the list each finish sooner than one writing all of it."""
+    cities = list(dict.fromkeys(s.city for s in state.route.segments)) if state.route else []
+    return [ideas_task(state, city=c) for c in cities] if len(cities) > 1 else [ideas_task(state)]
 
 
 # --- timeframe ---------------------------------------------------------------
@@ -837,6 +854,7 @@ class Spec:
     saved_fallback: bool = True  # on failure, show the last accepted result; off when only a fresh answer fits
     split: Callable[[TripState], list[str]] | None = None  # several prompts, each answered by its own agent at once
     join: Callable[[list], Any] | None = None  # makes those agents' answers one, for a single review
+    reuse: bool = False  # a result saved for the same destination and length is used at once, with no agent run
 
     def dump(self, value) -> str:
         return TypeAdapter(self.type).dump_json(value).decode()
@@ -856,7 +874,8 @@ SPECS = {s.name: s for s in [
                          "days minus arrival_day_offset."),
          build_route, lambda t: [], lambda r: " → ".join(f"{s.city} ({s.nights}n)" for s in r.segments)),
     Spec("ideas", "Ideas agent", "ideas", list[Idea], IdeasOut, ideas_task, build_ideas,
-         lambda t: [t.web_research, t.read_source], lambda ideas: f"{len(ideas)} places to choose from"),
+         lambda t: [t.web_research, t.read_source], lambda ideas: f"{len(ideas)} places to choose from",
+         split=ideas_split, join=lambda outs: IdeasOut(ideas=[i for o in outs for i in o.ideas]), reuse=True),
     Spec("more_ideas", "Ideas agent", "ideas", list[Idea], IdeasOut, more_ideas_task, build_more_ideas,
          lambda t: [t.web_research, t.read_source], lambda ideas: f"{len(ideas)} more places",
          per_traveler=True, append=True, saved_fallback=False),

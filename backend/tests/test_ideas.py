@@ -4,7 +4,7 @@ import pytest
 
 from tripwright import orchestrator
 from tripwright.models import Idea, Source
-from tripwright.specialists import SPECS, IdeaOut, IdeasOut, Rejected, build_ideas, build_more_ideas
+from tripwright.specialists import SPECS, IdeaOut, IdeasOut, Rejected, build_ideas, build_more_ideas, ideas_split
 from tripwright.toolbox import RunContext
 
 
@@ -79,3 +79,18 @@ def test_stage_one_runs_ideas_after_the_route():
     assert set(graph.nodes) == {"route", "profile", "timeframe", "ideas"}
     assert {(e.from_node.node_id, e.to_node.node_id) for e in graph.edges} == {
         ("route", "profile"), ("route", "timeframe"), ("route", "ideas")}
+
+
+
+def test_ideas_are_split_into_one_prompt_per_city_with_a_share_of_the_list_each(state):
+    tokyo, kyoto = ideas_split(state)  # Tokyo 4 nights, Kyoto 2: the 15-to-25 list is shared out by nights
+    assert "Suggest 10 to 16 distinct places and experiences in and around Tokyo" in tokyo
+    assert "Another agent is covering Kyoto" in tokyo
+    assert "Suggest 5 to 8 distinct places and experiences in and around Kyoto" in kyoto
+    joined = SPECS["ideas"].join([IdeasOut(ideas=places(2)), IdeasOut(ideas=[idea("Gion", "Kyoto")])])
+    assert [i.name for i in joined.ideas] == ["Place 0", "Place 1", "Gion"]
+
+    state.route.segments = state.route.segments[:1]  # one city, or no route yet: one agent for the whole list
+    assert len(ideas_split(state)) == 1 and "places and experiences in Japan for" in ideas_split(state)[0]
+    state.route = None
+    assert len(ideas_split(state)) == 1

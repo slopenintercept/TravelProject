@@ -70,8 +70,9 @@ class Verdict(BaseModel):
 
 
 def _result_key(spec: Spec, state: TripState, who: Traveler | None) -> str:
-    """Where a specialist's last accepted result is kept. Flights depend on the traveler's origin."""
-    origin = who.origin if who else "any" if spec.name == "lodging" else state.request.origin
+    """Where a specialist's last accepted result is kept. Flights depend on the traveler's origin; lodging and
+    the list of places to choose from are the same wherever the travelers fly from."""
+    origin = who.origin if who else "any" if spec.name in ("lodging", "ideas") else state.request.origin
     return f"result:{spec.name}:{origin}:{state.request.destination}:{state.request.days}".lower()
 
 
@@ -146,6 +147,16 @@ class SpecialistNode(MultiAgentBase):
 
     async def _run(self, state: TripState, events: Bus, who: Traveler | None) -> None:
         spec = self.spec
+        if spec.reuse and (saved := store.cache_get(_result_key(spec, state, who), SAVED_RESULT_TTL_S)):
+            try:  # the same destination and length was researched before: nothing to wait for
+                value = spec.load(saved["value"])
+            except ValueError:
+                value = None  # saved by an older version; research it again
+            if value:
+                self._store(state, who, value)
+                state.flags.pop(self.name, None)
+                return events.status(state, self.name, "accepted", "Reused from an earlier trip like this one", 1,
+                                     spec.describe(value))
         if not config.OPENAI_API_KEY:
             return self._fall_back(state, events, who, "had no inference key (set OPENAI_API_KEY)")
 
