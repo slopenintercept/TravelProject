@@ -1,19 +1,49 @@
 # Tripwright handoff
 
-Updated 2026-10-11, early morning Central, for continuing in a new chat. If you only read one section, read "Start here". Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
+Updated 2026-10-11 at about 04:35 Central, for continuing in a new chat. If you only read one section, read "Start here". Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
 
 ## Start here
 
-- **The app is live on Akamai** and the code on the server matches the committed app code. Details and commands are in "Hosting on Akamai".
-- **Branch:** `combine-picks-and-group-trips` is where all work happens and is pushed. `main` was fast-forwarded to `ffe77ab` on 2026-10-11, so it has the redesign and the new README; only handoff updates made after that are missing from it (see Git).
-- **The whole UI was rebuilt on 2026-10-11** to the design the user approved (see "The redesign"). It is committed, pushed and deployed. The user has not yet looked at the screens that had no mockup.
+- **The app is live on Akamai**, and the server runs exactly the committed app code: commit `5360e3b`, deployed at 04:29 on 2026-10-11. Details and commands are in "Hosting on Akamai".
+- **The whole UI was rebuilt on 2026-10-11** to the design the user approved. "What the last chat did" below lists everything in order; "The redesign" says what was built and what the user still has to sign off.
+- **Branch:** `combine-picks-and-group-trips` is where all work happens, and everything is committed and pushed. `main` is at `ffe77ab`: it has the redesign and the new README, but not `5360e3b` (a small change to the agents list) or the handoff updates after it (see Git).
+- **What the user was doing when this was written:** trying the new UI themselves.
+  - Locally, trip `trip_479d20ea` (Alex and Sam, Dec 11 to Dec 31) finished its research with the Lodging agent timed out (`pending`, no saved result), so neither traveler has stays. "Retry the one that didn't finish" on the board's Agents tab runs it again. Nobody has looked into why it timed out.
+  - On the hosted site, trip `trip_f24799b6` was created at 04:24 and is waiting for dates.
 - Several chats share the folder: run `git status` first, commit only your own files, and never stash or revert someone else's.
 - **Waiting on the user, none urgent:**
-  1. Whether local runs should keep using the hosted database and bucket that `.env` now names, or go back to local files.
-  2. Whether to give the hosted site a clean `https://` name. The user asked why the address is an IP with `:8000`, was offered a domain plus Caddy, and said to leave it for now.
-  3. The full planning flow has not been run on the hosted site.
-  4. Sign-off on the redesign choices listed under "The redesign".
-- **Housekeeping left on the Mac:** Docker Desktop is running from a test build and can be quit. The "Linode sign-in" terminal tab from the earlier chat is finished and can be closed.
+  1. Sign-off on the redesign choices listed under "The redesign".
+  2. Whether `deploy/deploy.sh` should clear `backend/` and `frontend/` on the server before copying (see Hosting).
+  3. Whether to fast-forward `main` again so it has `5360e3b`.
+  4. Whether local runs should keep using the hosted database and bucket that `.env` now names, or go back to local files.
+  5. Whether to give the hosted site a clean `https://` name. The user asked why the address is an IP with `:8000`, was offered a domain plus Caddy, and said to leave it for now.
+  6. The full planning flow has not been run on the hosted site.
+- **Housekeeping left on the Mac:** Docker Desktop may still be running from an earlier test build and can be quit.
+
+## What the last chat did
+
+One chat, on 2026-10-11 from about 02:30 to 04:35 Central. The user asked for the redesign in `design/REDESIGN-HANDOFF.md` to be built and tested, then for a README, a commit of everything, and a deploy.
+
+1. **Built the redesign.** Rewrote `frontend/src/styles.css` and `App.tsx`, added `shell.ts` and the components `Agents`, `Board`, `Calendar`, `Days`, `Route`, `Start` and `Working`, rewrote the other screens, and deleted `AgentPanel`, `BudgetBar`, `CalendarGrid`, `Itinerary` and `TripForm`.
+2. **Tested it** in the browser against a second backend on a throwaway SQLite copy of two real trips (see Gotchas for how), plus one live run in `DEMO_MODE` from Start to Review.
+3. **Had it reviewed before shipping:** six reviewing agents, two verifiers per finding. 27 of 29 findings were confirmed (about 17 distinct, none severe) and all were fixed. One needed a backend change (approvals, below).
+4. **Wrote the docs:** the README (how the screen works, how to run, test and deploy), `DEMO.md` for the new screen, and this file. A second set of agents checked all three against the code; 37 wrong or misleading statements were confirmed and corrected, many of them older than the redesign.
+5. **Committed and pushed** to `combine-picks-and-group-trips`, in this order:
+
+   | Commit | What |
+   |---|---|
+   | `889cd5e` | Another chat's finished change, committed after the tests passed: the ideas agents are asked for 16 places |
+   | `fe15c3e` | An approval remembers which flight or room it was for |
+   | `d357d45` | The UI rebuild |
+   | `f1c413e` | `design/`, `skills-lock.json`, `.impeccable/config.json`, the `design-mockups` preview entry, and the ignore rules for `.claude/skills/` and `.claude/agents/` |
+   | `ffe77ab` | README, demo script and handoff |
+   | `6a50ad6`, `5edada2` | Handoff updates |
+   | `5360e3b` | A draft agent that was cut off when planning started is left out of the agents list |
+
+6. **`main`:** the chat's own push to `main` was refused by its permission check, so the user ran the fast-forward themselves; `main` is at `ffe77ab`.
+7. **Deployed twice** with `deploy/deploy.sh`: `f1c413e` at 04:04 and `5360e3b` at 04:29. Each time the server's log was checked first, and the second time a trip that had just been started on the hosted site was waited out. After each, the JavaScript the server serves was compared byte for byte with the local build.
+8. **Cleaned the server:** the five deleted components were still in the server's source folder, because the deploy does not remove files. At the user's request they were deleted over SSH after checking they were identical to git's last copies.
+9. **The local server was restarted by the user** at 04:17 (see Gotchas), so it runs today's backend code.
 
 ## What it is
 
@@ -50,6 +80,8 @@ Two people commit to the repo: Amandeep Toor (the user) and Brandon Laing (teamm
 ```bash
 cd backend && .venv/bin/python -m uvicorn tripwright.api:app --port 8000
 ```
+
+With `.env` naming the hosted database, that command reads and writes hosted trips. To stay on the local SQLite file, put `DATABASE_URL=` right before `.venv/bin/python`. The server the user has running was started from the project root as `DATABASE_URL= backend/.venv/bin/uvicorn tripwright.api:app --app-dir backend --port 8000`.
 
 ```bash
 cd backend && .venv/bin/python -m pytest -q
@@ -104,14 +136,15 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 ## What changed today, newest first
 
-- The UI was rebuilt to the Direction C design (see "The redesign"), with a README and demo script to match.
-- An approval now remembers which flight or room was approved (`TripState.approvals` holds its id), so choosing another one, by any route, puts the card back to proposed. The redesign brought the Approve buttons back, which made this matter.
+- `5360e3b` Once planning has started, a draft agent that did not finish is left out of the feed's agent list, the Agents tab and its count (`laneOrder` in `Agents.tsx`). The draft is only rebuilt while people join, so if planning starts mid-rebuild its status stays "working" for good. A draft agent that finished is still listed.
+- `d357d45`, `ffe77ab` The UI was rebuilt to the Direction C design (see "The redesign"), with a README and demo script to match.
+- `fe15c3e` An approval now remembers which flight or room was approved (`TripState.approvals` holds its id), so choosing another one, by any route, puts the card back to proposed. The redesign brought the Approve buttons back, which made this matter.
 - `889cd5e` The ideas agents are asked for 16 places, shared out by the nights in each city; the review still accepts 12 to 25.
 - Tests are kept off the hosted database: `backend/tests/conftest.py` blanks `DATABASE_URL` and `OBJ_BUCKET` before the app's settings load (see Hosting for why).
 - Hosted on Akamai (see Hosting). `deploy/provision.sh` got the temporary-key fix (`560ff83`).
 - `b8b92f9` The ideas agent gives each place's reason in under 10 words.
 - `2b9ae63` Review cards show their facts as short tags and the agent's reason in a "Why this pick" box (details below).
-- `6a672ca` A Back button on every screen, fixed bottom-left. It undoes the last move in the app or reopens the previous step where that can still change, and never undoes the agents' work. It replaces "Back to review" in the Finish footer.
+- `6a672ca` A Back button on every screen, fixed bottom-left (since the redesign it is in the top bar). It undoes the last move in the app or reopens the previous step where that can still change, and never undoes the agents' work. It replaces "Back to review" in the Finish footer.
 - `33ce425` Attractions are planned by one agent per city on the route, in parallel. Their lists are joined and checked and reviewed once, so there is still one lane, one result and one fallback. Live on the 7-traveler demo trip it was accepted first time in 127s.
 - `2e4606f` The lodging reviewer is told each traveler pays only for their own room. It had been rejecting correct plans (6 of 10 live with the old wording, 0 of 10 with the new).
 - `7fc99a7` (Brandon, commit message is just "e") Draft plan, the ready-made scenario, the calendar grid on the Itinerary tab, a retry route for agents that timed out or fell back.
@@ -171,7 +204,8 @@ Tripwright has been live since 2026-10-11 (early morning, Central) on the user's
 
 - **Address:** `http://<ip>:8000`, plain HTTP on the server's IP with no domain name. This file is in a public repo, so the IP is left out on purpose; get it with `deploy/.venv/bin/linode-cli linodes list --label tripwright-app`. Akamai also gives the server a hostname of the form `<ip-with-dashes>.ip.linodeusercontent.com`, which works on port 8000 too.
 - **No login.** Anyone with the address can start trips and spend the inference and Tavily quota.
-- **Deployed code:** commit `f1c413e` (the UI rebuild and the approval fix), redeployed on 2026-10-11 at about 04:04 with `deploy/deploy.sh` (health passed, and the JavaScript the server serves is byte for byte the local build). The server's request log was read over SSH first (`docker compose logs` in `/opt/tripwright`): the last request that started or changed anything was two hours earlier, at 02:04. Reading a trip's data from the hosted site was blocked for the chat, so the log is how to check. The deploy copies the working folder, uncommitted changes included, so check `git status` first.
+- **Deployed code:** commit `5360e3b`, redeployed on 2026-10-11 at 04:29 with `deploy/deploy.sh` (health passed, and the JavaScript the server serves is byte for byte the local build in `frontend/dist`). The deploy copies the working folder, uncommitted changes included, so check `git status` first.
+- **How to check nobody is mid-run before a deploy:** read the server's request log over SSH (`cd /opt/tripwright && docker compose logs --since 3h app`, and look for `POST`, `PUT` and `DELETE` lines), then ask the hosted site for the `busy` flag of any trip that was just started (`GET /api/trips/<id>`) and wait until it is false. Before the 04:29 deploy a trip had been created five minutes earlier; its first stage finished at 04:28 and the deploy ran then. A command that printed a hosted trip's full state was refused by the chat's permission check; one that printed only its stage and `busy` went through.
 - **The deploy does not delete files that were removed locally.** After the redesign the server's `frontend/src/components` still held the five old components (`AgentPanel`, `BudgetBar`, `CalendarGrid`, `Itinerary`, `TripForm`). They were checked to be byte for byte git's last copies and deleted by hand over SSH on 2026-10-11, because the user asked; the server's component list now matches the repo. `deploy.sh` itself is unchanged, so the next time a file is deleted here its old copy will stay on the server: harmless while it still compiles, a failed build on a file that is not in the repo once it does not. Having `deploy.sh` clear `backend/` and `frontend/` on the server before it copies would end that.
 - **Redeploy:** `PATH="$PWD/deploy/.venv/bin:$PATH" SSH_KEY=~/.ssh/tripwright_ed25519 bash deploy/deploy.sh` from the project root. It reuses what exists, rebuilds the container and waits for `/api/health`.
 - **Tools on this Mac:** `linode-cli` and `boto3` live in `deploy/.venv` (gitignored); the user signed the CLI in themselves. The deploy SSH key is `~/.ssh/tripwright_ed25519`, made for this and with no passphrase. `ssh -i ~/.ssh/tripwright_ed25519 root@<ip>` gets a shell.
@@ -187,6 +221,8 @@ Nothing. `.claude/skills/` and `.claude/agents/` are on this Mac only and ignore
 
 ## Not done or not verified
 
+- The Lodging agent timed out after 240s on the user's local 20-day trip (`trip_479d20ea`: Tokyo 16 nights, Kyoto 2, Tokyo 1), with no saved result to fall back to. Not looked into; long stays may simply take longer to search than the time limit allows.
+- `deploy/deploy.sh` still leaves deleted files on the server (see Hosting).
 - Redesign: a real mouse drag on the calendar was not tried (the drag events were fired from a script, and the move and the refusal both worked). Phone widths were not checked; under 960px the panes stack. "Apply swaps", "Switch to Airbnb", "Add a rental car", "More like my picks", removing a traveler and the retry button were not clicked after the rebuild; their handlers are unchanged.
 - In the `DEMO_MODE` test run the ideas agent was sent back once with `BadRequestError 400: No user query found in messages`, then timed out, so the picks list was empty. Not looked into.
 - `DEMO.md` was updated for the new screen but has not been rehearsed against it.
@@ -209,7 +245,7 @@ Nothing. `.claude/skills/` and `.claude/agents/` are on this Mac only and ignore
 - The endpoint rejects an empty `tools` array; context is 32k tokens, output at most 4,096.
 - The server does not reload on code changes. Restart it after editing the backend, and rebuild the frontend after editing `frontend/src`.
 - Another chat's preview server can hold port 8000 and keep serving old code; `preview_stop` cannot stop a server another chat started. Use `tripwright-8001` or `tripwright-8002`, or ask the user before restarting it.
-- One app server is running locally, on port 8000, restarted at 00:20 on 2026-10-11 from a Terminal tab with `DATABASE_URL=` in front, so it is on SQLite (see Hosting). It belongs to no chat's preview list and is stopped by killing whatever listens on the port. It serves `frontend/dist`, so it shows the rebuilt UI. The `design-mockups` static server may also be up, on port 5180. Nothing is listening on 8001 or 8002. Preview configs: `tripwright` (8000), `tripwright-8001`, `tripwright-8002`, `tripwright-frontend`, `design-mockups` (5180), `tripwright-windows`.
+- One app server is running locally, on port 8000. The user restarted it at 04:17 on 2026-10-11 in the Claude app's Terminal pane with `DATABASE_URL=` in front, so it is on SQLite and runs today's backend code. It belongs to no chat's preview list; Ctrl+C in that terminal tab, or killing whatever listens on the port, stops it. It serves `frontend/dist`, so a rebuild shows up on reload without a restart. The `design-mockups` static server may also be up, on port 5180. Nothing is listening on 8001 or 8002. Preview configs: `tripwright` (8000), `tripwright-8001`, `tripwright-8002`, `tripwright-frontend`, `design-mockups` (5180), `tripwright-windows`.
 - Restarting a server kills any agent run in progress. Check that no trip is busy first (`GET /api/trips/<id>` returns `busy`).
 - To test without touching a real trip, copy it: load it with `store.load_trip`, change `state.id`, and save.
 - To click through the UI without touching any real data, start a second backend with `DATABASE_URL= OBJ_BUCKET= DATA_DIR=<a temporary folder>` on another port, save copies of trips into its SQLite file, and run `TRIPWRIGHT_BACKEND=http://localhost:<port> npm run dev -- --port 5174`. Check `/api/health` says `sqlite` first.
@@ -217,4 +253,6 @@ Nothing. `.claude/skills/` and `.claude/agents/` are on this Mac only and ignore
 - Booking.com blocks headless browsers, so hotels come from Google Hotels.
 - `tavily_search` in strands-agents-tools prints a deprecation warning; it still works.
 - `load_dotenv` does not override shell variables, so flags set in the shell win over `.env`.
+- A chat cannot push to `main` (its permission check refuses it as a merge without review). Give the user the command to run.
+- The user runs commands themselves in the app's Terminal pane when given one. Give one command per code block.
 - The user's global `CLAUDE.md` rules apply: state assumptions, keep code minimal, make surgical changes, verify against a concrete check.
