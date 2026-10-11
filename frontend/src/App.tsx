@@ -27,6 +27,7 @@ export default function App() {
   const [tab, setTab] = useState<'review' | 'itinerary'>('review')
   const [finishing, setFinishing] = useState(false)
   const [editingPicks, setEditingPicks] = useState(false)
+  const [rechoosing, setRechoosing] = useState(false)
   const { view, lanes, busy, sending, error, notice, act, setError, setNotice } = useTrip(tripId)
 
   useEffect(() => actAs(me), [me])
@@ -37,6 +38,7 @@ export default function App() {
       setRoute(routeFromHash())
       setFinishing(false)
       setEditingPicks(false)
+      setRechoosing(false)
     }
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
@@ -52,11 +54,22 @@ export default function App() {
   const beforePlanning = !!stage && !planningStarted(stage)
   const picking = !!you && beforePlanning && (!you.picked || editingPicks)
   // Then each traveler chooses their own flight and rooms, once their agents have found the options.
-  const choosing = !!you && (stage === 'choosing' || stage === 'review') && !you.confirmed
+  const choosing = !!you && (stage === 'choosing' || stage === 'review') && (!you.confirmed || rechoosing)
   const optionsReady = !!you && (stage === 'review' || [`flight:${you.id}`, 'lodging'].every((agent) => {
     const status = state?.agents[agent]?.status
     return !!status && !['idle', 'working', 'under_review', 'sent_back'].includes(status)
   }))
+  // Back undoes your last move in the app, or reopens the step before this one where that step can still change.
+  // It never undoes what the agents have done, so it is disabled where there is nothing to go back to.
+  const back =
+    !you ? null
+    : picking ? (you.picked ? () => setEditingPicks(false) : null)
+    : beforePlanning ? () => setEditingPicks(true)
+    : rechoosing ? () => setRechoosing(false)
+    : stage !== 'review' || choosing ? null
+    : finishing ? () => setFinishing(false)
+    : tab === 'itinerary' ? () => setTab('review')
+    : () => setRechoosing(true)
 
   return (
     <>
@@ -135,7 +148,10 @@ export default function App() {
               you={you}
               sending={sending}
               onConfirm={async (flightId, stayIds) => {
-                if (await act(api.confirmChoices(state.id, you.id, flightId, stayIds))) window.scrollTo(0, 0)
+                if (await act(api.confirmChoices(state.id, you.id, flightId, stayIds))) {
+                  setRechoosing(false)
+                  window.scrollTo(0, 0)
+                }
               }}
             />
           </>
@@ -150,7 +166,7 @@ export default function App() {
             <AgentPanel lanes={lanes} travelers={state.travelers} onRetry={retry} busy={busy} />
           </>
         ) : stage === 'review' && finishing ? (
-          <Finish view={view} you={you} onBack={() => setFinishing(false)} />
+          <Finish view={view} you={you} />
         ) : stage === 'review' ? (
           <>
             <AgentPanel lanes={lanes} travelers={state.travelers} compact onRetry={retry} busy={busy} />
@@ -212,6 +228,9 @@ export default function App() {
           </>
         )}
       </main>
+      <button className="big back-button" disabled={!back} onClick={() => { back?.(); window.scrollTo(0, 0) }}>
+        ← Back
+      </button>
     </>
   )
 }

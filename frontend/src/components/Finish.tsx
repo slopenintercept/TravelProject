@@ -16,12 +16,11 @@ const LINK_LABEL: Record<BookingStep['link'], string> = {
 interface Props {
   view: TripView
   you: Traveler
-  onBack: () => void
 }
 
 /** The hand-off: everything to book, in order, each with a link that already carries the trip's details.
  *  Each traveler sees their own flight and stays, and the bookings the group shares. */
-export function Finish({ view, you, onBack }: Props) {
+export function Finish({ view, you }: Props) {
   const { booking, state } = view
   const { travelers } = state
   const solo = travelers.length < 2
@@ -73,7 +72,6 @@ export function Finish({ view, you, onBack }: Props) {
           <strong>{money(total)}</strong> {solo ? 'to book' : 'is your share'}
           <span className="muted"> of your {money(you.budget_usd)} budget</span>
         </div>
-        <button onClick={onBack}>Back to review</button>
       </footer>
     </section>
   )
