@@ -54,3 +54,36 @@ Keep to this unless something in it turns out not to work.
 ## When you finish
 
 Add a section `## Result` at the bottom of this file: the files you changed, what you ran and what it showed, and anything left undone. Do the same if you stop early. Another chat reads this file every few minutes to see whether the work is done.
+
+## Result
+
+Done on 2026-10-11. The map works and is built into `frontend/dist`. Nothing is committed, pushed or deployed.
+
+**Files changed**
+
+- `frontend/src/components/Map.tsx` (new, 49 lines): the component, exported as `PlaceMap` so it does not shadow JavaScript's own `Map`.
+- `frontend/src/components/DraftPlan.tsx`: 4 lines added, the pins and `<PlaceMap>` under the `<Route>` row.
+- `frontend/src/types.ts`: `lat` and `lon` on `Idea`.
+- `frontend/src/styles.css`: one `.map` rule and its comment, after `.route`.
+- `frontend/package.json`, `frontend/package-lock.json`: `leaflet` and `@types/leaflet`.
+- `README.md`, `HANDOFF.md`: the two "No map." bullets now say what was built.
+- `design/implemented/15-picks-map.jpg`: Picks with the map, at 1280px wide.
+- `.claude/launch.json`: two preview entries for testing, `tripwright-map` (backend on 8011, scratch SQLite) and `tripwright-map-frontend` (dev server on 5181). Both servers are stopped. The entries can be deleted.
+
+**One departure from the plan:** the map is drawn in three small effects instead of one, so that marking a place only redraws the pins and does not rebuild the map or move it.
+
+**What was run and what it showed**
+
+- `npx tsc --noEmit` passed; `npm run build` passed at the end (once).
+- In the browser, on copies of `trip_99aaaeb1` in a scratch SQLite file (`/api/health` said `sqlite`):
+  - Picks at 1280px: 24 pins for 24 places with coordinates, 8 filled for Alex's 8 must-do places, tiles loaded, pin colour `#6e57ac` read from `--pick`.
+  - Marking "Odaiba waterfront" **Must do** took the filled pins from 8 to 9 with no reload.
+  - Choose at 1280px and 1440px: map shown with 24 pins, the confirm bar not overlapped and on top at its own centre; nothing scrolls sideways at either width, on Picks or Choose.
+  - Who's coming also showed the map. No console errors on any screen.
+
+**Not done or not checked**
+
+- Join and Agents working were not opened; they render the same `DraftPlan`.
+- Places in the same spot overlap as pins; there is no clustering. Zoomed out to fit Tokyo and Kyoto, the Tokyo pins sit close together.
+- The screenshot is 800px wide, the size the browser pane captured it at.
+- The copies' picks were not saved back, and the user's real trips were not touched.

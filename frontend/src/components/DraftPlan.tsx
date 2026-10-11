@@ -3,6 +3,7 @@ import { daysBetween, weekday, whoIsIn } from '../format'
 import { planningStarted, type TripState } from '../types'
 import { AgentTag } from './Agents'
 import { cityOn } from './Calendar'
+import { PlaceMap } from './Map'
 import { Route } from './Route'
 
 /** Place names match whatever their capitals and spacing. */
@@ -26,6 +27,8 @@ export function DraftPlan({ state, musts = [], untagged, children }: Props) {
   const status = live ? state.agents.draft : undefined
   const route = draft?.route ?? state.route
   const must = new Set(musts.map(placeKey))
+  const pins = state.ideas.flatMap((idea) =>
+    idea.lat == null || idea.lon == null ? [] : [{ name: idea.name, lat: idea.lat, lon: idea.lon, filled: must.has(placeKey(idea.name)) }])
   const names = (ids: string[]) => travelers.filter((t) => ids.includes(t.id)).map((t) => t.name)
   const visits = draft?.itinerary.filter((i) => i.kind === 'attraction') ?? []
   const sorted = [...(draft?.itinerary ?? [])].sort((a, b) => (a.day + a.start).localeCompare(b.day + b.start))
@@ -38,6 +41,7 @@ export function DraftPlan({ state, musts = [], untagged, children }: Props) {
         {!untagged && live && <AgentTag agent="draft" />}
       </div>
       {route && <Route route={route} />}
+      <PlaceMap pins={pins} />
       <p className="small">
         {live
           ? "A rough sketch from everyone's picks, rebuilt a few seconds after anyone saves theirs. Times are typical ones; real flights, hotels, hours and prices come when the host starts planning."

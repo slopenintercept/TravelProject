@@ -124,6 +124,8 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .ghost-days .ph { height: 150px; }
 .route { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; font-weight: 600; color: var(--dim); }
 .route .chip b { margin-right: 6px; font-weight: 600; }
+/* Its own stacking layer: Leaflet's panes go up to z-index 1000 and must stay under the app's floating pieces. */
+.map { position: relative; z-index: 0; height: 220px; margin-bottom: 14px; border-radius: 22px; overflow: hidden; }
 
 /* --- picks: the list of places, and the draft plan beside it ---------------------- */
 

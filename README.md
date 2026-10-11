@@ -282,5 +282,5 @@ deploy/             Akamai provisioning and deploy scripts
 - **Invites are a share link with no login.** Anyone with the invite link can join until planning starts, and then has their own link. The host's controls (choosing the dates, removing a traveler, starting planning) show only on the host's link, and the API refuses them from anyone else. This keeps people to their own choices rather than securing them: the bare trip link asks "Who are you?" and lets anyone pick any traveler, the host included.
 - **Trip length:** `days` runs from leaving home to the flight home, so "7 days" from Kansas City is 6 nights in Japan.
 - **Source and evidence links are not shown on the cards.** They were removed from the UI; every card in the API response still carries them (`sources[].url`, `sources[].evidence_url`).
-- **No map.** The design mockups show one as a placeholder; the app shows the route as a row of cities with the nights in each.
+- **A simple map.** The design mockups show one as a placeholder; the draft plan has a Leaflet map on OpenStreetMap tiles with a pin for every place on the list, your must-do places filled, under the route as a row of cities with the nights in each. The final days have no map.
 - **Not built:** the monitor agent (stretch goal), and food is not part of the budget.

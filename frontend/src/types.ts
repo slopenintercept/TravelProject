@@ -34,6 +34,8 @@ export interface Idea {
   source: Source | null
   added_by: string | null // traveler id; null for the agents' suggestions
   suggested_for: string | null // traveler id who asked the agents for more like their picks
+  lat: number | null // looked up when the draft plan is built; null until then, or if not found
+  lon: number | null
 }
 
 /** A traveler's marks on the ideas list, by place name. */
