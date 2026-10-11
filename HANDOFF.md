@@ -1,6 +1,6 @@
 # Tripwright handoff
 
-Updated 2026-10-10 (late night) for continuing in a new chat. Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
+Updated 2026-10-11 (early morning) for continuing in a new chat. Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
 
 ## What it is
 
@@ -89,6 +89,8 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 ## What changed today, newest first
 
+- Hosted on Akamai (see Hosting). `deploy/provision.sh` got the temporary-key fix.
+- `b8b92f9` The ideas agent gives each place's reason in under 10 words.
 - `2b9ae63` Review cards show their facts as short tags and the agent's reason in a "Why this pick" box (details below).
 - `6a672ca` A Back button on every screen, fixed bottom-left. It undoes the last move in the app or reopens the previous step where that can still change, and never undoes the agents' work. It replaces "Back to review" in the Finish footer.
 - `33ce425` Attractions are planned by one agent per city on the route, in parallel. Their lists are joined and checked and reviewed once, so there is still one lane, one result and one fallback. Live on the 7-traveler demo trip it was accepted first time in 127s.
@@ -117,13 +119,35 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 - The rating and duration wording is shared with the Swap list (`_rating`, `_duration`).
 - The "Most travelers here pick" card and the Choose screen were left in the older plain-text style.
 
+## Hosting on Akamai
+
+Tripwright has been live since 2026-10-11 (early morning, Central) on the user's Akamai account, which carries a $300 Hack Midwest credit that expires at the end of 2026. Everything is in Seattle (`us-sea`) and labelled `tripwright-*`:
+
+| Resource | What it is |
+|---|---|
+| `tripwright-app` | Linode `g6-standard-4` running the app in Docker (`/opt/tripwright`, `docker compose`) |
+| `tripwright-fw` | Cloud Firewall: only ports 22 and 8000 come in |
+| `tripwright-db` | Managed PostgreSQL 17, one small node; this Mac and the Linode are on its allow list |
+| `tripwright-<8 chars>` bucket and `tripwright-key` | Object Storage for page snapshots, with a key limited to that bucket |
+
+- **Address:** `http://<ip>:8000`, plain HTTP on the server's IP with no domain name. This file is in a public repo, so the IP is left out on purpose; get it with `deploy/.venv/bin/linode-cli linodes list --label tripwright-app`. Akamai also gives the server a hostname of the form `<ip-with-dashes>.ip.linodeusercontent.com`, which works on port 8000 too.
+- **No login.** Anyone with the address can start trips and spend the inference and Tavily quota.
+- **Deployed code:** commit `b8b92f9`. The deploy copies the working folder, uncommitted changes included, so check `git status` first.
+- **Redeploy:** `PATH="$PWD/deploy/.venv/bin:$PATH" SSH_KEY=~/.ssh/tripwright_ed25519 bash deploy/deploy.sh` from the project root. It reuses what exists, rebuilds the container and waits for `/api/health`.
+- **Tools on this Mac:** `linode-cli` and `boto3` live in `deploy/.venv` (gitignored); the user signed the CLI in themselves. The deploy SSH key is `~/.ssh/tripwright_ed25519`, made for this and with no passphrase. `ssh -i ~/.ssh/tripwright_ed25519 root@<ip>` gets a shell.
+- **`.env` changed.** `provision.sh` wrote `OBJ_*` and `DATABASE_URL` into the local `.env`, so a local server started now uses the hosted Postgres and bucket, not `data/tripwright.db`. The user has been told and has not said whether to separate them.
+- **Verified on the server:** health reports inference key, Tavily, PostgreSQL and Object Storage; the demo trip's first stage was accepted with live fares; flight and hotel page snapshots were taken by the server's own browsers and saved to the bucket. A test trip, `trip_7e281cec`, was left in the hosted database.
+- **What went wrong on the way:** the user's first signup was refused by Akamai's fraud check; the Akamai booth gave them a different signup link, which worked. `linode-cli obj` could not make its own access key (the API answers 500 when no region is sent), so `provision.sh` now hands it a temporary key. The database's hostname took a few minutes to resolve after it was created.
+- **Stop the billing:** `bash deploy/teardown.sh` deletes everything, including the database and snapshots. It asks for a typed "yes", and only the user should decide to run it.
+
 ## Work in progress, not committed
 
 Nothing. The working folder was clean when this file was last updated, and the committed state passes 108 tests. Several chats share this folder, so check `git status` before assuming that still holds.
 
 ## Not done or not verified
 
-- **Hosting on Akamai is blocked on the user.** They asked for it on 2026-10-10. It needs `deploy/.venv/bin/linode-cli configure` run by the user (it asks for their Linode sign-in); `linode-cli` is installed in `deploy/.venv` (gitignored). After that: create an SSH key (none exists in `~/.ssh`; the script takes `SSH_KEY=`), run `deploy/provision.sh`, then `deploy/deploy.sh`. The Docker build and the Postgres path have never been run. The hosted site would be plain `http://<ip>:8000` with no login, and `.env` is copied to the server.
+- The hosted site has only been run through the first stage (route, profile, timeframe, ideas). Planning, choosing and review have not been run there.
+- `deploy/teardown.sh` has not been run. Its `linode-cli obj rb` line will fail the way bucket creation did (see Hosting) until it is given a key the same way.
 - Split-offs have only happened in tests, never in a live run.
 - "Best" hotel is by rating only, with price as the tie-break. A 4.9 from 394 reviews beat hotels with thousands.
 - Transport: airport transfers assume everyone lands at the same airport. Nothing picks a cheaper leg for a smaller budget, and the over-budget swap suggestions cover flights and rooms only. An overnight bus is scheduled as a daytime ride. Alternatives the agent returns without a source or a believable price are dropped, so a leg can have no Swap button.
