@@ -58,3 +58,23 @@ Report each of these:
 ## When you finish
 
 Add a `## Result` section at the end of this file with the four points above, or what went wrong. Write it last and in one go: the checking chat takes that heading as "done".
+
+## Result
+
+Written 2026-10-11 at about 05:45 Central. Retry was pressed once, at 05:40:15, and it worked.
+
+**Before the press** (read-only): health said `sqlite` and `local disk`; the trip was not busy, stage `choosing`, Lodging `pending` on attempt 2 ("No result yet: timed out after 240s").
+
+1. **Time and status.** Busy straight away; the Lodging lane showed the agent working. It was `accepted` at 05:41:14, about 59 seconds after the press, on attempt 1, with no send-backs ("Accepted by the orchestrator"). Found: "Tokyo: 2 options from $592; Kyoto: 6 options from $100; Tokyo: 3 options from $75". Every other agent is unchanged; `draft` is still `failed` ("Stopped when the server restarted"), as expected.
+2. **Stays.** Alex and Sam each have the same 3 stays with the same rooms chosen:
+   - Tokyo, Dec 12 to Dec 28: Guest House Tokyo Samurai, Asakusa, $41 a night ($656). Within budget ("Best-rated option within Alex's lodging budget of about $44 a night"). 2 options.
+   - Kyoto, Dec 28 to Dec 30: Agora Place Kyoto Nijo, Nakagyo, $50 a night ($100). Says over budget ("Cheapest option found at $50 a night; that is over Alex's lodging budget of about $44 a night."). 6 options.
+   - Tokyo, Dec 30 to Dec 31: TOKYO-W-inn Asakusa, $75 a night ($75). Says over budget, same wording at $75. 3 options.
+   Sam's cards say the same with Sam's name.
+3. **Stage.** Still `choosing`; neither traveler is `confirmed` (checked again at 05:45). Nothing was confirmed or changed by this chat.
+4. **Choose screen.** After a reload, Alex's (`/p1`) and Sam's (`/p2`) pages each show all three stays with their options (2, 6, 3) and one room selected in each. Totals: Alex $2,523 of $3,000, Sam $2,624 of $3,000. The browser console had no messages at all for either.
+
+**Two things seen on the Choose screen, not fixed (no code was changed):**
+
+- The room chosen for each over-budget stay carries the badge "Matched to your budget", right under a line saying it is over budget.
+- `Choose.tsx` takes its selected flight and rooms from the trip only when the screen first opens (`useState` at lines 30 and 31). Seen: going from Sam's link to Alex's in the same tab without a reload left no flight selected and the total at $831 (stays only); a reload gave $2,523. By the same code, a Choose screen that was open before the Retry would show the new stays with no room selected until reloaded; that case was read from the code, not clicked.
