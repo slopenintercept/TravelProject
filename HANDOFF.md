@@ -5,7 +5,7 @@ Updated 2026-10-11, just after midnight Central, for continuing in a new chat. I
 ## Start here
 
 - **The app is live on Akamai** and the code on the server matches the committed app code. Details and commands are in "Hosting on Akamai".
-- **Branch:** `combine-picks-and-group-trips` is where all work happens and is pushed. `main` is a few commits behind (see Git).
+- **Branch:** `combine-picks-and-group-trips` is where all work happens and is pushed. `main` matched it when this file was last updated (see Git).
 - **Another chat has uncommitted work in this folder** (see "Work in progress"). Several chats share the folder: run `git status` first, commit only your own files, and never stash or revert someone else's.
 - **Waiting on the user, none urgent:**
   1. Whether local runs should keep using the hosted database and bucket that `.env` now names, or go back to local files.
@@ -92,7 +92,7 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 - Remote: `https://github.com/slopenintercept/TravelProject.git` (public).
 - Current branch: `combine-picks-and-group-trips`, pushed. It holds everything: Brandon's picks, per-person links and draft plan, merged with the user's `group-trips-live-run`.
-- `main` is at `0a7a9aa`. It has been fast-forwarded to this branch a few times on 2026-10-10, each time because the user asked. That is not a standing rule: commits made here afterwards are not in `main` until the user asks again. Right now `main` lacks `b8b92f9` (ideas reasons under 10 words), `560ff83` (provisioning fix) and the handoff and test-setup commits after them.
+- `main` was fast-forwarded to this branch several times on 2026-10-10 and again on 2026-10-11, each time because the user asked, and it matched the branch when this file was last updated. That is not a standing rule: commits made here afterwards are not in `main` until the user asks again.
 - To fast-forward `main` without leaving this branch or touching the working folder: `git push origin origin/combine-picks-and-group-trips:refs/heads/main`, then `git fetch && git branch -f main origin/main`.
 - `group-trips-live-run` is pushed at `b370be3` and is fully contained in the current branch.
 - GitHub push protection once blocked a push because a third-party Mapbox token sat inside scraped page text. It was redacted, not bypassed, and `tools/research.py` now strips such tokens.
