@@ -176,7 +176,7 @@ class IdeaOut(BaseModel):
     name: str = Field(description="The place or experience, e.g. Fushimi Inari Taisha or a sumo tournament")
     city: str = Field(description="The city or town it is in")
     category: str = Field(description="A short category, e.g. Sights, Food, Nature, Culture, Nightlife, Family, Day trips")
-    why: str = Field(description="Why a visitor would go, one sentence")
+    why: str = Field(description="Why a visitor would go, in under 10 words")
     source_id: str = Field(description="Source id from web_research that describes it, e.g. s4")
 
 
@@ -241,7 +241,7 @@ def more_ideas_task(state: TripState, who: Traveler | None = None) -> str:
             f"do not repeat them: {listed}.\nSuggest {MORE_MIN} to {MORE_MAX} new places and experiences in "
             f"{state.request.destination} that fit {who.name}'s picks, and avoid anything like a place anyone on the "
             "trip marked not for me. Give each its city, a short category (reuse the list's categories where they "
-            f"fit) and one sentence on why it suits {who.name}. Use web_research; every source_id must be an id your "
+            f"fit) and under 10 words on why it suits {who.name}. Use web_research; every source_id must be an id your "
             "tools showed, like s4.")
 
 
@@ -251,7 +251,7 @@ def ideas_task(state: TripState, who: Traveler | None = None) -> str:
             f"{r.destination} for the travelers to choose from. They will mark each one must do, interested or "
             "not for me, and the trip is then planned from their picks, so offer real variety: famous sights and "
             "lesser-known ones, food, nature, culture, nightlife, family attractions and day trips that fit "
-            f"{r.days} days at a {r.pace} pace. Give each its city, a short category and one sentence on why "
+            f"{r.days} days at a {r.pace} pace. Give each its city, a short category and under 10 words on why "
             "someone would go. Use web_research, one or two searches per category; every source_id must be an "
             "id your tools showed, like s4.")
 
