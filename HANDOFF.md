@@ -1,6 +1,17 @@
 # Tripwright handoff
 
-Updated 2026-10-11 (early morning) for continuing in a new chat. Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
+Updated 2026-10-11, just after midnight Central, for continuing in a new chat. If you only read one section, read "Start here". Read `README.md` and `DEMO.md` for the product and architecture; this file covers state, decisions and what is left.
+
+## Start here
+
+- **The app is live on Akamai** and the code on the server matches the committed app code. Details and commands are in "Hosting on Akamai".
+- **Branch:** `combine-picks-and-group-trips` is where all work happens and is pushed. `main` is a few commits behind (see Git).
+- **Another chat has uncommitted work in this folder** (see "Work in progress"). Several chats share the folder: run `git status` first, commit only your own files, and never stash or revert someone else's.
+- **Waiting on the user, none urgent:**
+  1. Whether local runs should keep using the hosted database and bucket that `.env` now names, or go back to local files.
+  2. Whether to give the hosted site a clean `https://` name. The user asked why the address is an IP with `:8000`, was offered a domain plus Caddy, and said to leave it for now.
+  3. The full planning flow has not been run on the hosted site.
+- **Housekeeping left on the Mac:** Docker Desktop is running from a test build and can be quit. The "Linode sign-in" terminal tab from the earlier chat is finished and can be closed.
 
 ## What it is
 
@@ -81,15 +92,15 @@ Pattern used throughout: the LLM picks ids, Python holds the facts. Tools keep f
 
 - Remote: `https://github.com/slopenintercept/TravelProject.git` (public).
 - Current branch: `combine-picks-and-group-trips`, pushed. It holds everything: Brandon's picks, per-person links and draft plan, merged with the user's `group-trips-live-run`.
-- `main` was fast-forwarded to this branch twice on 2026-10-10, each time at the user's request. The second time it moved to `2b9ae63`, after 108 tests and the frontend type-check passed. Each was a one-time request, not a standing rule: commits made here afterwards are not in `main` until the user asks for another fast-forward.
+- `main` is at `0a7a9aa`. It has been fast-forwarded to this branch a few times on 2026-10-10, each time because the user asked. That is not a standing rule: commits made here afterwards are not in `main` until the user asks again. Right now `main` lacks `b8b92f9` (ideas reasons under 10 words), `560ff83` (provisioning fix) and the handoff and test-setup commits after them.
 - To fast-forward `main` without leaving this branch or touching the working folder: `git push origin origin/combine-picks-and-group-trips:refs/heads/main`, then `git fetch && git branch -f main origin/main`.
 - `group-trips-live-run` is pushed at `b370be3` and is fully contained in the current branch.
-- `agents-faster` is a local-only branch at `0326c82`, the same change as `b370be3`.
 - GitHub push protection once blocked a push because a third-party Mapbox token sat inside scraped page text. It was redacted, not bypassed, and `tools/research.py` now strips such tokens.
 
 ## What changed today, newest first
 
-- Hosted on Akamai (see Hosting). `deploy/provision.sh` got the temporary-key fix.
+- Tests are kept off the hosted database: `backend/tests/conftest.py` blanks `DATABASE_URL` and `OBJ_BUCKET` before the app's settings load (see Hosting for why).
+- Hosted on Akamai (see Hosting). `deploy/provision.sh` got the temporary-key fix (`560ff83`).
 - `b8b92f9` The ideas agent gives each place's reason in under 10 words.
 - `2b9ae63` Review cards show their facts as short tags and the agent's reason in a "Why this pick" box (details below).
 - `6a672ca` A Back button on every screen, fixed bottom-left. It undoes the last move in the app or reopens the previous step where that can still change, and never undoes the agents' work. It replaces "Back to review" in the Finish footer.
@@ -132,17 +143,18 @@ Tripwright has been live since 2026-10-11 (early morning, Central) on the user's
 
 - **Address:** `http://<ip>:8000`, plain HTTP on the server's IP with no domain name. This file is in a public repo, so the IP is left out on purpose; get it with `deploy/.venv/bin/linode-cli linodes list --label tripwright-app`. Akamai also gives the server a hostname of the form `<ip-with-dashes>.ip.linodeusercontent.com`, which works on port 8000 too.
 - **No login.** Anyone with the address can start trips and spend the inference and Tavily quota.
-- **Deployed code:** commit `b8b92f9`. The deploy copies the working folder, uncommitted changes included, so check `git status` first.
+- **Deployed code:** commit `b8b92f9`. Nothing committed since then changes the app itself (a deploy script, test setup, this file), so the server is current until the next app commit. The deploy copies the working folder, uncommitted changes included, so check `git status` first.
 - **Redeploy:** `PATH="$PWD/deploy/.venv/bin:$PATH" SSH_KEY=~/.ssh/tripwright_ed25519 bash deploy/deploy.sh` from the project root. It reuses what exists, rebuilds the container and waits for `/api/health`.
 - **Tools on this Mac:** `linode-cli` and `boto3` live in `deploy/.venv` (gitignored); the user signed the CLI in themselves. The deploy SSH key is `~/.ssh/tripwright_ed25519`, made for this and with no passphrase. `ssh -i ~/.ssh/tripwright_ed25519 root@<ip>` gets a shell.
-- **`.env` changed.** `provision.sh` wrote `OBJ_*` and `DATABASE_URL` into the local `.env`, so a local server started now uses the hosted Postgres and bucket, not `data/tripwright.db`. The user has been told and has not said whether to separate them.
+- **`.env` changed at 23:47 on 2026-10-10.** `provision.sh` wrote `OBJ_*` and `DATABASE_URL` into the local `.env`, so any local server or script started after that uses the hosted Postgres and bucket, not `data/tripwright.db`. The local trips are still in the SQLite file; they are just not what a newly started server reads. The server on port 8000 was started at 23:45, before the change, so it is still on SQLite until it is restarted. The user has been told and has not said whether to separate them.
+- **Tests wrote into the hosted database for a few minutes.** With `DATABASE_URL` in `.env`, pytest ran against Postgres: it took over a minute, three timing tests failed, and it left about 60 throwaway trips there (ids like `trip_<19 digits>`, plus some ordinary-looking ids). `conftest.py` now prevents this and the suite is back to about 5 seconds. The leftover rows are harmless, since trips are only reached by id, and were not deleted: some ordinary-looking ids may be real trips.
 - **Verified on the server:** health reports inference key, Tavily, PostgreSQL and Object Storage; the demo trip's first stage was accepted with live fares; flight and hotel page snapshots were taken by the server's own browsers and saved to the bucket. A test trip, `trip_7e281cec`, was left in the hosted database.
 - **What went wrong on the way:** the user's first signup was refused by Akamai's fraud check; the Akamai booth gave them a different signup link, which worked. `linode-cli obj` could not make its own access key (the API answers 500 when no region is sent), so `provision.sh` now hands it a temporary key. The database's hostname took a few minutes to resolve after it was created.
 - **Stop the billing:** `bash deploy/teardown.sh` deletes everything, including the database and snapshots. It asks for a typed "yes", and only the user should decide to run it.
 
 ## Work in progress, not committed
 
-Nothing. The working folder was clean when this file was last updated, and the committed state passes 108 tests. Several chats share this folder, so check `git status` before assuming that still holds.
+Another chat is splitting the ideas agent into one agent per city, the same way attractions were split. Its edits are uncommitted in `backend/tripwright/specialists.py` (`ideas_split`, a `city` argument on `ideas_task`) and `backend/tests/test_ideas.py` (a new test). That chat owns them: do not commit, stash or revert them. With those edits in place, 109 tests pass. Check `git status` before assuming this is still the state.
 
 ## Not done or not verified
 
@@ -165,7 +177,7 @@ Nothing. The working folder was clean when this file was last updated, and the c
 - The endpoint rejects an empty `tools` array; context is 32k tokens, output at most 4,096.
 - The server does not reload on code changes. Restart it after editing the backend, and rebuild the frontend after editing `frontend/src`.
 - Another chat's preview server can hold port 8000 and keep serving old code; `preview_stop` cannot stop a server another chat started. Use `tripwright-8001` or `tripwright-8002`, or ask the user before restarting it.
-- The servers on ports 8000 and 8001 were restarted late on 2026-10-10 at the user's request, from the shell (`nohup`), because the preview tool still listed those ports under another chat after the old processes were killed. They run the code at `2b9ae63`, belong to no chat's preview list, and are stopped by killing whatever listens on the port.
+- One local server is running, on port 8000, started from a shell at 23:45 on 2026-10-10. It belongs to no chat's preview list and is stopped by killing whatever listens on the port. Nothing is listening on 8001 or 8002. Preview configs: `tripwright` (8000), `tripwright-8001`, `tripwright-8002`, `tripwright-frontend`, `tripwright-windows`.
 - Restarting a server kills any agent run in progress. Check that no trip is busy first (`GET /api/trips/<id>` returns `busy`).
 - To test without touching a real trip, copy it: load it with `store.load_trip`, change `state.id`, and save.
 - Booking.com blocks headless browsers, so hotels come from Google Hotels.
