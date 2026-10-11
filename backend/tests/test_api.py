@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from tripwright import api, store
+from tripwright.cards import review_cards
 from tripwright.models import AgentStatus, Idea
 
 client = TestClient(api.app)
@@ -24,6 +25,10 @@ def post(trip, path, body, traveler=None):
     return client.post(f"/api/trips/{trip.id}{path}", json=body, headers=headers)
 
 
+def status(trip, card_id):
+    return next(card.status for card in review_cards(trip) if card.id == card_id)
+
+
 def put(trip, path, body, traveler=None):
     headers = {"X-Traveler": traveler} if traveler else {}
     return client.put(f"/api/trips/{trip.id}{path}", json=body, headers=headers)
@@ -32,7 +37,9 @@ def put(trip, path, body, traveler=None):
 def test_each_traveler_approves_only_their_own_flight_and_stays(trip):
     assert post(trip, "/decisions", {"action": "approve", "card": "flight:p2"}, "p2").status_code == 200
     assert post(trip, "/decisions", {"action": "approve", "card": "stay:p2:0"}, "p2").status_code == 200
-    assert trip.approvals == {"flight:p2": "approved", "stay:p2:0": "approved"}
+    assert set(trip.approvals) == {"flight:p2", "stay:p2:0"}
+    assert status(trip, "flight:p2") == status(trip, "stay:p2:0") == "approved"
+    assert status(trip, "flight:p1") == "proposed"
 
     for card in ("flight:p1", "stay:p1:0"):  # Sam can't decide for Alex, and the host can't decide for Sam
         assert post(trip, "/decisions", {"action": "approve", "card": card}, "p2").status_code == 403
@@ -40,9 +47,21 @@ def test_each_traveler_approves_only_their_own_flight_and_stays(trip):
     assert post(trip, "/budget/apply", {"traveler": "p1"}, "p2").status_code == 403
 
 
+def test_an_approval_is_withdrawn_when_another_flight_or_room_is_chosen(trip):
+    sam = trip.traveler("p2")
+    for card in ("flight:p2", "stay:p2:0"):
+        assert post(trip, "/decisions", {"action": "approve", "card": card}, "p2").status_code == 200
+    # Not through the card's own Swap: a budget fix, a new confirm and a new search all set the choice directly.
+    other_flight = next(o.id for o in sam.flights.options if o.id != sam.flights.selected_id)
+    sam.flights.selected_id = other_flight
+    assert status(trip, "flight:p2") == "proposed" and status(trip, "stay:p2:0") == "approved"
+    assert post(trip, "/decisions", {"action": "approve", "card": "flight:p2"}, "p2").status_code == 200
+    assert trip.approvals["flight:p2"] == other_flight and status(trip, "flight:p2") == "approved"
+
+
 def test_shared_choices_are_anyones_on_the_trip(trip):
     assert post(trip, "/decisions", {"action": "approve", "card": "attraction:a_disney"}, "p2").status_code == 200
-    assert trip.approvals["attraction:a_disney"] == "approved"
+    assert status(trip, "attraction:a_disney") == "approved"
 
 
 def test_requests_need_someone_on_the_trip(trip):

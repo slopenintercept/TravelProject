@@ -331,7 +331,7 @@ export interface TripState {
   budgets: Record<string, BudgetSummary> // keyed by traveler id
   budget_proposals: Record<string, SwapProposal> // keyed by traveler id
   flags: Record<string, Flag> // keyed by agent name: "flight:<traveler>", "lodging", "attractions", ...
-  approvals: Record<string, 'approved'> // keyed by card id
+  approvals: Record<string, string> // keyed by card id: the approved flight or room's id, or "approved"
   agents: Record<string, AgentStatus> // keyed by agent name
   lodging_override: 'hotel' | 'airbnb' | null
 }

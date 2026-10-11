@@ -366,7 +366,9 @@ class TripState(BaseModel):
     budgets: dict[str, BudgetSummary] = {}  # per traveler id
     budget_proposals: dict[str, SwapProposal] = {}
     flags: dict[str, Flag] = {}
-    approvals: dict[str, Literal["approved"]] = {}
+    # Keyed by card id. The value is what was approved: the chosen flight or room's id, or "approved"
+    # for a card with nothing to choose between. Choosing another flight or room withdraws it.
+    approvals: dict[str, str] = {}
     agents: dict[str, AgentStatus] = {}
     # Overrides from the review screen.
     lodging_override: Literal["hotel", "airbnb"] | None = None

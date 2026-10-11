@@ -587,7 +587,13 @@ async def decide(state: TripState, action: str, card: str, option_id: str | None
     kind, _, ref = card.partition(":")
     rerun: list[str] = []
     if action == "approve":
-        state.approvals[card] = "approved"
+        # Remember which flight or room was approved, so the approval does not outlive it (see cards.py).
+        chosen = None
+        if kind == "flight" and (flights := state.traveler(ref).flights):
+            chosen = flights.selected_id
+        elif kind == "stay" and (lodging := state.traveler(ref.partition(":")[0]).lodging):
+            chosen = lodging.stays[int(ref.partition(":")[2])].selected_id
+        state.approvals[card] = chosen or "approved"
         return _saved(state)
     state.approvals.pop(card, None)
 

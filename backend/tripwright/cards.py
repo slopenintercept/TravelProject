@@ -77,8 +77,12 @@ def review_cards(state: TripState) -> list[Card]:
     cards: list[Card] = []
     everyone = [t.id for t in state.travelers]
 
-    def status(card_id: str, included: bool = True) -> str:
-        return "removed" if not included else state.approvals.get(card_id, "proposed")
+    def status(card_id: str, included: bool = True, chosen: str = "approved") -> str:
+        """An approval is for the flight or room chosen at the time (`chosen` is its id). When another one is
+        chosen, by a swap, a budget fix, a new confirm or a new search, the card is back to proposed."""
+        if not included:
+            return "removed"
+        return "approved" if state.approvals.get(card_id) == chosen else "proposed"
 
     for t in state.travelers:
         if not t.flights:
@@ -92,7 +96,7 @@ def review_cards(state: TripState) -> list[Card]:
                    f"Flies home {_clock(f.return_depart_at)}",
             price_usd=f.price_usd, reasoning=f.tradeoff, sources=[f.source],
             booking_url=flight_link(f, state.dates.start, state.dates.end, 1) if state.dates else f.booking_url,
-            status=status(card_id), flag=state.flags.get(card_id),
+            status=status(card_id, chosen=f.id), flag=state.flags.get(card_id),
             alternatives=[
                 Alternative(id=o.id, title=f"{o.airline}, lands {_clock(o.arrive_at)}", detail=o.tradeoff,
                             price_usd=o.price_usd)
@@ -115,7 +119,7 @@ def review_cards(state: TripState) -> list[Card]:
                 detail=f"{stay.check_in:%b %d} to {stay.check_out:%b %d} · {room.nights} Night{'s' * (room.nights > 1)} · "
                        f"{room.neighborhood or room.kind.capitalize()} · {_rating(room.rating)} · {_note(room.location_note)}",
                 price_usd=room.price_total_usd, reasoning=stay.reasoning, sources=[room.source],
-                booking_url=stay_link(room), status=status(card_id), flag=state.flags.get("lodging"),
+                booking_url=stay_link(room), status=status(card_id, chosen=room.id), flag=state.flags.get("lodging"),
                 alternatives=[
                     Alternative(id=o.id, title=o.name, detail=f"{_rating(o.rating)} · {_note(o.location_note)}",
                                 price_usd=o.price_total_usd)
