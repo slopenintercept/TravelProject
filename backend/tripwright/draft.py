@@ -138,8 +138,8 @@ def describe(state: TripState, draft: Draft) -> str:
 
 
 async def explain(state: TripState, draft: Draft) -> str:
-    """The orchestrator's note for the group, or nothing if the model is unavailable."""
-    if not config.OPENAI_API_KEY:
+    """The orchestrator's note for the group, or nothing if the model is unavailable or the trip is recorded."""
+    if not config.OPENAI_API_KEY or state.request.recorded:
         return ""
     agent = Agent(model=make_model(), name="orchestrator", system_prompt=DRAFT_ROLE, hooks=[RateLimit()],
                   callback_handler=None)

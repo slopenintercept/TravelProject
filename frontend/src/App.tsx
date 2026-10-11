@@ -103,6 +103,7 @@ export default function App() {
               {state.dates ? `${monthDay(state.dates.start)} – ${monthDay(state.dates.end)}` : count(state.request.days, 'day')}
             </span>
             {group > 1 && <span className="chip">{group} travelers</span>}
+            {state.request.recorded && <span className="chip">Recorded run</span>}
           </>
         )}
         {you && <button className="pill sm" disabled={!back} onClick={() => back?.()}>← Back</button>}

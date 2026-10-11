@@ -11,12 +11,16 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Awaitable, Callable
+from contextvars import ContextVar
 from pathlib import Path
 
 from . import config, store
 
 FIXTURES = Path(__file__).parent / "fixtures" / "recorded.json"
 DEFAULT_TTL_S = 6 * 3600
+# DEMO_MODE for one trip: set from the trip's request before its work starts, and copied into every task
+# started from there, so a recorded trip's tools replay while other trips on the same server run live.
+replaying: ContextVar[bool] = ContextVar("replaying", default=False)
 
 
 class NotRecorded(Exception):
@@ -58,7 +62,7 @@ def record(key: str, value) -> None:
 
 
 async def cached(key: str, fetch: Callable[[], Awaitable], ttl_s: float = DEFAULT_TTL_S, fuzzy: bool = True):
-    if config.DEMO_MODE:
+    if config.DEMO_MODE or replaying.get():
         return replay(key, fuzzy)
     hit = store.cache_get(key, ttl_s)
     if hit is not None:

@@ -48,6 +48,7 @@ class TripRequest(TravelerIn):
     days: int = Field(ge=1, le=30)
     start_date: date | None = None
     pace: Pace = "balanced"
+    recorded: bool = False  # the demo trip: every agent and tool replays the recorded run
 
 
 class TravelerProfile(BaseModel):

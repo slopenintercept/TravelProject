@@ -49,6 +49,9 @@ from .tools import flights
 from .validate import rebudget, validate_itinerary
 
 SAVED_RESULT_TTL_S = 30 * 24 * 3600
+# On a recorded trip, how long each agent shows as working before its recorded result appears.
+REPLAY_S = {"route": 1, "profile": 2, "ideas": 3, "timeframe": 5, "flight": 4, "transport": 6, "lodging": 7,
+            "attractions": 9}
 
 PREF = {
     "airbnb": "Prefers Airbnb over hotels",
@@ -133,22 +136,34 @@ class SpecialistNode(MultiAgentBase):
         try:
             if saved is None:
                 raise ValueError("there is no saved result")
-            payload = saved["value"]
-            if saved["start"] and state.dates:
-                payload = _redate(payload, state.dates.start - date.fromisoformat(saved["start"]))
-            value = self.spec.load(payload)
+            value = self._restore(state, who, saved)
         except ValueError as e:
             state.flags[self.name] = Flag(kind="pending", reason=f"{reason}; {e}")
             events.status(state, self.name, "pending", f"No result yet: {reason}")
             return
-        self._store(state, who, value)
-        if self.spec.after_fallback:
-            self.spec.after_fallback(state)
         state.flags[self.name] = Flag(kind="fallback", reason=f"Showing saved results: the live run {reason}.")
         events.status(state, self.name, "fallback", f"Using saved results: {reason}", found=self.spec.describe(value))
 
+    def _restore(self, state: TripState, who: Traveler | None, saved: dict):
+        """Store a saved result, moved to this trip's dates."""
+        payload = saved["value"]
+        if saved["start"] and state.dates:
+            payload = _redate(payload, state.dates.start - date.fromisoformat(saved["start"]))
+        value = self.spec.load(payload)
+        self._store(state, who, value)
+        if self.spec.after_fallback:
+            self.spec.after_fallback(state)
+        return value
+
     async def _run(self, state: TripState, events: Bus, who: Traveler | None) -> None:
         spec = self.spec
+        # A recorded trip takes the fixtures only: the database holds results from other people's trips.
+        if state.request.recorded and (saved := recorded.saved(_result_key(spec, state, who))):
+            events.status(state, self.name, "working", "Replaying the recorded run", 1)
+            await asyncio.sleep(REPLAY_S[spec.name])
+            value = self._restore(state, who, saved)
+            state.flags.pop(self.name, None)
+            return events.status(state, self.name, "accepted", "Recorded result", 1, spec.describe(value))
         if spec.reuse and (saved := store.cache_get(_result_key(spec, state, who), SAVED_RESULT_TTL_S)):
             try:  # the same destination and length was researched before: nothing to wait for
                 value = spec.load(saved["value"])
@@ -361,7 +376,7 @@ def _saved(state: TripState) -> None:
 
 def new_trip(request: TripRequest) -> TripState:
     host = Traveler(id="p1", host=True, **request.model_dump(include=set(TravelerIn.model_fields)))
-    saved = store.load_profile()
+    saved = None if request.recorded else store.load_profile()  # the recorded run had none
     preferences = saved.stated_preferences if saved else []
     # Only the stated preferences carry over: the rest of the saved profile describes the last trip's host.
     state = TripState(id=new_id("trip"), request=request, travelers=[host],
@@ -376,7 +391,7 @@ def new_trip(request: TripRequest) -> TripState:
 async def plan_timeframe(state: TripState) -> None:
     try:
         await run(state, timeframe_graph(), "timeframe")
-        if state.profile:
+        if state.profile and not state.request.recorded:
             store.save_profile(state.profile)
     finally:  # even if the stage failed, the host can still pick their own dates
         state.stage = "awaiting_dates"

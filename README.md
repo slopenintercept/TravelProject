@@ -210,7 +210,7 @@ This creates a seven-traveler Japan trip with dates set and everyone's picks sav
 
 ### Without keys, and DEMO_MODE
 
-- **No `OPENAI_API_KEY`:** every specialist goes straight to its fallback. For the demo trip (Kansas City → Japan, 7 days) that is the result of a real live run on 2026-10-10, recorded in [fixtures/recorded.json](backend/tripwright/fixtures/recorded.json) and shown with a "saved result" flag. The exception is the ideas agent: no list of places is recorded, so unless your database already has one from an earlier live run, the picks screen starts empty and you add places yourself with **Add a place**, or save with none. Any other trip shows the agents as pending.
+- **No `OPENAI_API_KEY`:** every specialist goes straight to its fallback. For the demo trip (Kansas City → Japan, 7 days) that is the result of a real live run on 2026-10-10, recorded in [fixtures/recorded.json](backend/tripwright/fixtures/recorded.json) and shown with a "saved result" flag, the list of places on the picks screen included. Any other trip shows the agents as pending.
 - **`DEMO_MODE=true`:** tools never touch the network. They replay recorded results (same call, or the closest recorded call to the same tool). The agents still reason live if a key is set, so the demo survives a site changing or blocking us.
 - **`RECORD_FIXTURES=true`:** live tool results and accepted agent results are also written to the fixtures file. To refresh the demo: start the server with `RECORD_FIXTURES=true` in front of the command. Plan the demo trip once, then `cp -R data/evidence/* backend/tripwright/fixtures/evidence/`. The list of places is the exception: if the database has one saved for a 7-day Japan trip in the last 30 days, it is reused and not recorded.
 

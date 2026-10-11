@@ -51,6 +51,7 @@ export interface TripRequest extends TravelerIn {
   days: number
   start_date: string | null
   pace: Pace
+  recorded?: boolean // the demo trip: the agents replay the recorded run
 }
 
 export interface TravelerProfile {

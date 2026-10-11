@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from stripe import StripeError
 
-from . import config, draft, evidence, orchestrator, payments, store
+from . import config, draft, evidence, orchestrator, payments, recorded, store
 from .booking import BookingStep, booking_steps
 from .cards import Card, review_cards
 from .events import bus
@@ -96,11 +96,13 @@ def _trip(trip_id: str) -> TripState:
         if state is None:
             raise HTTPException(404, "Trip not found")
         orchestrator.recover(state)  # nothing is running for it in this process
+        recorded.replaying.set(state.request.recorded)  # before the work below starts
         _live[trip_id] = state
         if state.stage == "choosing" and any(t.confirmed for t in state.travelers):
             _background(state, orchestrator.schedule_choices(state))  # research was cut off after someone chose
         if state.stage == "gathering" and state.draft is None:
             _redraft(state)
+    recorded.replaying.set(_live[trip_id].request.recorded)  # for this request and the work it starts
     return _live[trip_id]
 
 
@@ -198,6 +200,7 @@ def health() -> dict:
 @app.post("/api/trips")
 async def create_trip(request: TripRequest) -> TripView:
     state = orchestrator.new_trip(request)
+    recorded.replaying.set(request.recorded)
     _live[state.id] = state
     _background(state, orchestrator.plan_timeframe(state))
     return _view(state)

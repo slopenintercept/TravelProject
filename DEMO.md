@@ -1,12 +1,12 @@
 # Tripwright: 3-minute demo script
 
-Scenario: 7 days in Japan. Alex hosts from Kansas City ($2,500) and invites Sam from Chicago ($3,000) and Jo from Dallas ($2,200). On the picks screen Alex marks Tokyo Disneyland and Fushimi Inari Taisha **Must do** and teamLab Planets **Interested**; Sam marks the Ghibli Museum **Must do**; Jo marks Fushimi Inari **Must do** and Shinjuku Golden Gai **No** (not for me).
+Scenario: 7 days in Japan. Alex hosts from Kansas City ($2,500) and invites Sam from Chicago ($3,000) and Jo from Dallas ($2,200). On the picks screen Alex marks Tokyo Disneyland and Fushimi Inari Taisha **Must do** and teamLab Planets TOKYO **Interested**; Sam marks Ghibli Museum **Must do**; Jo marks Fushimi Inari Taisha **Must do** and Golden Gai **No** (not for me).
 
 ## Before you go on stage
 
 1. `.env` has `OPENAI_API_KEY` (team key) and `TAVILY_API_KEY`. Open `/api/health` and check `inference.key` is true.
-2. Plan the demo trip once beforehand. A cold group run takes about 4 to 5 minutes; with the cache warm the tools answer instantly, but the model calls still take about 2 minutes, so start the planning step before you begin talking about it.
-3. Safety net: set `DEMO_MODE=true` and restart. Tools then replay recorded results and never browse, while the agents still reason live. If inference itself is down, every specialist falls back to its recorded result and the cards say so. The ideas list has no recorded result yet. Planning the demo trip with `RECORD_FIXTURES=true` records one only on a database that has no saved ideas list for Japan, 7 days: a list saved by an earlier run (step 2 saves one, and it is kept for 30 days) is reused without being recorded. The picks screen shows that saved list whether or not inference is up. With neither a saved nor a recorded list, the picks screen is empty and you add the places by hand with **Add a place**.
+2. **Use the demo trip** replays a recorded run of this trip (a live run on 2026-10-10). It works on any server with nothing to switch: each agent shows as working for a few seconds and then shows its recorded result, the top bar says **Recorded run**, and no model or site is asked. The first agents take about 6 seconds, the draft plan about 11 seconds after the last picks are saved, and planning about 10. It replays only while the origin, destination and days are still Kansas City, Japan and 7 when you press **Start planning**; the name and budget can change. Sam and Jo must type **Chicago** and **Dallas**: flights are recorded for those two cities only. From any other city that traveler's flight agent runs live, which takes minutes, and its searches are answered from the recorded ones.
+3. To show the agents working live instead, type the trip in by hand: a trip started without the button is planned for real. A cold group run takes about 4 to 5 minutes; with the cache warm the tools answer instantly, but the model calls still take about 2 minutes, so start the planning step before you begin talking about it. Safety net for a live run: set `DEMO_MODE=true` and restart. Tools then replay recorded results and never browse, while the agents still reason live. If inference itself is down, every specialist falls back to its recorded result and the cards say so. The ideas list is recorded too, so the picks screen is not empty; a list saved in the database by an earlier live run (kept for 30 days) is shown first.
 4. Have Sam's and Jo's browsers (or phones) ready: each joins from the invite link on their own device.
 5. For paying together: `/api/health` says `"payments": "stripe test mode"`, and the Stripe dashboard is open on test-mode Payments in another tab. Safety net: on the hosted site, `#trip_paydemo/p1` (Alex) and `#trip_paydemo/p2` (Sam) open a finished two-traveler trip that nobody has paid yet.
 6. Keep the app open on the Start screen, browser at about 1360 px wide. The screen has two panes: the feed on the left asks for each decision, and the board on the right shows the plan, or the agents when you switch its tab.
@@ -25,7 +25,7 @@ The ideas agent's list of places appears in the feed, grouped by category, with 
 
 > "I never typed what I wanted to see. The ideas agent researched Japan and gave me a menu. I mark what I must do, what interests me, and what's not for me, and everyone I invite marks the same list."
 
-Mark Tokyo Disneyland and Fushimi Inari **Must do**, teamLab Planets **Interested**, then **Save my picks** (under the draft plan).
+Mark Tokyo Disneyland and Fushimi Inari Taisha **Must do**, teamLab Planets TOKYO **Interested**, then **Save my picks** (under the draft plan).
 
 **0:35 Timeframe (15 s)**
 

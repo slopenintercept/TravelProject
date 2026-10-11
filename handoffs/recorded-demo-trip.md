@@ -124,3 +124,69 @@ Then in the browser, on the scratch setup below, 1360 px wide. Use a stopwatch a
 ## When you finish
 
 Add a `## Result` section at the end of this file: the files you changed, what each of the ten checks showed (with the seconds you measured), which of my choices you changed and why, and anything left undone or noticed. Write it last and in one go, after your servers are stopped and your launch entries are removed: the checking chat takes that heading as "ready".
+
+## Result
+
+Written 2026-10-11 at 06:54 Central. Both scratch servers are stopped and both launch entries are removed (`.claude/launch.json` is as committed). Nothing is built, committed, pushed or deployed.
+
+### Files changed
+
+- `backend/tripwright/models.py`: `TripRequest.recorded`.
+- `backend/tripwright/recorded.py`: the `replaying` ContextVar, read by `cached` next to `config.DEMO_MODE`.
+- `backend/tripwright/api.py`: `_trip` and `create_trip` set `replaying` from the trip's request, on every request (true or false), before any background work starts.
+- `backend/tripwright/orchestrator.py`: `REPLAY_S`; the recorded path at the top of `_run`; `_restore`, the re-dating and storing that `_fall_back` and the recorded path now share; `new_trip` and `plan_timeframe` leave the saved profile alone on a recorded trip.
+- `backend/tripwright/draft.py`: `explain` returns "" on a recorded trip.
+- `backend/tripwright/fixtures/recorded.json`: 63 lines added, none changed. `result:ideas:any:japan:7` plus 37 `geocode:` entries.
+- `backend/tripwright/fixtures/evidence/20261010/`: 19 new `.txt` files.
+- `backend/tests/test_recorded_trip.py`: new, two tests.
+- `frontend/src/types.ts`, `components/Start.tsx`, `App.tsx`.
+- `DEMO.md`, `README.md`.
+
+### The checks
+
+1. **and 2.** `test_a_recorded_trip_runs_to_review_on_recordings_alone` passes. One test covers both: with a key set and `DEMO_MODE` false it goes through the API from Start to `review` and gets 24 ideas, a draft with all 24 places located, 3 flight options and 3 stays for each traveler, 9 attractions, 5 legs, 7 days of weather, no flags and every agent `accepted`, while `make_model` (in `orchestrator` and `draft`) and `socket.socket.connect` record any call and raise. Nothing was recorded.
+3. `test_an_ordinary_trip_on_the_same_server_plans_live` passes: the same form without the flag goes to the model, and a tool call replays or fetches according to which trip the last request was for.
+   On the committed code both tests fail (at the fixture: there is no `REPLAY_S`).
+4. `pytest -q`: 130 passed. `npx tsc --noEmit`: passes.
+
+In the browser at 1360 px. The scratch backend ran on port **8031**, not 8021: something else on this Mac holds 8021 on loopback. Health said `"key": true`, `"demo_mode": false`, `sqlite`, `local disk`, `holds kept in the app`. Times are from a timer in the page started at the click. Screenshots could not be taken (the Browser pane was hidden), so everything below was read from the page's text and the API.
+
+5. **Start.** "Recorded run" in the top bar at 0.1 s. Route done at 1.2 s, profile 3.3 s, ideas 4.2 s (24 places on screen at 4.4 s), timeframe and everything at 6.2 s. No "Saved result" anywhere, no flags, and the Agents tab reads "Agents · 4" with no dot.
+6. **Picks, dates, travelers.** Alex's marks saved through the page. "Choose these dates" on Jan 18 to Jan 25 answered in 0.07 s. Sam and Jo joined and saved their picks through the API with `X-Traveler`. The draft was accepted 11.3 s after the last save, with a map and **24 of 24 pins**. Five of those pins sit on their city's centre because the place has no entry of its own on OpenStreetMap: Odaiba & Gundam Statue (Tokyo), and Kinkaku-ji Golden Pavilion, Gion District, Byodo-in Temple and Kaiseki Dinner (Kyoto).
+7. **Planning.** The board switched to the Agents tab; six agents (three flights, lodging, attractions, transport) showed as working together from 1.2 s. Flights done at 5.2 s, transport 7.2 s, lodging and Alex's Choose screen at 8.3 s, attractions and everything at 10.3 s. Twelve cards read "Accepted"; with "Show details", ten read "Recorded result" (the Draft and Weather cards are steps, not agents). No "Retry" button.
+8. **Review.** Alex's confirm brought Review up in 0.12 s; Sam's and Jo's confirms answered in 0.03 s each. No pink notice on any card, no flags, "Needs you" says "Nothing needs you right now." All four marked places are on the days of whoever marked them: Tokyo Disneyland on Jan 20 (Alex), Fushimi Inari Taisha on Jan 22 (all three), teamLab Planets on Jan 24 (Alex), Ghibli Museum on Jan 20 (Sam). Golden Gai, which Jo marked "No", is not among the nine attractions.
+9. **An ordinary trip.** Kansas City, Japan, 7 days typed by hand: no label, `"recorded": false`, the agents tried the model (`APIConnectionError`) and after about 9 s ended on "Saved result", not "Didn't finish", because this trip's results are in the fixtures and that is what the existing fallback does. "Use the demo trip" with the destination changed to Italy: no label, `"recorded": false`, all four agents `pending`.
+10. **Docs.** `DEMO.md`: steps 2 and 3 rewritten, and the scenario line and the picks step use the list's names (teamLab Planets TOKYO, Fushimi Inari Taisha, Golden Gai, Ghibli Museum). `README.md`: the sentence saying the picks screen starts empty is gone. Nothing else changed in either, so the README still does not describe the recorded demo trip.
+
+### The picks list
+
+- Only 10 of the 24 `evidence_url` values pointed at the bucket (8 distinct files). All 8 were fetched. The other 14 were already `/evidence/20261010/...` paths (11 distinct files) that were in `data/evidence/20261010/` but not in the fixtures; they were copied from there. No link is null, and `grep -c linodeobjects.com` on `recorded.json` is still 0.
+- The locations were recorded the suggested way, on a scratch `DATA_DIR` filled with the local database's `geocode:` rows. OpenStreetMap answered every missing lookup; no 429.
+
+### Your choices that I changed
+
+None. The seconds, the wording, the chip's place, the empty note and the profile rule are as you wrote them.
+
+### Left undone or noticed
+
+- `frontend/dist` is not rebuilt, so port 8000 and the hosted site show no label and send no flag until you build.
+- Read from the code, not pressed: on the demo trip "Switch to Airbnb" replays the recorded lodging again, so the hotels come back after 7 s, and it still writes the preference to the saved profile (`_learn` is not guarded). "Add a rental car" replays the recorded transport. "More like my picks" has no recording, so it asks the model, with its searches answered from the recordings. "Retry" answers that nothing is left to retry.
+- A traveler who joins the demo trip from a city other than Chicago or Dallas gets a live flight agent whose searches are answered from the recorded ones. `DEMO.md` step 2 says so.
+- The recorded date windows start on 2027-01-18. The new test picks the first one, and the API refuses a start date that is not in the future, so the test will fail from that day on.
+- In the draft, Alex has Tokyo Disneyland and teamLab Planets TOKYO on the same day (Jan 20). The final plan moves teamLab to Jan 24. Not looked into.
+- An ordinary trip with the demo's values now also gets the recorded picks list when it falls back, flagged "Saved result" like the rest.
+
+## Checked
+
+By the checking chat, 2026-10-11 at about 07:00 Central, before committing.
+
+- The diff touches only the files named above. `recorded.json` has 63 lines added and none removed: 21 new keys, which are the picks list and 20 `geocode:` lookups (the Result says 37), 7 of them recorded misses that fall back to their city. The recorded list is the local cache row field for field, apart from the 24 evidence links, which all resolve to files under `fixtures/evidence/20261010/`.
+- `pytest -q`: 130 passed. `npx tsc --noEmit`: passes. `frontend/dist` rebuilt.
+- Clicked through on the built frontend, on a scratch backend with a key set, `DEMO_MODE` off and no reachable model (port 8003), at 1360 px:
+  - **Start:** "Recorded run" in the top bar at 0.1 s, 24 places at 4.3 s, all four agents done at 6.3 s.
+  - **Dates:** the request answered in 0.04 s.
+  - **Draft:** with all three travelers' picks it shows a map with 24 pins and four activities, and no note.
+  - **Planning:** "6 agents running in parallel", each card "Replaying the recorded run"; Alex's Choose screen at 8.4 s; every agent "Accepted" with "Recorded result", no flags, no "Retry".
+  - **Review:** 0.07 s after Alex's confirm. No pink notice. Tokyo Disneyland (Alex, Jan 20), Ghibli Museum (Sam, Jan 20), Fushimi Inari Taisha (all three, Jan 22) and teamLab Planets (Alex, Jan 24) are on the days; nothing left off; everyone within budget.
+  - **Ordinary trips:** the same values typed by hand, and the demo button with the destination changed to Italy, both gave `"recorded": false` and no label.
+- Not new, seen in passing: the top bar says "Agents working…" for the whole Choose stage on every trip (`App.tsx`, line 58), so it is still showing while the Choose screen waits for the traveler.

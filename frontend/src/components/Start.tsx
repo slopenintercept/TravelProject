@@ -26,6 +26,7 @@ export function Row({ label, hint, children }: { label: string; hint?: string; c
 /** Where a trip starts: the host's form on the left, and the empty plan it will fill on the right. */
 export function Start({ onCreated }: { onCreated: (tripId: string, hostId: string) => void }) {
   const [form, setForm] = useState(EMPTY)
+  const [demo, setDemo] = useState(false) // "Use the demo trip" was pressed
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const set = (patch: Partial<typeof EMPTY>) => setForm((current) => ({ ...current, ...patch }))
@@ -43,6 +44,8 @@ export function Start({ onCreated }: { onCreated: (tripId: string, hostId: strin
         start_date: form.start_date || null,
         budget_usd: Number(form.budget_usd),
         pace: form.pace,
+        // The recorded run is of this trip only; the name and budget may be changed.
+        recorded: demo && (['origin', 'destination', 'days'] as const).every((key) => form[key].trim() === DEMO[key]),
       })
       onCreated(view.state.id, view.state.travelers[0].id)
     } catch (err) {
@@ -56,7 +59,7 @@ export function Start({ onCreated }: { onCreated: (tripId: string, hostId: strin
       <header className="bar">
         <a className="brand" href="#">Tripwright</a>
         <span className="grow" />
-        <button className="pill sm" onClick={() => setForm(DEMO)}>Use the demo trip</button>
+        <button className="pill sm" onClick={() => { setForm(DEMO); setDemo(true) }}>Use the demo trip</button>
       </header>
       {error && <div className="banners"><p className="banner error" role="alert">{error}</p></div>}
 
